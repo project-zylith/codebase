@@ -1,0 +1,24 @@
+{
+  "name": "renaissance",
+  "version": "1.0.0",
+  "description": "My awesome app",
+  "main": "index.js",
+  "scripts": {
+    "devf": "npm start --prefix frontend",
+    "frontend:install": "npm install --prefix frontend",
+    "devb": "npm run dev --prefix backend",
+    "backend:install": "npm install --prefix backend",
+    "install:all": "npm run frontend:install && npm run backend:install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ibra-Hud/renaissance.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://github.com/Ibra-Hud/renaissance#readme",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1"
+  }
+}

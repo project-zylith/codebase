@@ -1,0 +1,24 @@
+// backend/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["es2020"],
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "controllers/**/*.ts",
+    "middleware/**/*.ts",
+    "database/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}
