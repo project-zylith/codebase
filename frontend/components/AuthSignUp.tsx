@@ -9,11 +9,14 @@ import {
   Alert,
 } from "react-native";
 import { registerUser } from "../adapters/userAdapters";
+import { useUser } from "../contexts/UserContext";
 
 const AuthSignUp = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const { login } = useUser();
 
   const handleSubmit = async () => {
     if (!username || !email || !password) {
@@ -22,19 +25,43 @@ const AuthSignUp = () => {
     }
     if (password.length < 6) {
       Alert.alert(
+        "Error",
         `Password must be at least 6 characters long, current length: ${password.length}`
       );
       return;
     }
+    if (password !== passwordConfirmation) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+
     try {
-      const response = await registerUser({ username, email, password });
-      if (!response) throw new Error("Error submitting data to server");
+      const response = await registerUser({
+        username,
+        email,
+        password, // Backend controller expects 'password' field
+      });
+
+      if (!response) {
+        throw new Error("No response from server");
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+
+      const userData = await response.json();
+
+      // Use the UserContext login function to log in the newly registered user
+      await login(userData);
+
       Alert.alert(
         "Success",
-        `Welcome, ${username}, you're successfully registered.`
+        `Welcome, ${username}, you're successfully registered!`
       );
-    } catch (error) {
-      // Alert.alert("Error", `Error submitting the user data, ${error}`);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Registration failed");
       console.error(error);
     }
   };
@@ -67,6 +94,15 @@ const AuthSignUp = () => {
         placeholderTextColor="#aaa"
         value={password}
         onChangeText={setPassword}
+        secureTextEntry
+      />
+      <Text style={styles.label}>Password Confirmation</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter password confirmation"
+        placeholderTextColor="#aaa"
+        value={passwordConfirmation}
+        onChangeText={setPasswordConfirmation}
         secureTextEntry
       />
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>

@@ -11,6 +11,7 @@ import {
 import { NewTask } from "./NewTask";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./types";
+import { TenTapEditor } from "./TenTapEditor";
 
 export const HomeScreen = ({
   navigation,

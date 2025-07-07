@@ -1,9 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { TenTapEditor } from "./TenTapEditor";
 
 export const InsightScreen = () => (
   <View style={styles.container}>
     <Text style={styles.title}>Insight Page</Text>
+    <View>
+      <TenTapEditor />
+    </View>
   </View>
 );
 

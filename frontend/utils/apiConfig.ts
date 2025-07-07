@@ -1,5 +1,6 @@
 // API Configuration
-export const API_BASE_URL = "http://10.0.13.161:3000";
+// must change this to the ip of the machine running the backend
+export const API_BASE_URL = "http://192.168.1.189:3000";
 
 // API Endpoints
 export const API_ENDPOINTS = {
