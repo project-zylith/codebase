@@ -47,12 +47,12 @@ export class UserService {
     return user || null;
   }
 
-  static async create(email: string, username: string, password: string) {
+  static async create(username: string, email: string, password: string) {
     // Validate username length requirement
-    if (username.length < 6) {
+    if (username.length < 2) {
       return {
         success: false,
-        message: "Username must be at least 6 characters long. ",
+        message: "Username must be at least 2 characters long. ",
       };
     }
 
@@ -113,8 +113,8 @@ export class UserService {
   }
 
   static async createGoogleUser(
-    email: string,
     username: string,
+    email: string,
     google_id: string
   ) {
     try {

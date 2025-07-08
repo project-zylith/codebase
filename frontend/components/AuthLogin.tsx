@@ -7,17 +7,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
 } from "react-native";
 import { loginUser, LoginRequest } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
-import { useNavigation } from "@react-navigation/native";
 
-export const AuthLogin = () => {
+export const AuthLogin: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useUser();
-  const navigation = useNavigation();
 
   const handleSubmit = async () => {
     if (!username || !password) {
@@ -43,7 +40,6 @@ export const AuthLogin = () => {
       await login(userData);
 
       Alert.alert("Success", `Welcome back, ${userData.username}!`);
-      navigation.navigate("AccountScreen" as never);
     } catch (error: any) {
       Alert.alert("Error", error.message || "Login failed");
       console.error(error);
@@ -51,43 +47,40 @@ export const AuthLogin = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter username"
-          placeholderTextColor="#aaa"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter password"
-          placeholderTextColor="#aaa"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.label}>Username</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter username"
+        placeholderTextColor="#aaa"
+        value={username}
+        onChangeText={setUsername}
+        autoCapitalize="none"
+      />
+      <Text style={styles.label}>Password</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter password"
+        placeholderTextColor="#aaa"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#111",
-    paddingTop: 36,
-  },
   container: {
+    flex: 1,
     width: "100%",
-    marginBottom: 24,
+    maxWidth: 400,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
   label: {
     color: "#fff",
@@ -105,11 +98,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
     borderWidth: 0,
+    width: "100%",
+    minHeight: 50,
   },
   button: {
     backgroundColor: "#A259F7",
     borderRadius: 24,
-    paddingVertical: 16,
+    paddingVertical: 10,
     alignItems: "center",
     width: "100%",
     marginTop: 24,

@@ -11,7 +11,7 @@ import {
 import { registerUser } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
 
-const AuthSignUp = () => {
+const AuthSignUp: React.FC = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -114,8 +114,12 @@ const AuthSignUp = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     width: "100%",
-    marginBottom: 24,
+    maxWidth: 400,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
   label: {
     color: "#fff",
@@ -133,11 +137,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
     borderWidth: 0,
+    width: "100%",
+    minHeight: 50,
   },
   button: {
     backgroundColor: "#A259F7",
     borderRadius: 24,
-    paddingVertical: 16,
+    paddingVertical: 10,
     alignItems: "center",
     width: "100%",
     marginTop: 24,

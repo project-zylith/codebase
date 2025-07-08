@@ -12,6 +12,8 @@ import { AuthLogin } from "./AuthLogin";
 export const UserProfile: React.FC = () => {
   const { state, logout } = useUser();
 
+  // This page is not being used right now.
+
   const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
       {

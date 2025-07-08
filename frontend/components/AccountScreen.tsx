@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,11 @@ import {
 } from "react-native";
 import { useUser } from "../contexts/UserContext";
 import { AuthLogin } from "./AuthLogin";
+import AuthSignUp from "./AuthSignUp";
+
 export const AccountScreen: React.FC = () => {
   const { state, logout } = useUser();
+  const [showSignUp, setShowSignUp] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -35,33 +38,62 @@ export const AccountScreen: React.FC = () => {
 
   if (!state.isAuthenticated || !state.user) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Please login to view your profile</Text>
-        <AuthLogin />
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          {showSignUp ? (
+            <View style={styles.authContainer}>
+              <Text style={styles.title}>Create Account</Text>
+              <AuthSignUp />
+              <TouchableOpacity
+                style={styles.switchButton}
+                onPress={() => setShowSignUp(false)}
+              >
+                <Text style={styles.switchText}>
+                  Already have an account? Login
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.authContainer}>
+              <Text style={styles.title}>Welcome Back</Text>
+              <AuthLogin />
+              <TouchableOpacity
+                style={styles.switchButton}
+                onPress={() => setShowSignUp(true)}
+              >
+                <Text style={styles.switchText}>
+                  Don't have an account? Sign Up
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Welcome Back, {state.user.username}!</Text>
+        <View style={styles.content}>
+          <Text style={styles.title}>Welcome Back, {state.user.username}!</Text>
 
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>User ID:</Text>
-          <Text style={styles.value}>{state.user.id}</Text>
-        </View>
+          <View style={styles.userInfo}>
+            <Text style={styles.label}>User ID:</Text>
+            <Text style={styles.value}>{state.user.id}</Text>
+          </View>
 
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{state.user.email}</Text>
-        </View>
+          <View style={styles.userInfo}>
+            <Text style={styles.label}>Email:</Text>
+            <Text style={styles.value}>{state.user.email}</Text>
+          </View>
 
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Account Created:</Text>
-          <Text style={styles.value}>
-            {new Date(state.user.created_at).toLocaleDateString()}
-          </Text>
+          {/* <View style={styles.userInfo}>
+            <Text style={styles.label}>Account Created:</Text>
+            <Text style={styles.value}>
+              {new Date(state.user.created_at).toLocaleDateString()}
+            </Text>
+          </View> */}
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -121,13 +153,33 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: "#ff6b6b",
     borderRadius: 12,
-    paddingVertical: 15,
-    marginTop: 30,
+    paddingVertical: 10,
     alignItems: "center",
+    marginBottom: 20,
   },
   logoutButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  authContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  switchButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+  },
+  switchText: {
+    color: "#A259F7",
+    fontSize: 16,
+    textAlign: "center",
+    textDecorationLine: "underline",
+  },
+  content: {
+    flex: 1,
   },
 });
