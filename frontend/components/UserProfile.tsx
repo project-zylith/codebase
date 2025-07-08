@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { useUser } from "../contexts/UserContext";
 import { AuthLogin } from "./AuthLogin";
+import colorPalette from "../assets/colorPalette";
+
 export const UserProfile: React.FC = () => {
   const { state, logout } = useUser();
 
@@ -77,18 +79,18 @@ export const UserProfile: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
     paddingTop: 36,
   },
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
+    color: colorPalette.tertiary,
     marginBottom: 30,
     textAlign: "center",
   },
@@ -100,17 +102,17 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: "#aaa",
+    color: colorPalette.quinary,
     fontWeight: "600",
   },
   value: {
     fontSize: 16,
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontWeight: "400",
   },
   loadingText: {
     fontSize: 18,
-    color: "#fff",
+    color: colorPalette.tertiary,
     textAlign: "center",
     marginTop: 50,
   },
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoutButtonText: {
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontSize: 16,
     fontWeight: "600",
   },

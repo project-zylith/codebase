@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   Animated,
 } from "react-native";
+import colorPalette from "../assets/colorPalette";
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
@@ -159,12 +160,12 @@ const AppNavigator = () => {
           screenOptions={({ route }) => ({
             headerShown: false,
             tabBarStyle: {
-              backgroundColor: "#111",
-              borderTopColor: "#222",
+              backgroundColor: colorPalette.primary,
+              borderTopColor: colorPalette.secondary,
               height: 64,
             },
-            tabBarActiveTintColor: "#A259F7",
-            tabBarInactiveTintColor: "#fff",
+            tabBarActiveTintColor: colorPalette.quaternary,
+            tabBarInactiveTintColor: colorPalette.tertiary,
             tabBarIcon: ({ color, size }) => {
               let iconName = "";
               if (route.name === "Home") iconName = "home-outline";
@@ -199,10 +200,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
   },
   loadingText: {
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontSize: 18,
     fontWeight: "600",
   },
@@ -213,18 +214,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
     padding: 20,
   },
   screenTitle: {
-    color: "#A259F7",
+    color: colorPalette.quaternary,
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 16,
     textAlign: "center",
   },
   screenSubtitle: {
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontSize: 18,
     textAlign: "center",
     opacity: 0.8,

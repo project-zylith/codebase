@@ -50,6 +50,9 @@ export const registerUser = async (
 };
 
 export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
+  console.log("🎯 loginUser controller hit!");
+  console.log("📨 Request body:", req.body);
+
   // Request needs a body
   if (!req.body) {
     return res.status(400).send({ message: "Username and password required" });
@@ -70,6 +73,8 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).send({ message: "User not found." });
     }
 
+    console.log("👤 Found user:", { id: user.id, username: user.username });
+
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
@@ -78,6 +83,9 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
 
     // Add the user id to the session and send the user data back
     req.session!.userId = user.id;
+    console.log("🔐 Session after setting userId:", req.session);
+    console.log("✅ User logged in successfully with ID:", user.id);
+
     res.send({
       id: user.id,
       username: user.username,
@@ -90,17 +98,27 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 export const showMe = async (req: AuthenticatedRequest, res: Response) => {
+  console.log("🎯 showMe controller hit!");
+  console.log("🔍 Session data:", req.session);
+  console.log("👤 User ID from session:", req.session?.userId);
+
   // no session with an id => Not authenticated.
   if (!req.session?.userId) {
+    console.log("❌ No userId in session, user not authenticated");
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
   // session with an id => here's your user info!
   const user = await UserService.getUserById(req.session.userId);
   if (!user) {
+    console.log("❌ User not found in database for ID:", req.session.userId);
     return res.status(404).send({ message: "User not found." });
   }
 
+  console.log("✅ User found and authenticated:", {
+    id: user.id,
+    username: user.username,
+  });
   res.send({
     id: user.id,
     username: user.username,

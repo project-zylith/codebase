@@ -10,6 +10,7 @@ import {
 import { useUser } from "../contexts/UserContext";
 import { AuthLogin } from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
+import colorPalette from "../assets/colorPalette";
 
 export const AccountScreen: React.FC = () => {
   const { state, logout } = useUser();
@@ -107,18 +108,18 @@ export const AccountScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
     paddingTop: 36,
   },
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
+    color: colorPalette.tertiary,
     marginBottom: 30,
     textAlign: "center",
   },
@@ -130,17 +131,17 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: "#aaa",
+    color: colorPalette.quinary,
     fontWeight: "600",
   },
   value: {
     fontSize: 16,
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontWeight: "400",
   },
   loadingText: {
     fontSize: 18,
-    color: "#fff",
+    color: colorPalette.tertiary,
     textAlign: "center",
     marginTop: 50,
   },
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoutButtonText: {
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -170,11 +171,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   switchButton: {
-    marginTop: 20,
+    marginTop: 8,
     paddingVertical: 10,
   },
   switchText: {
-    color: "#A259F7",
+    color: colorPalette.quaternary,
     fontSize: 16,
     textAlign: "center",
     textDecorationLine: "underline",

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { loginUser, LoginRequest } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
+import colorPalette from "../assets/colorPalette";
 
 export const AuthLogin: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -52,7 +53,7 @@ export const AuthLogin: React.FC = () => {
       <TextInput
         style={styles.input}
         placeholder="Enter username"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colorPalette.quinary}
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
@@ -61,7 +62,7 @@ export const AuthLogin: React.FC = () => {
       <TextInput
         style={styles.input}
         placeholder="Enter password"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colorPalette.quinary}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -83,15 +84,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   label: {
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
-    backgroundColor: "#222",
-    color: "#fff",
+    backgroundColor: colorPalette.secondary,
+    color: colorPalette.tertiary,
     borderRadius: 16,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     minHeight: 50,
   },
   button: {
-    backgroundColor: "#A259F7",
+    backgroundColor: colorPalette.quaternary,
     borderRadius: 24,
     paddingVertical: 10,
     alignItems: "center",
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   buttonText: {
-    color: "#fff",
+    color: colorPalette.primary,
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,

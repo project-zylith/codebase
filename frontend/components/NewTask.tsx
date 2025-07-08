@@ -6,32 +6,47 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import colorPalette from "../assets/colorPalette";
+import { createTask, Task } from "../adapters/todoAdapters";
 
-// When using props with TypeScript you need to declare the types using an interface. This allows us to declare the types of our props.
-// Since we are using the prop "setTask" we use the () => syntax as it is the function to set task
+// Updated interface to work with Task objects
 interface NewTaskProps {
-  setTask: (task: string) => void;
-  tasks: string[];
-  setTasks: (tasks: string[]) => void;
+  onTaskCreated: (task: Task) => void;
+  tasks: Task[];
+  setTasks: (tasks: Task[]) => void;
 }
 
 // This line is declaring our component and setting its type decleration to newTaskProps
-export const NewTask = ({ setTask, tasks, setTasks }: NewTaskProps) => {
+export const NewTask = ({ onTaskCreated, tasks, setTasks }: NewTaskProps) => {
   // Below we declare a useState to track the state of the user inputed form. So as the user types the value will change more on that later.
   const [taskText, setTaskText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Unlike traditional React Web when creating event handlers to handle form submission utilizing event objects,
-  // we use a onChangeText prop (found within the <TextInput>) to update the state of our "taskText" value as the user types.
-  // That is reflected in our onSubmit function where we would usally get the event.target, etc. now we just change the state of the value we use to
-  // track user input.
+  // Updated onSubmit function to work with the backend API
+  const onSubmit = async () => {
+    if (taskText.trim() !== "" && !isSubmitting) {
+      setIsSubmitting(true);
+      try {
+        const response = await createTask({
+          content: taskText.trim(),
+          is_completed: false,
+          is_ai_generated: false,
+          is_favorite: false,
+        });
 
-  // When we finally decide to use the onSubmit function we use a button to call it. (reflected in our tsx code)
-  const onSubmit = () => {
-    if (taskText != "") {
-      setTask(taskText);
-      // here we don't use .push() as .push() returns the length of the array rather than the array itself. So we use the spread operator instead to
-      setTasks([...tasks, taskText]);
-      setTaskText(""); // Clear input after submission
+        if (response.ok) {
+          const newTask: Task = await response.json();
+          onTaskCreated(newTask);
+          setTasks([newTask, ...tasks]);
+          setTaskText(""); // Clear input after submission
+        } else {
+          console.error("Failed to create task");
+        }
+      } catch (error) {
+        console.error("Error creating task:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -41,11 +56,12 @@ export const NewTask = ({ setTask, tasks, setTasks }: NewTaskProps) => {
       <TextInput
         style={styles.input}
         placeholder="Enter a new task"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colorPalette.quinary}
         value={taskText}
         onChangeText={setTaskText}
         returnKeyType="done"
         onSubmitEditing={onSubmit}
+        editable={!isSubmitting}
       />
       {/* <TouchableOpacity style={styles.button} onPress={onSubmit}>
         <Text style={styles.buttonText}>Add Task</Text>
@@ -60,14 +76,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   label: {
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 12,
   },
   input: {
-    backgroundColor: "#222",
-    color: "#fff",
+    backgroundColor: colorPalette.secondary,
+    color: colorPalette.tertiary,
     borderRadius: 16,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -76,14 +92,14 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   button: {
-    backgroundColor: "#A259F7",
+    backgroundColor: colorPalette.quaternary,
     borderRadius: 24,
     paddingVertical: 16,
     alignItems: "center",
     width: "100%",
   },
   buttonText: {
-    color: "#fff",
+    color: colorPalette.primary,
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,

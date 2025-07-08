@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { TenTapEditor } from "./TenTapEditor";
+import colorPalette from "../assets/colorPalette";
 
 export const InsightScreen = () => (
   <View style={styles.container}>
@@ -14,12 +15,12 @@ export const InsightScreen = () => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
     justifyContent: "center",
     alignItems: "center",
   },
   title: {
-    color: "#A259F7",
+    color: colorPalette.quaternary,
     fontSize: 32,
     fontWeight: "bold",
     letterSpacing: 1.2,

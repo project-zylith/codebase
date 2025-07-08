@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { NewTask } from "./NewTask";
 import { TenTapEditor } from "./TenTapEditor";
+import colorPalette from "../assets/colorPalette";
 
 export const HomeScreen = () => {
   return (
@@ -24,18 +25,18 @@ export const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
     paddingTop: 36,
   },
   container: {
     flex: 1,
-    backgroundColor: "#111",
+    backgroundColor: colorPalette.primary,
     padding: 24,
     justifyContent: "flex-start",
     alignItems: "stretch",
   },
   header: {
-    color: "#A259F7",
+    color: colorPalette.quaternary,
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 24,
@@ -45,14 +46,14 @@ const styles = StyleSheet.create({
     height: 32,
   },
   button: {
-    backgroundColor: "#A259F7",
+    backgroundColor: colorPalette.quaternary,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
     marginBottom: 16,
   },
   buttonText: {
-    color: "#fff",
+    color: colorPalette.primary,
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,
@@ -65,12 +66,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   taskText: {
-    color: "#fff",
+    color: colorPalette.tertiary,
     fontSize: 18,
   },
   divider: {
     height: 1,
-    backgroundColor: "#222",
+    backgroundColor: colorPalette.secondary,
     marginHorizontal: 8,
   },
 });

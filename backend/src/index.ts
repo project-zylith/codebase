@@ -1,12 +1,12 @@
 // backend/src/index.ts
 import express, { Request, Response } from "express";
 import { testConnection } from "./database";
-import { TaskService } from "./services/taskService";
-import { CreateTaskRequest, UpdateTaskRequest } from "./types/task";
 import * as ai from "./prompts/taskInsights";
 import { checkAuthentication } from "../middleware/checkAuthentication";
 import * as auth from "../controllers/authControllers";
+import * as taskControllers from "../controllers/taskControllers";
 const session = require("express-session");
+const cors = require("cors");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,6 +18,16 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
+// CORS configuration to allow credentials
+app.use(
+  cors({
+    origin: true, // Allow all origins in development
+    credentials: true, // Allow cookies to be sent
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  })
+);
+
 // Middleware
 app.use(express.json());
 app.use(
@@ -25,7 +35,11 @@ app.use(
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // Set to true in production with HTTPS
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true, // Prevent XSS attacks
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
   })
 );
 
@@ -48,7 +62,7 @@ app.get("/test", (req: Request, res: Response) => {
 });
 
 /////////////////////////////////
-// Task Routes
+// Task Routes (Authenticated)
 /////////////////////////////////
 
 // Basic route
@@ -56,76 +70,21 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello from the backend!");
 });
 
-// Task routes
-app.get("/api/tasks", async (req: Request, res: Response) => {
-  try {
-    const tasks = await TaskService.getAllTasks();
-    res.json(tasks);
-  } catch (error) {
-    console.error("Error fetching tasks:", error);
-    res.status(500).json({ error: "Failed to fetch tasks" });
-  }
-});
-
-app.post("/api/tasks", async (req: Request, res: Response) => {
-  try {
-    const taskData: CreateTaskRequest = req.body;
-    const newTask = await TaskService.createTask(taskData);
-    res.status(201).json(newTask);
-  } catch (error) {
-    console.error("Error creating task:", error);
-    res.status(500).json({ error: "Failed to create task" });
-  }
-});
-
-app.put("/api/tasks/:id", async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    const taskData: UpdateTaskRequest = req.body;
-    const updatedTask = await TaskService.updateTask(id, taskData);
-
-    if (!updatedTask) {
-      return res.status(404).json({ error: "Task not found" });
-    }
-
-    res.json(updatedTask);
-  } catch (error) {
-    console.error("Error updating task:", error);
-    res.status(500).json({ error: "Failed to update task" });
-  }
-});
-
-app.delete("/api/tasks/:id", async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    const deleted = await TaskService.deleteTask(id);
-
-    if (!deleted) {
-      return res.status(404).json({ error: "Task not found" });
-    }
-
-    res.status(204).send();
-  } catch (error) {
-    console.error("Error deleting task:", error);
-    res.status(500).json({ error: "Failed to delete task" });
-  }
-});
-
-app.patch("/api/tasks/:id/toggle", async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    const updatedTask = await TaskService.toggleTaskCompletion(id);
-
-    if (!updatedTask) {
-      return res.status(404).json({ error: "Task not found" });
-    }
-
-    res.json(updatedTask);
-  } catch (error) {
-    console.error("Error toggling task:", error);
-    res.status(500).json({ error: "Failed to toggle task" });
-  }
-});
+// Task routes - all require authentication
+app.get("/api/tasks", checkAuthentication, taskControllers.getTasks);
+app.post("/api/tasks", checkAuthentication, taskControllers.createTask);
+app.put("/api/tasks/:id", checkAuthentication, taskControllers.updateTask);
+app.delete("/api/tasks/:id", checkAuthentication, taskControllers.deleteTask);
+app.patch(
+  "/api/tasks/:id/toggle",
+  checkAuthentication,
+  taskControllers.toggleTaskCompletion
+);
+app.patch(
+  "/api/tasks/:id/toggle-favorite",
+  checkAuthentication,
+  taskControllers.toggleTaskFavorite
+);
 
 /////////////////////////////////
 // AI Routes
