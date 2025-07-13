@@ -2,6 +2,7 @@ export interface Task {
   id: number;
   user_id: number;
   content: string;
+  goal?: string | null;
   is_completed: boolean;
   is_ai_generated: boolean;
   is_favorite: boolean;
@@ -12,6 +13,7 @@ export interface Task {
 export interface CreateTaskRequest {
   user_id: number;
   content: string;
+  goal?: string | null;
   is_completed?: boolean;
   is_ai_generated?: boolean;
   is_favorite?: boolean;
@@ -19,6 +21,7 @@ export interface CreateTaskRequest {
 
 export interface UpdateTaskRequest {
   content?: string;
+  goal?: string | null;
   is_completed?: boolean;
   is_ai_generated?: boolean;
   is_favorite?: boolean;

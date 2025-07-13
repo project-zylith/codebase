@@ -1,10 +1,11 @@
 // backend/src/index.ts
 import express, { Request, Response } from "express";
 import { testConnection } from "./database";
-import * as ai from "./prompts/taskInsights";
+import * as ai from "./aiServices/taskInsights";
 import { checkAuthentication } from "../middleware/checkAuthentication";
 import * as auth from "../controllers/authControllers";
 import * as taskControllers from "../controllers/taskControllers";
+import SchedulerService from "./scheduler";
 const session = require("express-session");
 const cors = require("cors");
 
@@ -45,7 +46,11 @@ app.use(
 
 // Test database connection on startup
 testConnection()
-  .then(() => console.log("✅ Database connected successfully"))
+  .then(() => {
+    console.log("✅ Database connected successfully");
+    // Initialize schedulers after database connection is established
+    SchedulerService.initializeSchedulers();
+  })
   .catch((error) => console.error("❌ Database connection failed:", error));
 
 /////////////////////////////////
@@ -84,6 +89,11 @@ app.patch(
   "/api/tasks/:id/toggle-favorite",
   checkAuthentication,
   taskControllers.toggleTaskFavorite
+);
+app.delete(
+  "/api/tasks/cleanup",
+  checkAuthentication,
+  taskControllers.cleanupCompletedTasks
 );
 
 /////////////////////////////////

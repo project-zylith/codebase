@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <link href="./quill.snow.css" rel="stylesheet" />
+    <style>
+      body {
+        margin: 0;
+        padding: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background-color: #ffffff;
+      }
+
+      #editor-container {
+        height: calc(100vh - 20px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .ql-editor {
+        font-size: 16px;
+        line-height: 1.5;
+        padding: 12px 15px;
+        border: none;
+        outline: none;
+        min-height: 200px;
+        flex: 1;
+      }
+
+      .ql-toolbar {
+        border-top: 1px solid #ccc;
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        border-radius: 8px 8px 0 0;
+        background-color: #f8f9fa;
+        padding: 8px;
+      }
+
+      .ql-container {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        border-radius: 0 0 8px 8px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .ql-editor.ql-blank::before {
+        color: #999;
+        font-style: italic;
+        left: 15px;
+        right: 15px;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .ql-toolbar {
+          padding: 6px;
+        }
+
+        .ql-toolbar .ql-formats {
+          margin-right: 8px;
+        }
+
+        .ql-editor {
+          font-size: 16px; /* Prevent iOS zoom */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editor-container"></div>
+
+    <script src="./quill.min.js"></script>
+    <script>
+      // Initialize Quill with mobile-friendly configuration
+      const quill = new Quill("#editor-container", {
+        theme: "snow",
+        placeholder: "Start writing your note...",
+        modules: {
+          toolbar: [
+            ["bold", "italic", "underline", "strike"],
+            ["blockquote", "code-block"],
+            [{ header: 1 }, { header: 2 }],
+            [{ list: "ordered" }, { list: "bullet" }],
+            [{ color: [] }, { background: [] }],
+            [{ align: [] }],
+            ["link"],
+            ["clean"],
+          ],
+        },
+        formats: [
+          "bold",
+          "italic",
+          "underline",
+          "strike",
+          "blockquote",
+          "code-block",
+          "header",
+          "list",
+          "bullet",
+          "color",
+          "background",
+          "align",
+          "link",
+        ],
+      });
+
+      // Track if content has changed
+      let contentChanged = false;
+
+      // --- Communication from WebView to React Native ---
+      // When content changes, send it to the native app
+      quill.on("text-change", (delta, oldDelta, source) => {
+        if (source === "user") {
+          contentChanged = true;
+          const htmlContent = quill.root.innerHTML;
+          const textContent = quill.getText();
+
+          // Send content change to React Native
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_CONTENT_CHANGE",
+                payload: {
+                  html: htmlContent,
+                  text: textContent,
+                  length: textContent.length,
+                },
+              })
+            );
+          }
+        }
+      });
+
+      // When the editor gains/loses focus
+      quill.on("selection-change", (range, oldRange, source) => {
+        if (window.ReactNativeWebView) {
+          if (range) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_FOCUS",
+              })
+            );
+          } else {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_BLUR",
+              })
+            );
+          }
+        }
+      });
+
+      // When the editor is ready
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(
+            JSON.stringify({
+              type: "EDITOR_READY",
+            })
+          );
+        }
+      });
+
+      // --- Communication from React Native to WebView ---
+      // Listen for messages from React Native
+      document.addEventListener("message", function (event) {
+        try {
+          const message = JSON.parse(event.data);
+
+          switch (message.type) {
+            case "LOAD_CONTENT":
+              if (message.payload) {
+                quill.root.innerHTML = message.payload;
+                contentChanged = false;
+              }
+              break;
+
+            case "GET_CONTENT":
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(
+                  JSON.stringify({
+                    type: "CONTENT_RESPONSE",
+                    payload: {
+                      html: quill.root.innerHTML,
+                      text: quill.getText(),
+                      length: quill.getText().length,
+                    },
+                  })
+                );
+              }
+              break;
+
+            case "CLEAR_CONTENT":
+              quill.setText("");
+              contentChanged = false;
+              break;
+
+            case "SET_PLACEHOLDER":
+              quill.root.setAttribute(
+                "data-placeholder",
+                message.payload || "Start writing your note..."
+              );
+              break;
+
+            case "FORMAT_BOLD":
+              const boldFormat = quill.getFormat();
+              quill.format("bold", !boldFormat.bold);
+              break;
+
+            case "FORMAT_ITALIC":
+              const italicFormat = quill.getFormat();
+              quill.format("italic", !italicFormat.italic);
+              break;
+
+            case "FORMAT_UNDERLINE":
+              const underlineFormat = quill.getFormat();
+              quill.format("underline", !underlineFormat.underline);
+              break;
+
+            case "INSERT_TEXT":
+              const range = quill.getSelection();
+              if (range) {
+                quill.insertText(range.index, message.payload);
+              }
+              break;
+
+            default:
+              console.log("Unknown message type:", message.type);
+          }
+        } catch (error) {
+          console.error("Error parsing message:", error);
+        }
+      });
+
+      // Handle Android back button and other navigation
+      window.addEventListener("message", function (event) {
+        document.dispatchEvent(
+          new MessageEvent("message", {
+            data: event.data,
+          })
+        );
+      });
+
+      // Prevent default drag behavior
+      document.addEventListener("dragover", function (e) {
+        e.preventDefault();
+      });
+
+      document.addEventListener("drop", function (e) {
+        e.preventDefault();
+      });
+
+      // Handle keyboard shortcuts
+      document.addEventListener("keydown", function (e) {
+        // Prevent default zoom behavior on mobile
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === "=" || e.key === "-" || e.key === "0") {
+            e.preventDefault();
+          }
+        }
+      });
+
+      // Prevent scrolling when keyboard is open (iOS fix)
+      document.body.addEventListener(
+        "touchmove",
+        function (e) {
+          const target = e.target;
+          if (!target.closest(".ql-editor") && !target.closest(".ql-toolbar")) {
+            e.preventDefault();
+          }
+        },
+        { passive: false }
+      );
+
+      // Auto-resize handling
+      function adjustEditorHeight() {
+        const container = document.getElementById("editor-container");
+        const windowHeight = window.innerHeight;
+        container.style.height = windowHeight - 20 + "px";
+      }
+
+      window.addEventListener("resize", adjustEditorHeight);
+      window.addEventListener("orientationchange", function () {
+        setTimeout(adjustEditorHeight, 100);
+      });
+
+      // Initialize height
+      adjustEditorHeight();
+    </script>
+  </body>
+</html>

@@ -24,6 +24,7 @@ export const NewTaskModal = ({
   onTaskCreated,
 }: NewTaskModalProps) => {
   const [taskText, setTaskText] = useState("");
+  const [goalText, setGoalText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -32,6 +33,7 @@ export const NewTaskModal = ({
       try {
         const response = await createTask({
           content: taskText.trim(),
+          goal: goalText.trim() || null,
           is_completed: false,
           is_ai_generated: false,
           is_favorite: false,
@@ -41,6 +43,7 @@ export const NewTaskModal = ({
           const newTask: Task = await response.json();
           onTaskCreated(newTask);
           setTaskText("");
+          setGoalText("");
           onClose();
         } else {
           console.error("Failed to create task");
@@ -55,6 +58,7 @@ export const NewTaskModal = ({
 
   const handleClose = () => {
     setTaskText("");
+    setGoalText("");
     onClose();
   };
 
@@ -72,6 +76,19 @@ export const NewTaskModal = ({
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.title}>Create New Task</Text>
+
+            <Text style={styles.goalLabel}>Goal (Optional)</Text>
+            <TextInput
+              style={styles.goalInput}
+              placeholder="What do you want to achieve?"
+              placeholderTextColor={colorPalette.quinary}
+              value={goalText}
+              onChangeText={setGoalText}
+              multiline
+              numberOfLines={3}
+              maxLength={300}
+              editable={!isSubmitting}
+            />
 
             <Text style={styles.label}>Task Content</Text>
             <TextInput
@@ -142,6 +159,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 12,
   },
+  goalLabel: {
+    color: colorPalette.tertiary,
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
   input: {
     backgroundColor: colorPalette.primary,
     color: colorPalette.tertiary,
@@ -151,6 +174,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 24,
     minHeight: 100,
+    textAlignVertical: "top",
+  },
+  goalInput: {
+    backgroundColor: colorPalette.primary,
+    color: colorPalette.tertiary,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 24,
+    minHeight: 80,
     textAlignVertical: "top",
   },
   buttonContainer: {

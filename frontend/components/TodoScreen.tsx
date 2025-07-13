@@ -63,7 +63,6 @@ export const TodoScreen = () => {
       }
 
       const data = await response.json();
-      console.log("✅ Tasks fetched:", data);
       setTasks(data);
     } catch (error: any) {
       console.error("❌ Error fetching tasks:", error);
@@ -178,14 +177,18 @@ export const TodoScreen = () => {
         style={styles.taskContent}
         onPress={() => handleTaskPress(item)}
       >
-        <Text
-          style={[
-            styles.taskText,
-            item.is_completed && styles.completedTaskText,
-          ]}
-        >
-          {item.content}
-        </Text>
+        <View style={styles.taskInfo}>
+          {item.goal && <Text style={styles.goalText}>{item.goal}</Text>}
+
+          <Text
+            style={[
+              styles.taskText,
+              item.is_completed && styles.completedTaskText,
+            ]}
+          >
+            {item.content}
+          </Text>
+        </View>
 
         <View style={styles.taskActions}>
           <TouchableOpacity
@@ -366,8 +369,17 @@ const styles = StyleSheet.create({
   taskText: {
     color: colorPalette.tertiary,
     fontSize: 16,
+  },
+  taskInfo: {
     flex: 1,
     marginRight: 12,
+  },
+  goalText: {
+    color: colorPalette.quinary,
+    fontSize: 12,
+    marginBottom: 4,
+    fontStyle: "italic",
+    opacity: 0.8,
   },
   completedTaskText: {
     textDecorationLine: "line-through",

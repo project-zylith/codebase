@@ -60,6 +60,21 @@ export class TaskService {
     return task;
   }
 
+  // Pass in AI generated data in task format
+  static async createTaskWithAI(taskData: CreateTaskRequest): Promise<Task> {
+    const taskToInsert = {
+      ...taskData,
+      is_completed: taskData.is_completed ?? false,
+      is_ai_generated: true,
+      is_favorite: taskData.is_favorite ?? false,
+      created_at: db.fn.now(),
+      updated_at: db.fn.now(),
+    };
+
+    const [task] = await db("tasks").insert(taskToInsert).returning("*");
+    return task;
+  }
+
   static async updateTask(
     id: number,
     taskData: UpdateTaskRequest

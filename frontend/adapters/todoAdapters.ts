@@ -5,6 +5,7 @@ export interface Task {
   id: number;
   user_id: number;
   content: string;
+  goal?: string | null;
   is_completed: boolean;
   is_ai_generated: boolean;
   is_favorite: boolean;
@@ -14,6 +15,7 @@ export interface Task {
 
 export interface CreateTaskRequest {
   content: string;
+  goal?: string | null;
   is_completed?: boolean;
   is_ai_generated?: boolean;
   is_favorite?: boolean;
@@ -21,6 +23,7 @@ export interface CreateTaskRequest {
 
 export interface UpdateTaskRequest {
   content?: string;
+  goal?: string | null;
   is_completed?: boolean;
   is_ai_generated?: boolean;
   is_favorite?: boolean;
@@ -102,6 +105,19 @@ export const toggleTaskFavorite = async (id: number) => {
     });
   } catch (error) {
     console.error("Toggle task favorite error:", error);
+    throw error;
+  }
+};
+
+export const cleanupCompletedTasks = async () => {
+  try {
+    return await fetch(`${API_ENDPOINTS.TASKS.CLEANUP}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include session cookies
+    });
+  } catch (error) {
+    console.error("Cleanup completed tasks error:", error);
     throw error;
   }
 };

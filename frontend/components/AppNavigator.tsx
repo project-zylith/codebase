@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { HomeScreen } from "./HomeScreen";
 import { TodoScreen } from "./TodoScreen";
-import { InsightScreen } from "./InsightScreen";
+import { EditorScreen } from "./EditorScreen";
 import { AccountScreen } from "./AccountScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { RootTabParamList } from "../types/types";
@@ -185,7 +185,7 @@ const AppNavigator = () => {
         >
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Todo" component={TodoScreen} />
-          <Tab.Screen name="Insight" component={InsightScreen} />
+          <Tab.Screen name="Insight" component={EditorScreen} />
           <Tab.Screen name="Account" component={AccountScreen} />
         </Tab.Navigator>
       </NavigationContainer>

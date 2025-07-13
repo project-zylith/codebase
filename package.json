@@ -19,6 +19,8 @@
   "license": "MIT",
   "homepage": "https://github.com/Ibra-Hud/renaissance#readme",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1"
+    "@google/generative-ai": "^0.24.1",
+    "expo-asset": "^11.1.7",
+    "expo-file-system": "^18.1.11"
   }
 }

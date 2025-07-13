@@ -177,7 +177,7 @@ expo start
   - **AppNavigator.tsx** — Navigation setup (tab bar, etc).
   - **HomeScreen.tsx** — Home page UI and logic.
   - **AccountScreen.tsx** — Account/signup page UI and logic.
-  - **InsightScreen.tsx** — Insights page UI.
+  - **EditorScreen.tsx** — Editor page UI.
   - **NewTask.tsx** — Task input form.
   - **AuthSignUp.tsx** — Signup form.
 - **adapters/**

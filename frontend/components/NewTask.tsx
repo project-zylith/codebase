@@ -20,6 +20,7 @@ interface NewTaskProps {
 export const NewTask = ({ onTaskCreated, tasks, setTasks }: NewTaskProps) => {
   // Below we declare a useState to track the state of the user inputed form. So as the user types the value will change more on that later.
   const [taskText, setTaskText] = useState("");
+  const [goalText, setGoalText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Updated onSubmit function to work with the backend API
@@ -29,6 +30,7 @@ export const NewTask = ({ onTaskCreated, tasks, setTasks }: NewTaskProps) => {
       try {
         const response = await createTask({
           content: taskText.trim(),
+          goal: goalText.trim() || null,
           is_completed: false,
           is_ai_generated: false,
           is_favorite: false,
@@ -39,6 +41,7 @@ export const NewTask = ({ onTaskCreated, tasks, setTasks }: NewTaskProps) => {
           onTaskCreated(newTask);
           setTasks([newTask, ...tasks]);
           setTaskText(""); // Clear input after submission
+          setGoalText(""); // Clear goal input after submission
         } else {
           console.error("Failed to create task");
         }
@@ -53,6 +56,20 @@ export const NewTask = ({ onTaskCreated, tasks, setTasks }: NewTaskProps) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Add a New Task</Text>
+
+      <Text style={styles.goalLabel}>Goal (Optional)</Text>
+      <TextInput
+        style={styles.goalInput}
+        placeholder="What do you want to achieve?"
+        placeholderTextColor={colorPalette.quinary}
+        value={goalText}
+        onChangeText={setGoalText}
+        returnKeyType="next"
+        editable={!isSubmitting}
+        multiline
+        numberOfLines={2}
+      />
+
       <TextInput
         style={styles.input}
         placeholder="Enter a new task"
@@ -103,6 +120,23 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,
+  },
+  goalLabel: {
+    color: colorPalette.tertiary,
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  goalInput: {
+    backgroundColor: colorPalette.secondary,
+    color: colorPalette.tertiary,
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    fontSize: 16,
+    marginBottom: 16,
+    borderWidth: 0,
+    minHeight: 80, // Added minHeight for multiline goal input
   },
 });
 

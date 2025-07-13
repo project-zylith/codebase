@@ -1,23 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   View,
+  SafeAreaView,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   Alert,
   Keyboard,
-  ScrollView,
   TouchableWithoutFeedback,
+  ScrollView,
   Modal,
 } from "react-native";
 import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
-import colorPalette from "../assets/colorPalette";
 
-export const TenTapEditor = () => {
-  const [content, setContent] = useState("");
+interface TenTapEditorNewProps {
+  initialContent?: string;
+  onContentChange?: (html: string, text: string) => void;
+  onSave?: (html: string, text: string) => void;
+  placeholder?: string;
+}
+
+export const TenTapEditorNew: React.FC<TenTapEditorNewProps> = ({
+  initialContent = "",
+  onContentChange,
+  onSave,
+  placeholder = "Start writing your note...",
+}) => {
+  const [currentHtmlContent, setCurrentHtmlContent] = useState("");
+  const [currentTextContent, setCurrentTextContent] = useState("");
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
@@ -26,11 +38,11 @@ export const TenTapEditor = () => {
   const editor = useEditorBridge({
     autofocus: false,
     avoidIosKeyboard: true,
-    initialContent: "", // Clean start like Apple Notes
+    initialContent: initialContent || "", // Clean start like Apple Notes
   });
 
   // Listen for keyboard events
-  React.useEffect(() => {
+  useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
@@ -53,7 +65,7 @@ export const TenTapEditor = () => {
   }, []);
 
   // Clear last used tool after a delay
-  React.useEffect(() => {
+  useEffect(() => {
     if (lastUsedTool) {
       const timer = setTimeout(() => {
         setLastUsedTool(null);
@@ -63,15 +75,42 @@ export const TenTapEditor = () => {
     }
   }, [lastUsedTool]);
 
+  // Listen for content changes
+  useEffect(() => {
+    const getContent = async () => {
+      try {
+        const htmlContent = await editor.getHTML();
+        const textContent = await editor.getText();
+
+        setCurrentHtmlContent(htmlContent);
+        setCurrentTextContent(textContent);
+
+        if (onContentChange) {
+          onContentChange(htmlContent, textContent);
+        }
+      } catch (error) {
+        console.error("Error getting content:", error);
+      }
+    };
+
+    // Set up content change listener
+    const unsubscribe = editor._subscribeToEditorStateUpdate(() => {
+      getContent();
+    });
+
+    return unsubscribe;
+  }, [editor, onContentChange]);
+
+  // Save function
   const handleSave = async () => {
     try {
       const htmlContent = await editor.getHTML();
-      if (htmlContent.trim()) {
-        Alert.alert("Note Saved", "Your note has been saved successfully!");
-        console.log("Saved content:", htmlContent);
-        setContent(htmlContent);
-      } else {
-        Alert.alert("Nothing to Save", "Please write something first!");
+      const textContent = await editor.getText();
+
+      if (htmlContent.trim() || textContent.trim()) {
+        if (onSave) {
+          onSave(htmlContent, textContent);
+        }
       }
     } catch (error) {
       Alert.alert("Error", "Failed to save note");

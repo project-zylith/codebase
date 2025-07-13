@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <style>
+      /* Inline minimal Quill.js styles for offline use */
+      .ql-container {
+        box-sizing: border-box;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 13px;
+        height: 100%;
+        margin: 0px;
+        position: relative;
+      }
+
+      .ql-editor {
+        box-sizing: border-box;
+        line-height: 1.42;
+        height: 100%;
+        outline: none;
+        overflow-y: auto;
+        padding: 12px 15px;
+        tab-size: 4;
+        -moz-tab-size: 4;
+        text-align: left;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 16px;
+        border: none;
+        flex: 1;
+      }
+
+      .ql-editor > * {
+        cursor: text;
+      }
+
+      .ql-editor p,
+      .ql-editor ol,
+      .ql-editor ul,
+      .ql-editor pre,
+      .ql-editor blockquote,
+      .ql-editor h1,
+      .ql-editor h2,
+      .ql-editor h3,
+      .ql-editor h4,
+      .ql-editor h5,
+      .ql-editor h6 {
+        margin: 0;
+        padding: 0;
+      }
+
+      .ql-editor h1 {
+        font-size: 2em;
+        font-weight: bold;
+      }
+      .ql-editor h2 {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+      .ql-editor h3 {
+        font-size: 1.17em;
+        font-weight: bold;
+      }
+      .ql-editor h4 {
+        font-size: 1em;
+        font-weight: bold;
+      }
+      .ql-editor h5 {
+        font-size: 0.83em;
+        font-weight: bold;
+      }
+      .ql-editor h6 {
+        font-size: 0.67em;
+        font-weight: bold;
+      }
+
+      .ql-editor blockquote {
+        border-left: 4px solid #ccc;
+        margin-bottom: 5px;
+        margin-top: 5px;
+        padding-left: 16px;
+      }
+
+      .ql-editor code,
+      .ql-editor pre {
+        background-color: #f0f0f0;
+        border-radius: 3px;
+      }
+
+      .ql-editor code {
+        font-size: 85%;
+        padding: 2px 4px;
+      }
+
+      .ql-editor pre {
+        white-space: pre-wrap;
+        margin-bottom: 5px;
+        margin-top: 5px;
+        padding: 5px 10px;
+      }
+
+      .ql-editor a {
+        color: #06c;
+        text-decoration: underline;
+      }
+
+      .ql-editor ol,
+      .ql-editor ul {
+        padding-left: 1.5em;
+      }
+
+      .ql-editor ol > li,
+      .ql-editor ul > li {
+        list-style-type: none;
+      }
+
+      .ql-editor ul > li::before {
+        content: "\\2022";
+        display: inline-block;
+        white-space: nowrap;
+        width: 1.2em;
+        margin-left: -1.5em;
+        margin-right: 0.3em;
+        text-align: right;
+      }
+
+      .ql-editor ol li {
+        counter-increment: list-0;
+      }
+
+      .ql-editor ol li:before {
+        content: counter(list-0, decimal) ". ";
+        display: inline-block;
+        white-space: nowrap;
+        width: 1.2em;
+        margin-left: -1.5em;
+        margin-right: 0.3em;
+        text-align: right;
+      }
+
+      .ql-editor ol {
+        counter-reset: list-0;
+      }
+
+      .ql-editor.ql-blank::before {
+        color: #999;
+        content: attr(data-placeholder);
+        font-style: italic;
+        position: absolute;
+        left: 15px;
+        right: 15px;
+        pointer-events: none;
+      }
+
+      /* Toolbar styles */
+      .ql-toolbar {
+        border: 1px solid #ccc;
+        border-radius: 8px 8px 0 0;
+        background-color: #f8f9fa;
+        padding: 8px;
+        font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .ql-toolbar button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+        float: left;
+        height: 24px;
+        padding: 3px 5px;
+        width: 28px;
+        text-align: center;
+        margin-right: 2px;
+        border-radius: 3px;
+        font-weight: bold;
+        font-size: 12px;
+      }
+
+      .ql-toolbar button:hover {
+        background-color: #e0e0e0;
+      }
+
+      .ql-toolbar button.ql-active {
+        background-color: #ccc;
+      }
+
+      .ql-toolbar .ql-formats {
+        display: inline-block;
+        margin-right: 15px;
+      }
+
+      .ql-toolbar .ql-formats:after {
+        clear: both;
+        content: "";
+        display: table;
+      }
+
+      .ql-toolbar select {
+        font-size: 14px;
+        padding: 2px 4px;
+        margin-right: 8px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+      }
+
+      /* Container styles */
+      body {
+        margin: 0;
+        padding: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background-color: #ffffff;
+      }
+
+      #editor-container {
+        height: calc(100vh - 20px);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .ql-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .ql-toolbar {
+          padding: 6px;
+          font-size: 12px;
+        }
+
+        .ql-toolbar button {
+          height: 28px;
+          width: 32px;
+        }
+
+        .ql-toolbar .ql-formats {
+          margin-right: 8px;
+        }
+
+        .ql-editor {
+          font-size: 16px; /* Prevent iOS zoom */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editor-container">
+      <div class="ql-toolbar">
+        <span class="ql-formats">
+          <button class="ql-bold" title="Bold" type="button">
+            <strong>B</strong>
+          </button>
+          <button class="ql-italic" title="Italic" type="button">
+            <em>I</em>
+          </button>
+          <button class="ql-underline" title="Underline" type="button">
+            <u>U</u>
+          </button>
+          <button class="ql-strike" title="Strike" type="button">
+            <s>S</s>
+          </button>
+        </span>
+        <span class="ql-formats">
+          <select class="ql-header" title="Header">
+            <option selected></option>
+            <option value="1">H1</option>
+            <option value="2">H2</option>
+            <option value="3">H3</option>
+          </select>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-blockquote" title="Blockquote" type="button">
+            ❝
+          </button>
+          <button class="ql-code-block" title="Code Block" type="button">
+            &lt;/&gt;
+          </button>
+        </span>
+        <span class="ql-formats">
+          <button
+            class="ql-list"
+            value="ordered"
+            title="Ordered List"
+            type="button"
+          >
+            1.
+          </button>
+          <button
+            class="ql-list"
+            value="bullet"
+            title="Bullet List"
+            type="button"
+          >
+            •
+          </button>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-link" title="Link" type="button">🔗</button>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-clean" title="Remove Formatting" type="button">
+            🗑
+          </button>
+        </span>
+      </div>
+      <div class="ql-container">
+        <div
+          class="ql-editor"
+          contenteditable="true"
+          data-placeholder="Start writing your note..."
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      let editor;
+      let contentChanged = false;
+
+      // Simple editor implementation without external dependencies
+      class SimpleQuillEditor {
+        constructor(container, options = {}) {
+          this.container = container;
+          this.options = { placeholder: "Start typing...", ...options };
+          this.editor = container.querySelector(".ql-editor");
+          this.toolbar = container.querySelector(".ql-toolbar");
+          this.formats = {};
+
+          this.init();
+        }
+
+        init() {
+          this.setupEditor();
+          this.setupToolbar();
+          this.setupEventListeners();
+
+          // Set placeholder
+          this.editor.setAttribute(
+            "data-placeholder",
+            this.options.placeholder
+          );
+
+          // Notify ready
+          this.notifyReady();
+        }
+
+        setupEditor() {
+          this.editor.addEventListener("input", () => {
+            contentChanged = true;
+            this.notifyContentChange();
+          });
+
+          this.editor.addEventListener("focus", () => {
+            this.notifyFocus();
+          });
+
+          this.editor.addEventListener("blur", () => {
+            this.notifyBlur();
+          });
+        }
+
+        setupToolbar() {
+          this.toolbar.addEventListener("click", (e) => {
+            const button = e.target.closest("button");
+            if (button) {
+              e.preventDefault();
+              this.handleToolbarClick(button);
+            }
+          });
+
+          this.toolbar.addEventListener("change", (e) => {
+            if (e.target.tagName === "SELECT") {
+              this.handleSelectChange(e.target);
+            }
+          });
+        }
+
+        setupEventListeners() {
+          document.addEventListener("selectionchange", () => {
+            this.updateToolbarState();
+          });
+        }
+
+        handleToolbarClick(button) {
+          const format = button.className.split(" ")[0].replace("ql-", "");
+
+          switch (format) {
+            case "bold":
+              document.execCommand("bold");
+              break;
+            case "italic":
+              document.execCommand("italic");
+              break;
+            case "underline":
+              document.execCommand("underline");
+              break;
+            case "strike":
+              document.execCommand("strikeThrough");
+              break;
+            case "blockquote":
+              document.execCommand("formatBlock", false, "blockquote");
+              break;
+            case "code-block":
+              document.execCommand("formatBlock", false, "pre");
+              break;
+            case "list":
+              const listType =
+                button.value === "ordered"
+                  ? "insertOrderedList"
+                  : "insertUnorderedList";
+              document.execCommand(listType);
+              break;
+            case "link":
+              const url = prompt("Enter URL:");
+              if (url) {
+                document.execCommand("createLink", false, url);
+              }
+              break;
+            case "clean":
+              document.execCommand("removeFormat");
+              break;
+          }
+
+          this.updateToolbarState();
+          this.notifyContentChange();
+        }
+
+        handleSelectChange(select) {
+          const format = select.className.split(" ")[0].replace("ql-", "");
+          const value = select.value;
+
+          if (format === "header") {
+            const tag = value ? `h${value}` : "p";
+            document.execCommand("formatBlock", false, tag);
+          }
+
+          this.updateToolbarState();
+          this.notifyContentChange();
+        }
+
+        updateToolbarState() {
+          // Update button states based on current selection
+          const buttons = this.toolbar.querySelectorAll("button");
+          buttons.forEach((button) => {
+            const format = button.className.split(" ")[0].replace("ql-", "");
+            const isActive = this.isFormatActive(format);
+            button.classList.toggle("ql-active", isActive);
+          });
+        }
+
+        isFormatActive(format) {
+          switch (format) {
+            case "bold":
+              return document.queryCommandState("bold");
+            case "italic":
+              return document.queryCommandState("italic");
+            case "underline":
+              return document.queryCommandState("underline");
+            case "strike":
+              return document.queryCommandState("strikeThrough");
+            default:
+              return false;
+          }
+        }
+
+        getHTML() {
+          return this.editor.innerHTML;
+        }
+
+        getText() {
+          return this.editor.textContent || this.editor.innerText || "";
+        }
+
+        setHTML(html) {
+          this.editor.innerHTML = html;
+          contentChanged = false;
+        }
+
+        setText(text) {
+          this.editor.textContent = text;
+          contentChanged = false;
+        }
+
+        clear() {
+          this.editor.innerHTML = "";
+          contentChanged = false;
+        }
+
+        focus() {
+          this.editor.focus();
+        }
+
+        blur() {
+          this.editor.blur();
+        }
+
+        format(name, value) {
+          switch (name) {
+            case "bold":
+              document.execCommand("bold");
+              break;
+            case "italic":
+              document.execCommand("italic");
+              break;
+            case "underline":
+              document.execCommand("underline");
+              break;
+          }
+          this.updateToolbarState();
+          this.notifyContentChange();
+        }
+
+        notifyReady() {
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_READY",
+              })
+            );
+          }
+        }
+
+        notifyContentChange() {
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_CONTENT_CHANGE",
+                payload: {
+                  html: this.getHTML(),
+                  text: this.getText(),
+                  length: this.getText().length,
+                },
+              })
+            );
+          }
+        }
+
+        notifyFocus() {
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_FOCUS",
+              })
+            );
+          }
+        }
+
+        notifyBlur() {
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_BLUR",
+              })
+            );
+          }
+        }
+      }
+
+      // Wait for DOM to be ready
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeEditor();
+      });
+
+      // Also try to initialize if DOMContentLoaded already fired
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeEditor);
+      } else {
+        initializeEditor();
+      }
+
+      function initializeEditor() {
+        try {
+          const container = document.getElementById("editor-container");
+          editor = new SimpleQuillEditor(container, {
+            placeholder: "Start writing your note...",
+          });
+
+          console.log("Simple editor initialized successfully");
+        } catch (error) {
+          console.error("Error initializing editor:", error);
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "EDITOR_ERROR",
+                payload: error.message,
+              })
+            );
+          }
+        }
+      }
+
+      // --- Communication from React Native to WebView ---
+      document.addEventListener("message", function (event) {
+        if (!editor) return;
+
+        try {
+          const message = JSON.parse(event.data);
+
+          switch (message.type) {
+            case "LOAD_CONTENT":
+              if (message.payload) {
+                editor.setHTML(message.payload);
+              }
+              break;
+
+            case "GET_CONTENT":
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(
+                  JSON.stringify({
+                    type: "CONTENT_RESPONSE",
+                    payload: {
+                      html: editor.getHTML(),
+                      text: editor.getText(),
+                      length: editor.getText().length,
+                    },
+                  })
+                );
+              }
+              break;
+
+            case "CLEAR_CONTENT":
+              editor.clear();
+              break;
+
+            case "SET_PLACEHOLDER":
+              editor.editor.setAttribute(
+                "data-placeholder",
+                message.payload || "Start writing your note..."
+              );
+              break;
+
+            case "FORMAT_BOLD":
+              editor.format("bold");
+              break;
+
+            case "FORMAT_ITALIC":
+              editor.format("italic");
+              break;
+
+            case "FORMAT_UNDERLINE":
+              editor.format("underline");
+              break;
+
+            case "INSERT_TEXT":
+              const selection = window.getSelection();
+              if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(document.createTextNode(message.payload));
+              }
+              break;
+
+            default:
+              console.log("Unknown message type:", message.type);
+          }
+        } catch (error) {
+          console.error("Error parsing message:", error);
+        }
+      });
+
+      // Handle Android back button and other navigation
+      window.addEventListener("message", function (event) {
+        document.dispatchEvent(
+          new MessageEvent("message", {
+            data: event.data,
+          })
+        );
+      });
+
+      // Auto-resize handling
+      function adjustEditorHeight() {
+        const container = document.getElementById("editor-container");
+        if (container) {
+          const windowHeight = window.innerHeight;
+          container.style.height = windowHeight - 20 + "px";
+        }
+      }
+
+      window.addEventListener("resize", adjustEditorHeight);
+      window.addEventListener("orientationchange", function () {
+        setTimeout(adjustEditorHeight, 100);
+      });
+
+      // Initialize height
+      setTimeout(adjustEditorHeight, 100);
+    </script>
+  </body>
+</html>

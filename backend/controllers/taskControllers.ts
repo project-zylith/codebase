@@ -47,7 +47,8 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
-  const { content, is_completed, is_ai_generated, is_favorite } = req.body;
+  const { content, goal, is_completed, is_ai_generated, is_favorite } =
+    req.body;
 
   if (!content) {
     return res.status(400).send({ message: "Task content is required." });
@@ -57,6 +58,7 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
     const task = await TaskService.createTask({
       user_id: req.session.userId,
       content,
+      goal,
       is_completed: is_completed || false,
       is_ai_generated: is_ai_generated || false,
       is_favorite: is_favorite || false,
@@ -78,7 +80,8 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
   }
 
   const taskId = parseInt(req.params.id);
-  const { content, is_completed, is_ai_generated, is_favorite } = req.body;
+  const { content, goal, is_completed, is_ai_generated, is_favorite } =
+    req.body;
 
   if (!taskId) {
     return res.status(400).send({ message: "Task ID is required." });
@@ -93,6 +96,7 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
 
     const updatedTask = await TaskService.updateTask(taskId, {
       content,
+      goal,
       is_completed,
       is_ai_generated,
       is_favorite,
@@ -215,5 +219,35 @@ export const toggleTaskFavorite = async (
   } catch (error) {
     console.error("Toggle task favorite error:", error);
     res.status(500).send({ message: "Failed to toggle task favorite." });
+  }
+};
+
+export const cleanupCompletedTasks = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  console.log("🎯 cleanupCompletedTasks controller hit!");
+
+  if (!req.session?.userId) {
+    return res.status(401).send({ message: "User must be authenticated." });
+  }
+
+  try {
+    const { SchedulerService } = await import("../src/scheduler");
+    const deletedCount = await SchedulerService.cleanupUserTasks(
+      req.session.userId
+    );
+
+    console.log(
+      `✅ Manual cleanup completed for user ${req.session.userId}: ${deletedCount} tasks deleted`
+    );
+    res.send({
+      message: "Cleanup completed successfully",
+      deletedCount,
+      userId: req.session.userId,
+    });
+  } catch (error) {
+    console.error("Manual cleanup error:", error);
+    res.status(500).send({ message: "Failed to cleanup completed tasks." });
   }
 };
