@@ -2,48 +2,43 @@
 import React, { useState } from "react";
 import {
   View,
-  TextInput,
   Text,
-  StyleSheet,
+  TextInput,
   TouchableOpacity,
   Alert,
+  StyleSheet,
 } from "react-native";
-import { loginUser, LoginRequest } from "../adapters/userAdapters";
+import { loginUser } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
 import colorPalette from "../assets/colorPalette";
 
-export const AuthLogin: React.FC = () => {
+const AuthLogin: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useUser();
 
   const handleSubmit = async () => {
     if (!username || !password) {
-      Alert.alert("Error", "Please fill in all fields.");
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     try {
       const response = await loginUser({ username, password });
 
-      if (!response) {
-        throw new Error("No response from server");
-      }
-
-      if (!response.ok) {
+      if (response && response.ok) {
+        const userData = await response.json();
+        await login(userData);
+        Alert.alert("Success", "Logged in successfully!");
+      } else if (response) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
+        Alert.alert("Error", errorData.message || "Failed to login");
+      } else {
+        Alert.alert("Error", "No response from server");
       }
-
-      const userData = await response.json();
-
-      // Use the UserContext login function
-      await login(userData);
-
-      Alert.alert("Success", `Welcome back, ${userData.username}!`);
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Login failed");
-      console.error(error);
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert("Error", "An unexpected error occurred");
     }
   };
 
@@ -117,3 +112,5 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 });
+
+export default AuthLogin;

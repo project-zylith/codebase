@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   TextInput,
@@ -8,9 +7,13 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  StyleSheet,
 } from "react-native";
+import { createTask } from "../adapters/todoAdapters";
+import { useUser } from "../contexts/UserContext";
+import type { Task } from "../adapters/todoAdapters";
 import colorPalette from "../assets/colorPalette";
-import { createTask, Task } from "../adapters/todoAdapters";
 
 interface NewTaskModalProps {
   visible: boolean;
@@ -18,48 +21,59 @@ interface NewTaskModalProps {
   onTaskCreated: (task: Task) => void;
 }
 
-export const NewTaskModal = ({
+export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   visible,
   onClose,
   onTaskCreated,
-}: NewTaskModalProps) => {
+}) => {
   const [taskText, setTaskText] = useState("");
   const [goalText, setGoalText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { state: userState } = useUser();
 
-  const handleSubmit = async () => {
-    if (taskText.trim() !== "" && !isSubmitting) {
-      setIsSubmitting(true);
-      try {
-        const response = await createTask({
-          content: taskText.trim(),
-          goal: goalText.trim() || null,
-          is_completed: false,
-          is_ai_generated: false,
-          is_favorite: false,
-        });
-
-        if (response.ok) {
-          const newTask: Task = await response.json();
-          onTaskCreated(newTask);
-          setTaskText("");
-          setGoalText("");
-          onClose();
-        } else {
-          console.error("Failed to create task");
-        }
-      } catch (error) {
-        console.error("Error creating task:", error);
-      } finally {
-        setIsSubmitting(false);
-      }
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setTaskText("");
+      setGoalText("");
+      onClose();
     }
   };
 
-  const handleClose = () => {
-    setTaskText("");
-    setGoalText("");
-    onClose();
+  const handleCreateTask = async () => {
+    if (!taskText.trim()) {
+      Alert.alert("Error", "Please enter a task");
+      return;
+    }
+
+    if (!userState.user) {
+      Alert.alert("Error", "You must be logged in to create tasks");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const taskData = {
+        content: taskText.trim(),
+        goal: goalText.trim() || null,
+        is_completed: false,
+        is_ai_generated: false,
+        is_favorite: false,
+      };
+
+      const response = await createTask(taskData);
+      if (response && response.ok) {
+        const newTask = await response.json();
+        onTaskCreated(newTask);
+        handleClose();
+      } else {
+        throw new Error("Failed to create task");
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
+      Alert.alert("Error", "Failed to create task. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,14 +125,13 @@ export const NewTaskModal = ({
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.button, styles.createButton]}
-                onPress={handleSubmit}
-                disabled={isSubmitting || taskText.trim() === ""}
+                onPress={handleCreateTask}
+                disabled={isSubmitting}
               >
                 <Text style={styles.createButtonText}>
-                  {isSubmitting ? "Creating..." : "Create Task"}
+                  {isSubmitting ? "Creating..." : "Create"}
                 </Text>
               </TouchableOpacity>
             </View>

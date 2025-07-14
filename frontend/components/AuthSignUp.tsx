@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import {
   View,
-  TextInput,
   Text,
-  StyleSheet,
+  TextInput,
   TouchableOpacity,
   Alert,
+  StyleSheet,
 } from "react-native";
 import { registerUser } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
@@ -20,19 +20,8 @@ const AuthSignUp: React.FC = () => {
   const { login } = useUser();
 
   const handleSubmit = async () => {
-    if (!username || !email || !password) {
-      Alert.alert("Error", "Please fill in all fields.");
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert(
-        "Error",
-        `Password must be at least 6 characters long, current length: ${password.length}`
-      );
-      return;
-    }
     if (password !== passwordConfirmation) {
-      Alert.alert("Error", "Passwords do not match.");
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
 
@@ -40,30 +29,22 @@ const AuthSignUp: React.FC = () => {
       const response = await registerUser({
         username,
         email,
-        password, // Backend controller expects 'password' field
+        password,
       });
 
-      if (!response) {
-        throw new Error("No response from server");
-      }
-
-      if (!response.ok) {
+      if (response && response.ok) {
+        const userData = await response.json();
+        await login(userData);
+        Alert.alert("Success", "Account created successfully!");
+      } else if (response) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+        Alert.alert("Error", errorData.message || "Failed to create account");
+      } else {
+        Alert.alert("Error", "No response from server");
       }
-
-      const userData = await response.json();
-
-      // Use the UserContext login function to log in the newly registered user
-      await login(userData);
-
-      Alert.alert(
-        "Success",
-        `Welcome, ${username}, you're successfully registered!`
-      );
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Registration failed");
-      console.error(error);
+    } catch (error) {
+      console.error("Signup error:", error);
+      Alert.alert("Error", "An unexpected error occurred");
     }
   };
 

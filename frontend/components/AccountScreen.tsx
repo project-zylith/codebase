@@ -1,73 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
-  Alert,
   SafeAreaView,
+  Alert,
+  StyleSheet,
 } from "react-native";
 import { useUser } from "../contexts/UserContext";
-import { AuthLogin } from "./AuthLogin";
+import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
 import colorPalette from "../assets/colorPalette";
 
-export const AccountScreen: React.FC = () => {
-  const { state, logout } = useUser();
+export const AccountScreen = () => {
+  const { state: userState, logout } = useUser();
   const [showSignUp, setShowSignUp] = useState(false);
 
+  useEffect(() => {
+    console.log("AccountScreen: userState changed", userState);
+  }, [userState]);
+
   const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Logout",
-        onPress: logout,
-      },
-    ]);
+    try {
+      await logout();
+      Alert.alert("Success", "Logged out successfully");
+    } catch (error) {
+      console.error("Logout error:", error);
+      Alert.alert("Error", "Failed to logout");
+    }
   };
 
-  if (state.isLoading) {
+  const renderUserInfo = () => {
+    if (!userState.user) return null;
+
     return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>Account</Text>
+
+        <View style={styles.userInfo}>
+          <Text style={styles.label}>Username:</Text>
+          <Text style={styles.value}>{userState.user.username}</Text>
+        </View>
+
+        <View style={styles.userInfo}>
+          <Text style={styles.label}>Email:</Text>
+          <Text style={styles.value}>{userState.user.email}</Text>
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
     );
-  }
+  };
 
-  if (!state.isAuthenticated || !state.user) {
+  if (userState.isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
-          {showSignUp ? (
-            <View style={styles.authContainer}>
-              <Text style={styles.title}>Create Account</Text>
-              <AuthSignUp />
-              <TouchableOpacity
-                style={styles.switchButton}
-                onPress={() => setShowSignUp(false)}
-              >
-                <Text style={styles.switchText}>
-                  Already have an account? Login
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.authContainer}>
-              <Text style={styles.title}>Welcome Back</Text>
-              <AuthLogin />
-              <TouchableOpacity
-                style={styles.switchButton}
-                onPress={() => setShowSignUp(true)}
-              >
-                <Text style={styles.switchText}>
-                  Don't have an account? Sign Up
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -76,30 +67,23 @@ export const AccountScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Welcome Back, {state.user.username}!</Text>
-
-          <View style={styles.userInfo}>
-            <Text style={styles.label}>User ID:</Text>
-            <Text style={styles.value}>{state.user.id}</Text>
+        {userState.user ? (
+          renderUserInfo()
+        ) : (
+          <View style={styles.authContainer}>
+            {showSignUp ? <AuthSignUp /> : <AuthLogin />}
+            <TouchableOpacity
+              style={styles.switchButton}
+              onPress={() => setShowSignUp(!showSignUp)}
+            >
+              <Text style={styles.switchText}>
+                {showSignUp
+                  ? "Already have an account? Login"
+                  : "Don't have an account? Sign up"}
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <View style={styles.userInfo}>
-            <Text style={styles.label}>Email:</Text>
-            <Text style={styles.value}>{state.user.email}</Text>
-          </View>
-
-          {/* <View style={styles.userInfo}>
-            <Text style={styles.label}>Account Created:</Text>
-            <Text style={styles.value}>
-              {new Date(state.user.created_at).toLocaleDateString()}
-            </Text>
-          </View> */}
-        </View>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );

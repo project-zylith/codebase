@@ -3,10 +3,10 @@ import {
   View,
   TouchableOpacity,
   Text,
-  StyleSheet,
   FlatList,
   Alert,
   SafeAreaView,
+  StyleSheet,
 } from "react-native";
 import { NewTask } from "./NewTask";
 import { TenTapEditor } from "./TenTapEditor";
@@ -75,5 +75,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
 });
-export default HomeScreen;
 
+export default HomeScreen;

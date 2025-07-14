@@ -1,185 +1,111 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
-  TouchableOpacity,
   Text,
-  StyleSheet,
   FlatList,
-  Alert,
+  TouchableOpacity,
   SafeAreaView,
+  Alert,
+  StyleSheet,
 } from "react-native";
-import { NewTaskModal } from "./NewTaskModal";
-import { TenTapEditor } from "./TenTapEditor";
-import colorPalette from "../assets/colorPalette";
-import { useUser } from "../contexts/UserContext";
 import {
-  getTasks,
-  deleteTask,
-  toggleTaskCompletion,
-  toggleTaskFavorite,
   Task,
+  getTasks,
+  updateTask,
+  deleteTask,
 } from "../adapters/todoAdapters";
+import { NewTaskModal } from "./NewTaskModal";
+import colorPalette from "../assets/colorPalette";
 
 export const TodoScreen = () => {
-  const { state: userState } = useUser();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Sort tasks to show AI-generated ones at the top
-  const sortedTasks = [...tasks].sort((a, b) => {
-    // AI-generated tasks first
-    if (a.is_ai_generated && !b.is_ai_generated) return -1;
-    if (!a.is_ai_generated && b.is_ai_generated) return 1;
-
-    // Then by favorite status
-    if (a.is_favorite && !b.is_favorite) return -1;
-    if (!a.is_favorite && b.is_favorite) return 1;
-
-    // Then by created date (newest first)
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
-
   const fetchTasks = async () => {
-    if (!userState.user) {
-      setError("User not authenticated");
-      setIsLoading(false);
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
       const response = await getTasks();
-
-      if (!response) {
-        throw new Error("No response from server");
+      if (response && response.ok) {
+        const fetchedTasks = await response.json();
+        setTasks(fetchedTasks);
+      } else {
+        throw new Error("Failed to fetch tasks");
       }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch tasks");
-      }
-
-      const data = await response.json();
-      setTasks(data);
-    } catch (error: any) {
-      console.error("❌ Error fetching tasks:", error);
-      setError(error.message || "Failed to fetch tasks");
+    } catch (err) {
+      setError("Failed to fetch tasks");
+      console.error("Error fetching tasks:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleTaskPress = (task: Task) => {
-    Alert.alert(
-      "Task Options",
-      `What would you like to do with: "${task.content}"?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: task.is_completed ? "Mark Incomplete" : "Mark Complete",
-          onPress: () => handleToggleCompletion(task.id),
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => handleDeleteTask(task.id),
-        },
-      ]
-    );
-  };
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
-  const handleToggleCompletion = async (taskId: number) => {
+  const handleToggleComplete = async (task: Task) => {
     try {
-      const response = await toggleTaskCompletion(taskId);
-
-      if (!response || !response.ok) {
-        throw new Error("Failed to toggle task completion");
-      }
-
-      const updatedTask = await response.json();
-      console.log("✅ Task completion toggled:", updatedTask);
-
-      // Update local state
+      const updatedTask = { ...task, is_completed: !task.is_completed };
+      await updateTask(task.id, updatedTask);
       setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
+        prevTasks.map((t) => (t.id === task.id ? updatedTask : t))
       );
-    } catch (error: any) {
-      console.error("❌ Error toggling task:", error);
+    } catch (err) {
       Alert.alert("Error", "Failed to update task");
-    }
-  };
-
-  const handleToggleFavorite = async (taskId: number) => {
-    try {
-      const response = await toggleTaskFavorite(taskId);
-
-      if (!response || !response.ok) {
-        throw new Error("Failed to toggle task favorite");
-      }
-
-      const updatedTask = await response.json();
-      console.log("✅ Task favorite toggled:", updatedTask);
-
-      // Update local state
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
-      );
-    } catch (error: any) {
-      console.error("❌ Error toggling favorite:", error);
-      Alert.alert("Error", "Failed to update favorite status");
+      console.error("Error updating task:", err);
     }
   };
 
   const handleDeleteTask = async (taskId: number) => {
     try {
-      const response = await deleteTask(taskId);
-
-      if (!response || !response.ok) {
-        throw new Error("Failed to delete task");
-      }
-
-      console.log("✅ Task deleted");
-
-      // Update local state
+      await deleteTask(taskId);
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-    } catch (error: any) {
-      console.error("❌ Error deleting task:", error);
+    } catch (err) {
       Alert.alert("Error", "Failed to delete task");
+      console.error("Error deleting task:", err);
     }
   };
 
   const handleTaskCreated = (newTask: Task) => {
-    // Add new task to the list
-    setTasks((prevTasks) => [newTask, ...prevTasks]);
+    setTasks((prevTasks) => [...prevTasks, newTask]);
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+
+  const sortedTasks = tasks.sort((a, b) => {
+    if (a.is_completed && !b.is_completed) return 1;
+    if (!a.is_completed && b.is_completed) return -1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   const renderTask = ({ item }: { item: Task }) => (
     <View
       style={[
         styles.taskRow,
-        item.is_completed && styles.completedTaskRow,
         item.is_ai_generated && styles.aiGeneratedTaskRow,
+        item.is_completed && styles.completedTaskRow,
       ]}
     >
       {item.is_ai_generated && (
         <View style={styles.aiGeneratedHeader}>
-          <Text style={styles.aiGeneratedLabel}>Zylith Generated</Text>
+          <Text style={styles.aiGeneratedLabel}>AI GENERATED</Text>
         </View>
       )}
-
-      <TouchableOpacity
-        style={styles.taskContent}
-        onPress={() => handleTaskPress(item)}
-      >
+      <View style={styles.taskContent}>
         <View style={styles.taskInfo}>
-          {item.goal && <Text style={styles.goalText}>{item.goal}</Text>}
-
+          {item.goal && <Text style={styles.goalText}>Goal: {item.goal}</Text>}
           <Text
             style={[
               styles.taskText,
@@ -188,46 +114,28 @@ export const TodoScreen = () => {
           >
             {item.content}
           </Text>
+          <Text style={styles.dateText}>{formatDate(item.created_at)}</Text>
         </View>
-
         <View style={styles.taskActions}>
           <TouchableOpacity
-            style={styles.starButton}
-            onPress={() => handleToggleFavorite(item.id)}
+            style={[
+              styles.checkbox,
+              item.is_completed && styles.checkedCheckbox,
+            ]}
+            onPress={() => handleToggleComplete(item)}
           >
-            <Text
-              style={[
-                styles.starIcon,
-                item.is_favorite && styles.starIconFavorited,
-              ]}
-            >
-              ★
-            </Text>
+            {item.is_completed && <Text style={styles.checkmark}>✓</Text>}
           </TouchableOpacity>
-
-          <View style={styles.taskMeta}>
-            {item.is_completed && <Text style={styles.completedBadge}>✓</Text>}
-          </View>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => handleDeleteTask(item.id)}
+          >
+            <Text style={styles.deleteButtonText}>×</Text>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </View>
     </View>
   );
-
-  useEffect(() => {
-    if (userState.user) {
-      fetchTasks();
-    }
-  }, [userState.user]);
-
-  if (!userState.user) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Text style={styles.errorText}>Please log in to view tasks</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -340,7 +248,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   aiGeneratedTaskRow: {
-    backgroundColor: colorPalette.secondary,
     borderWidth: 2,
     borderColor: colorPalette.quaternary,
   },
@@ -384,32 +291,47 @@ const styles = StyleSheet.create({
   completedTaskText: {
     textDecorationLine: "line-through",
   },
+  dateText: {
+    color: colorPalette.quinary,
+    fontSize: 12,
+    marginTop: 4,
+  },
   taskActions: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 8,
   },
-  starButton: {
-    padding: 4,
-    marginRight: 8,
-  },
-  starIcon: {
-    color: colorPalette.quinary,
-    fontSize: 20,
-  },
-  starIconFavorited: {
-    color: "#FFD700",
-  },
-  taskMeta: {
-    flexDirection: "row",
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colorPalette.quinary,
     alignItems: "center",
+    justifyContent: "center",
   },
-  completedBadge: {
-    color: colorPalette.quaternary,
-    fontSize: 16,
-    fontWeight: "bold",
+  checkedCheckbox: {
+    backgroundColor: colorPalette.quaternary,
+    borderColor: colorPalette.quaternary,
+  },
+  checkmark: {
+    color: "white",
+    fontSize: 12,
+  },
+  deleteButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#ff6b6b",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteButtonText: {
+    color: "white",
+    fontSize: 12,
   },
   divider: {
-    height: 8,
+    height: 4,
   },
   loadingText: {
     color: colorPalette.tertiary,
@@ -432,7 +354,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   retryButtonText: {
-    color: colorPalette.primary,
+    color: "white",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -452,5 +374,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default TodoScreen;
