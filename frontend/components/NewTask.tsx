@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   buttonText: {
-    color: colorPalette.primary,
+    color: colorPalette.tertiary,
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,

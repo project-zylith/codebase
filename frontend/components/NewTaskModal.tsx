@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   title: {
-    color: colorPalette.quaternary,
+    color: colorPalette.quinary,
     fontSize: 24,
     fontWeight: "700",
     marginBottom: 24,
@@ -218,12 +218,12 @@ const styles = StyleSheet.create({
     backgroundColor: colorPalette.quaternary,
   },
   cancelButtonText: {
-    color: colorPalette.tertiary,
+    color: colorPalette.quinary,
     fontSize: 16,
     fontWeight: "600",
   },
   createButtonText: {
-    color: colorPalette.primary,
+    color: colorPalette.tertiary,
     fontSize: 16,
     fontWeight: "700",
   },

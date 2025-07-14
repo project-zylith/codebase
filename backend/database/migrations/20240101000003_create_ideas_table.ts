@@ -3,7 +3,7 @@
  * @param {import('knex').Knex} knex
  */
 exports.up = function (knex) {
-  return knex.schema.createTable("ideas", (table) => {
+  return knex.schema.createTable("notes", (table) => {
     table.increments("id").primary();
     table
       .integer("user_id")
@@ -28,5 +28,5 @@ exports.up = function (knex) {
  * @param {import('knex').Knex} knex
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable("ideas");
+  return knex.schema.dropTable("notes");
 };

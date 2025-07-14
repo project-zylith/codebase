@@ -6,10 +6,10 @@ exports.up = function (knex) {
   return knex.schema.createTable("insights", (table) => {
     table.increments("id").primary();
     table
-      .integer("idea_id")
+      .integer("note_id")
       .notNullable()
       .references("id")
-      .inTable("ideas")
+      .inTable("notes")
       .onDelete("CASCADE");
     table.text("content").notNullable();
     table.timestamp("created_at").defaultTo(knex.fn.now()).notNullable();

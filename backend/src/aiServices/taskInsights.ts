@@ -16,7 +16,7 @@ sentence. Return your response as a JSON object with the key: "response" and val
 
 const promptProvideFinalInsight = `You will be passed an array of information based on the goals a user has set on a todo app. This array will have information regarding the original goal 
 as well as insights from an AI. Create a 1 - 3 paragraph breakdown of goals that work in tandem if there are any, i.e. Goal 1: Go to the gym more Goal 2: Eat Healthier. If there aren't any suggest goals that can help bridge the gap. 
-Overall your response should provide next steps a user can take to achieve their goals and ideas that resonate with their goals such as, "reading a article on nutrition has lead more people to complete goals similar to yours. Your response should be a JSON object like this, 
+Overall your response should provide next steps a user can take to achieve their goals and notes that resonate with their goals such as, "reading a article on nutrition has lead more people to complete goals similar to yours. Your response should be a JSON object like this, 
     {
         "response": "your response..."
     } "`;

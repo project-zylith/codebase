@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   header: {
-    color: colorPalette.quaternary,
+    color: colorPalette.quinary,
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 24,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   createTaskButtonText: {
-    color: colorPalette.primary,
+    color: colorPalette.tertiary,
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   aiGeneratedTaskRow: {
     borderWidth: 2,
-    borderColor: colorPalette.quaternary,
+    borderColor: colorPalette.accent,
   },
   aiGeneratedHeader: {
     backgroundColor: colorPalette.quaternary,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   aiGeneratedLabel: {
-    color: colorPalette.primary,
+    color: colorPalette.tertiary,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 0.5,

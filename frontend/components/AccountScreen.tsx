@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: colorPalette.tertiary,
+    color: colorPalette.quinary,
     marginBottom: 30,
     textAlign: "center",
   },

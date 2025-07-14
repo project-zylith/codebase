@@ -4,71 +4,71 @@
  */
 exports.seed = function (knex) {
   // Deletes ALL existing entries
-  return knex("ideas")
+  return knex("notes")
     .del()
     .then(function () {
       // Inserts seed entries
-      return knex("ideas").insert([
+      return knex("notes").insert([
         {
           user_id: 1, // cool_cat
-          galaxy_id: 1, // Project Phoenix Ideas
-          title: "AI-Powered Task Manager",
+          galaxy_id: 1, // Project Phoenix Notes
+          title: "AI-Powered Task Manager Notes",
           content:
-            "A smart task management system that uses AI to prioritize tasks and provide insights. Could integrate with calendar and email for context.",
+            "Working on a smart task management system that uses AI to prioritize tasks and provide insights. Need to integrate with calendar and email for context.",
           created_at: new Date("2024-01-16T09:30:00Z"),
           updated_at: new Date("2024-01-16T09:30:00Z"),
         },
         {
           user_id: 1, // cool_cat
-          galaxy_id: 1, // Project Phoenix Ideas
-          title: "Collaborative Mind Mapping Tool",
+          galaxy_id: 1, // Project Phoenix Notes
+          title: "Collaborative Mind Mapping Tool Notes",
           content:
-            "Real-time collaborative mind mapping with AI suggestions for connections between ideas. Perfect for brainstorming sessions.",
+            "Developing a real-time collaborative mind mapping tool with AI suggestions for connections between concepts. Perfect for brainstorming sessions.",
           created_at: new Date("2024-01-17T14:20:00Z"),
           updated_at: new Date("2024-01-17T14:20:00Z"),
         },
         {
           user_id: 1, // cool_cat
           galaxy_id: 2, // Weekend Hobby Projects
-          title: "Indoor Garden Monitoring",
+          title: "Indoor Garden Monitoring Notes",
           content:
-            "IoT sensors to monitor soil moisture, light levels, and temperature for indoor plants. Send notifications to phone.",
+            "Researching IoT sensors to monitor soil moisture, light levels, and temperature for indoor plants. Planning to send notifications to phone.",
           created_at: new Date("2024-01-19T10:15:00Z"),
           updated_at: new Date("2024-01-19T10:15:00Z"),
         },
         {
           user_id: 2, // wowow
           galaxy_id: 3, // Business Ventures
-          title: "Subscription Box for Local Artisans",
+          title: "Subscription Box for Local Artisans Notes",
           content:
-            "Monthly subscription box featuring products from local artisans and craftspeople. Support local economy while discovering unique items.",
+            "Planning a monthly subscription box featuring products from local artisans and craftspeople. Goal is to support local economy while discovering unique items.",
           created_at: new Date("2024-01-23T16:45:00Z"),
           updated_at: new Date("2024-01-23T16:45:00Z"),
         },
         {
           user_id: 3, // iaso
           galaxy_id: 4, // Research Topics
-          title: "Impact of Remote Work on Urban Planning",
+          title: "Impact of Remote Work on Urban Planning Notes",
           content:
-            "Research how the shift to remote work is affecting urban development and city planning. Look into commercial real estate trends.",
+            "Researching how the shift to remote work is affecting urban development and city planning. Need to look into commercial real estate trends.",
           created_at: new Date("2024-02-02T11:30:00Z"),
           updated_at: new Date("2024-02-02T11:30:00Z"),
         },
         {
           user_id: 3, // iaso
           galaxy_id: 5, // Creative Writing
-          title: "Sci-Fi Novel: The Memory Traders",
+          title: "Sci-Fi Novel: The Memory Traders Notes",
           content:
-            "In a future where memories can be extracted and traded, a black market dealer discovers memories that shouldn't exist.",
+            "Working on a sci-fi novel set in a future where memories can be extracted and traded. A black market dealer discovers memories that shouldn't exist.",
           created_at: new Date("2024-02-04T13:20:00Z"),
           updated_at: new Date("2024-02-04T13:20:00Z"),
         },
         {
           user_id: 4, // google_user
           galaxy_id: null, // Not assigned to any galaxy yet
-          title: "Mobile App for Plant Care",
+          title: "Mobile App for Plant Care Notes",
           content:
-            "An app that helps users care for their plants by providing watering schedules, care tips, and plant identification features.",
+            "Designing an app that helps users care for their plants by providing watering schedules, care tips, and plant identification features.",
           created_at: new Date("2024-02-06T09:15:00Z"),
           updated_at: new Date("2024-02-06T09:15:00Z"),
         },

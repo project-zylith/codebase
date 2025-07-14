@@ -66,7 +66,7 @@ exports.seed = function (knex) {
         {
           conversation_id: 3,
           sender_id: 3, // iaso
-          content: "Great to have you here! Let's share some ideas.",
+          content: "Great to have you here! Let's share some notes.",
           created_at: new Date("2024-02-01T10:30:00Z"),
         },
         // Conversation 4: cool_cat and google_user

@@ -11,7 +11,7 @@ exports.seed = function (knex) {
       return knex("galaxies").insert([
         {
           user_id: 1, // cool_cat
-          name: "Project Phoenix Ideas",
+          name: "Project Phoenix Notes",
           created_at: new Date("2024-01-16T09:00:00Z"),
         },
         {
