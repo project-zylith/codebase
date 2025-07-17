@@ -39,16 +39,6 @@ exports.seed = function (knex) {
           stripe_customer_id: "cus_stripe_789",
           stripe_subscription_id: "sub_stripe_789",
         },
-        {
-          user_id: 4, // google_user
-          plan_id: 6, // Free Tier
-          status: "active",
-          start_date: new Date("2024-02-05T00:00:00Z"),
-          end_date: null,
-          canceled_at: null,
-          stripe_customer_id: null,
-          stripe_subscription_id: null,
-        },
       ]);
     });
 };

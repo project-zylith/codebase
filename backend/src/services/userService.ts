@@ -25,11 +25,6 @@ export class UserService {
     return user.length > 0 ? user[0] : null;
   }
 
-  static async getUserByGoogleId(google_id: string): Promise<User | null> {
-    const user = await db("users").select("*").where({ google_id }).limit(1);
-    return user.length > 0 ? user[0] : null;
-  }
-
   static async createUser(userData: CreateUserRequest): Promise<User> {
     const [user] = await db("users").insert(userData).returning("*");
     return user;
@@ -83,7 +78,6 @@ export class UserService {
           username,
           email,
           password_hash,
-          google_id: null,
           created_at: db.fn.now(),
           updated_at: db.fn.now(),
         })
@@ -112,49 +106,7 @@ export class UserService {
     }
   }
 
-  static async createGoogleUser(
-    username: string,
-    email: string,
-    google_id: string
-  ) {
-    try {
-      // Check if google_id already exists
-      const existingGoogleUser = await this.getUserByGoogleId(google_id);
-      if (existingGoogleUser) {
-        return {
-          success: true,
-          user: existingGoogleUser,
-        };
-      }
-
-      const [user] = await db("users")
-        .insert({
-          username,
-          email,
-          password_hash: null, // Google OAuth users don't have passwords
-          google_id,
-          created_at: db.fn.now(),
-          updated_at: db.fn.now(),
-        })
-        .returning("*");
-
-      return {
-        success: true,
-        user: user,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        message: "An unexpected error occurred during Google user creation.",
-        detail: error.message,
-      };
-    }
-  }
-
   static async verifyPassword(user: User, password: string): Promise<boolean> {
-    if (!user.password_hash) {
-      return false; // Google OAuth users don't have passwords
-    }
     return bcrypt.compare(password, user.password_hash);
   }
 
