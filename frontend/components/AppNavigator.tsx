@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { HomeScreen } from "./HomeScreen";
 import { TodoScreen } from "./TodoScreen";
 import { EditorScreen } from "./EditorScreen";
 import { AccountScreen } from "./AccountScreen";
 import { Ionicons } from "@expo/vector-icons";
-import { RootTabParamList } from "../types/types";
+import { RootTabParamList, RootStackParamList } from "../types/types";
 import { useUser } from "../contexts/UserContext";
+import { useTheme } from "../contexts/ThemeContext";
 import {
   View,
   Text,
@@ -15,21 +17,30 @@ import {
   TouchableOpacity,
   Animated,
 } from "react-native";
-import colorPalette from "../assets/colorPalette";
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // First intro screen component
 const IntroScreen1 = ({
   onPress,
   fadeAnim,
+  currentPalette,
 }: {
   onPress: () => void;
   fadeAnim: Animated.Value;
+  currentPalette: any;
 }) => (
   <TouchableOpacity style={styles.fullScreenTouchable} onPress={onPress}>
-    <Animated.View style={[styles.screenContainer, { opacity: fadeAnim }]}>
-      <Text style={styles.screenTitle}>Welcome to Renaissance</Text>
+    <Animated.View
+      style={[
+        styles.screenContainer,
+        { opacity: fadeAnim, backgroundColor: currentPalette.primary },
+      ]}
+    >
+      <Text style={[styles.screenTitle, { color: currentPalette.quaternary }]}>
+        Welcome to Renaissance
+      </Text>
     </Animated.View>
   </TouchableOpacity>
 );
@@ -38,19 +49,68 @@ const IntroScreen1 = ({
 const IntroScreen2 = ({
   onPress,
   fadeAnim,
+  currentPalette,
 }: {
   onPress: () => void;
   fadeAnim: Animated.Value;
+  currentPalette: any;
 }) => (
   <TouchableOpacity style={styles.fullScreenTouchable} onPress={onPress}>
-    <Animated.View style={[styles.screenContainer, { opacity: fadeAnim }]}>
-      <Text style={styles.screenTitle}>Initializing Zylith...</Text>
+    <Animated.View
+      style={[
+        styles.screenContainer,
+        { opacity: fadeAnim, backgroundColor: currentPalette.primary },
+      ]}
+    >
+      <Text style={[styles.screenTitle, { color: currentPalette.quaternary }]}>
+        Your Digital Mind Palace
+      </Text>
+      <Text style={[styles.screenSubtitle, { color: currentPalette.tertiary }]}>
+        Capture ideas, organize thoughts, and let AI help you achieve your goals
+      </Text>
     </Animated.View>
   </TouchableOpacity>
 );
 
+// Tab Navigator Component
+const TabNavigator = () => {
+  const { currentPalette } = useTheme();
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: currentPalette.primary,
+          borderTopColor: currentPalette.secondary,
+          height: 64,
+        },
+        tabBarActiveTintColor: currentPalette.quaternary,
+        tabBarInactiveTintColor: currentPalette.tertiary,
+        tabBarIcon: ({ color, size }) => {
+          let iconName = "";
+          if (route.name === "Home") iconName = "home-outline";
+          if (route.name === "Todo") iconName = "list-outline";
+          if (route.name === "Account") iconName = "person-outline";
+          return <Ionicons name={iconName as any} size={size} color={color} />;
+        },
+        tabBarLabelStyle: {
+          fontWeight: "700",
+          fontSize: 13,
+          marginBottom: 6,
+        },
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Todo" component={TodoScreen} />
+      <Tab.Screen name="Account" component={AccountScreen} />
+    </Tab.Navigator>
+  );
+};
+
 const AppNavigator = () => {
   const { state } = useUser();
+  const { currentPalette } = useTheme();
   const [currentScreen, setCurrentScreen] = useState<
     "intro1" | "intro2" | "main"
   >("intro1");
@@ -124,13 +184,34 @@ const AppNavigator = () => {
     };
   }, [currentScreen]);
 
+  useEffect(() => {
+    // Start fade-in animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
   // First level: Intro screen flow
   if (currentScreen === "intro1") {
-    return <IntroScreen1 onPress={skipToNext} fadeAnim={fadeAnim} />;
+    return (
+      <IntroScreen1
+        onPress={skipToNext}
+        fadeAnim={fadeAnim}
+        currentPalette={currentPalette}
+      />
+    );
   }
 
   if (currentScreen === "intro2") {
-    return <IntroScreen2 onPress={skipToNext} fadeAnim={fadeAnim} />;
+    return (
+      <IntroScreen2
+        onPress={skipToNext}
+        fadeAnim={fadeAnim}
+        currentPalette={currentPalette}
+      />
+    );
   }
 
   // Second level: Your existing auth logic (only runs after intro)
@@ -138,8 +219,17 @@ const AppNavigator = () => {
     // Show loading screen while checking authentication
     if (state.isLoading) {
       return (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+        <View
+          style={[
+            styles.loadingContainer,
+            { backgroundColor: currentPalette.primary },
+          ]}
+        >
+          <Text
+            style={[styles.loadingText, { color: currentPalette.tertiary }]}
+          >
+            Loading...
+          </Text>
         </View>
       );
     }
@@ -156,38 +246,21 @@ const AppNavigator = () => {
     // Show full navigation when authenticated
     return (
       <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
+        <Stack.Navigator
+          screenOptions={{
             headerShown: false,
-            tabBarStyle: {
-              backgroundColor: colorPalette.primary,
-              borderTopColor: colorPalette.secondary,
-              height: 64,
-            },
-            tabBarActiveTintColor: colorPalette.quaternary,
-            tabBarInactiveTintColor: colorPalette.tertiary,
-            tabBarIcon: ({ color, size }) => {
-              let iconName = "";
-              if (route.name === "Home") iconName = "home-outline";
-              if (route.name === "Todo") iconName = "list-outline";
-              if (route.name === "Insight") iconName = "bulb-outline";
-              if (route.name === "Account") iconName = "person-outline";
-              return (
-                <Ionicons name={iconName as any} size={size} color={color} />
-              );
-            },
-            tabBarLabelStyle: {
-              fontWeight: "700",
-              fontSize: 13,
-              marginBottom: 6,
-            },
-          })}
+          }}
         >
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Todo" component={TodoScreen} />
-          <Tab.Screen name="Insight" component={EditorScreen} />
-          <Tab.Screen name="Account" component={AccountScreen} />
-        </Tab.Navigator>
+          <Stack.Screen name="Main" component={TabNavigator} />
+          <Stack.Screen
+            name="NoteEditor"
+            component={EditorScreen}
+            options={{
+              presentation: "modal",
+              headerShown: false,
+            }}
+          />
+        </Stack.Navigator>
       </NavigationContainer>
     );
   }
@@ -200,10 +273,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colorPalette.primary,
   },
   loadingText: {
-    color: colorPalette.tertiary,
     fontSize: 18,
     fontWeight: "600",
   },
@@ -214,18 +285,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colorPalette.primary,
     padding: 20,
   },
   screenTitle: {
-    color: colorPalette.quaternary,
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 16,
     textAlign: "center",
   },
   screenSubtitle: {
-    color: colorPalette.tertiary,
     fontSize: 18,
     textAlign: "center",
     opacity: 0.8,

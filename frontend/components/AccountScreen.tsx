@@ -6,14 +6,17 @@ import {
   SafeAreaView,
   Alert,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import { useUser } from "../contexts/UserContext";
+import { useTheme } from "../contexts/ThemeContext";
 import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
-import colorPalette from "../assets/colorPalette";
 
 export const AccountScreen = () => {
   const { state: userState, logout } = useUser();
+  const { currentPalette, currentPaletteId, paletteOptions, switchPalette } =
+    useTheme();
   const [showSignUp, setShowSignUp] = useState(false);
 
   useEffect(() => {
@@ -30,43 +33,140 @@ export const AccountScreen = () => {
     }
   };
 
+  const handlePaletteChange = async (paletteId: string) => {
+    try {
+      await switchPalette(paletteId);
+    } catch (error) {
+      console.error("Error switching palette:", error);
+      Alert.alert("Error", "Failed to switch color palette");
+    }
+  };
+
+  const renderPaletteSelector = () => (
+    <View
+      style={[styles.paletteSection, { backgroundColor: currentPalette.card }]}
+    >
+      <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
+        Color Theme
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.paletteContainer}
+      >
+        {paletteOptions.map((option) => (
+          <TouchableOpacity
+            key={option.id}
+            style={[
+              styles.paletteButton,
+              { backgroundColor: option.palette.primary },
+              currentPaletteId === option.id && [
+                styles.selectedPalette,
+                { borderColor: currentPalette.accent },
+              ],
+            ]}
+            onPress={() => handlePaletteChange(option.id)}
+          >
+            <View
+              style={[
+                styles.palettePreview,
+                { backgroundColor: option.palette.primary },
+              ]}
+            >
+              <View
+                style={[
+                  styles.paletteAccent,
+                  { backgroundColor: option.palette.quaternary },
+                ]}
+              />
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      <Text style={[styles.paletteLabel, { color: currentPalette.quinary }]}>
+        {paletteOptions.find((p) => p.id === currentPaletteId)?.name}
+      </Text>
+    </View>
+  );
+
   const renderUserInfo = () => {
     if (!userState.user) return null;
 
     return (
-      <View style={styles.content}>
-        <Text style={styles.title}>Account</Text>
+      <View
+        style={[styles.content, { backgroundColor: currentPalette.background }]}
+      >
+        <View style={styles.mainContent}>
+          <Text style={[styles.title, { color: currentPalette.tertiary }]}>
+            Account
+          </Text>
 
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Username:</Text>
-          <Text style={styles.value}>{userState.user.username}</Text>
+          <View style={styles.profileSection}>
+            <View style={styles.userInfoContainer}>
+              <Text
+                style={[styles.username, { color: currentPalette.tertiary }]}
+              >
+                {userState.user.username}
+              </Text>
+              <Text style={[styles.email, { color: currentPalette.quinary }]}>
+                {userState.user.email}
+              </Text>
+            </View>
+          </View>
+
+          {renderPaletteSelector()}
         </View>
 
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{userState.user.email}</Text>
+        <View style={styles.bottomSection}>
+          <TouchableOpacity
+            style={[
+              styles.logoutButton,
+              { backgroundColor: currentPalette.button },
+            ]}
+            onPress={handleLogout}
+          >
+            <Text
+              style={[
+                styles.logoutButtonText,
+                { color: currentPalette.buttonText },
+              ]}
+            >
+              Logout
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
       </View>
     );
   };
 
   if (userState.isLoading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Text style={styles.loadingText}>Loading...</Text>
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: currentPalette.primary }]}
+      >
+        <View
+          style={[
+            styles.container,
+            { backgroundColor: currentPalette.primary },
+          ]}
+        >
+          <Text
+            style={[styles.loadingText, { color: currentPalette.tertiary }]}
+          >
+            Loading...
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: currentPalette.primary }]}
+    >
+      <View
+        style={[styles.container, { backgroundColor: currentPalette.primary }]}
+      >
         {userState.user ? (
           renderUserInfo()
         ) : (
@@ -76,7 +176,12 @@ export const AccountScreen = () => {
               style={styles.switchButton}
               onPress={() => setShowSignUp(!showSignUp)}
             >
-              <Text style={styles.switchText}>
+              <Text
+                style={[
+                  styles.switchText,
+                  { color: currentPalette.quaternary },
+                ]}
+              >
                 {showSignUp
                   ? "Already have an account? Login"
                   : "Don't have an account? Sign up"}
@@ -92,40 +197,104 @@ export const AccountScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colorPalette.primary,
     paddingTop: 36,
   },
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: colorPalette.primary,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: colorPalette.quinary,
     marginBottom: 30,
     textAlign: "center",
   },
-  userInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-    paddingHorizontal: 10,
+  mainContent: {
+    flex: 1,
   },
-  label: {
+  bottomSection: {
+    alignItems: "center",
+    marginTop: 40,
+  },
+  profileSection: {
+    alignItems: "center",
+    marginTop: 40,
+    marginBottom: 40,
+  },
+  userInfoContainer: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  username: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  email: {
     fontSize: 16,
-    color: colorPalette.quinary,
+    textAlign: "center",
+    opacity: 0.8,
+  },
+  paletteSection: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: "600",
+    marginBottom: 16,
+    textAlign: "center",
   },
-  value: {
+  paletteContainer: {
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  paletteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginHorizontal: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  selectedPalette: {
+    borderWidth: 2,
+    transform: [{ scale: 1.1 }],
+  },
+  palettePreview: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paletteAccent: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  paletteLabel: {
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  logoutButton: {
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  logoutButtonText: {
     fontSize: 16,
-    color: colorPalette.tertiary,
-    fontWeight: "400",
+    fontWeight: "600",
   },
   loadingText: {
     fontSize: 18,
-    color: colorPalette.tertiary,
     textAlign: "center",
     marginTop: 50,
   },
@@ -134,18 +303,6 @@ const styles = StyleSheet.create({
     color: "#ff6b6b",
     textAlign: "center",
     marginTop: 50,
-  },
-  logoutButton: {
-    backgroundColor: "#ff6b6b",
-    borderRadius: 12,
-    paddingVertical: 10,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  logoutButtonText: {
-    color: colorPalette.tertiary,
-    fontSize: 16,
-    fontWeight: "600",
   },
   authContainer: {
     flex: 1,
@@ -159,7 +316,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   switchText: {
-    color: colorPalette.quaternary,
     fontSize: 16,
     textAlign: "center",
     textDecorationLine: "underline",

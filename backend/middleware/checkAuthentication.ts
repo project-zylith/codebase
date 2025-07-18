@@ -1,7 +1,7 @@
 const express = require("express");
 import type { Request, Response, NextFunction } from "express";
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   session?: {
     userId?: number;
   };

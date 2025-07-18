@@ -1,6 +1,13 @@
 export type RootTabParamList = {
   Home: undefined;
   Todo: undefined;
-  Insight: undefined;
   Account: undefined;
+};
+
+export type RootStackParamList = {
+  Main: undefined;
+  NoteEditor: {
+    noteId?: number;
+    isNewNote?: boolean;
+  };
 };

@@ -1,75 +1,78 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
+  Modal,
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  Modal,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Alert,
-  StyleSheet,
 } from "react-native";
-import { createTask } from "../adapters/todoAdapters";
-import { useUser } from "../contexts/UserContext";
+import { Task, updateTask } from "../adapters/todoAdapters";
 import { useTheme } from "../contexts/ThemeContext";
-import type { Task } from "../adapters/todoAdapters";
 
-interface NewTaskModalProps {
+interface EditTaskModalProps {
   visible: boolean;
   onClose: () => void;
-  onTaskCreated: (task: Task) => void;
+  task: Task | null;
+  onTaskUpdated: (updatedTask: Task) => void;
 }
 
-export const NewTaskModal: React.FC<NewTaskModalProps> = ({
+export const EditTaskModal: React.FC<EditTaskModalProps> = ({
   visible,
   onClose,
-  onTaskCreated,
+  task,
+  onTaskUpdated,
 }) => {
   const { currentPalette } = useTheme();
   const [taskContent, setTaskContent] = useState("");
-  const [goalContent, setGoalContent] = useState("");
+  const [taskGoal, setTaskGoal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { state: userState } = useUser();
+
+  useEffect(() => {
+    if (task) {
+      setTaskContent(task.content);
+      setTaskGoal(task.goal || "");
+    }
+  }, [task]);
 
   const handleSubmit = async () => {
-    if (!taskContent.trim()) {
-      Alert.alert("Error", "Please enter a task");
-      return;
-    }
-
-    if (!userState.user) {
-      Alert.alert("Error", "You must be logged in to create tasks");
+    if (!task || !taskContent.trim()) {
+      Alert.alert("Error", "Task content cannot be empty");
       return;
     }
 
     setIsSubmitting(true);
-
     try {
-      const response = await createTask({
+      const response = await updateTask(task.id, {
         content: taskContent.trim(),
-        goal: goalContent.trim() || null,
-        is_completed: false,
-        is_ai_generated: false,
-        is_favorite: false,
+        goal: taskGoal.trim() || null,
       });
 
-      if (response && response.ok) {
-        const newTask = await response.json();
-        onTaskCreated(newTask);
-        setTaskContent("");
-        setGoalContent("");
+      if (response.ok) {
+        const updatedTask = await response.json();
+        onTaskUpdated(updatedTask);
         onClose();
       } else {
-        const errorData = response ? await response.json() : null;
-        Alert.alert("Error", errorData?.message || "Failed to create task");
+        Alert.alert("Error", "Failed to update task");
       }
     } catch (error) {
-      console.error("Error creating task:", error);
-      Alert.alert("Error", "An unexpected error occurred");
+      console.error("Error updating task:", error);
+      Alert.alert("Error", "Failed to update task");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCancel = () => {
+    // Reset form to original values
+    if (task) {
+      setTaskContent(task.content);
+      setTaskGoal(task.goal || "");
+    }
+    onClose();
   };
 
   return (
@@ -77,7 +80,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onRequestClose={handleCancel}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -86,7 +89,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         <View
           style={[styles.header, { backgroundColor: currentPalette.primary }]}
         >
-          <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity onPress={handleCancel}>
             <Text
               style={[
                 styles.cancelButton,
@@ -97,74 +100,73 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             </Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: currentPalette.tertiary }]}>
-            New Task
+            Edit Task
           </Text>
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={isSubmitting || !taskContent.trim()}
             style={[
-              styles.createButton,
+              styles.saveButton,
               { backgroundColor: currentPalette.quaternary },
               (isSubmitting || !taskContent.trim()) &&
-                styles.createButtonDisabled,
+                styles.saveButtonDisabled,
             ]}
           >
             <Text
               style={[
-                styles.createButtonText,
+                styles.saveButtonText,
                 { color: currentPalette.tertiary },
               ]}
             >
-              {isSubmitting ? "Creating..." : "Create"}
+              {isSubmitting ? "Saving..." : "Save"}
             </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
-          <View style={styles.inputContainer}>
+          <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: currentPalette.tertiary }]}>
-              Goal (Optional)
+              Task Content
             </Text>
             <TextInput
               style={[
-                styles.goalInput,
+                styles.textInput,
                 {
                   backgroundColor: currentPalette.secondary,
                   color: currentPalette.tertiary,
                   borderColor: currentPalette.border,
                 },
               ]}
-              placeholder="What do you want to achieve?"
+              value={taskContent}
+              onChangeText={setTaskContent}
+              placeholder="Enter task content..."
               placeholderTextColor={currentPalette.quinary}
-              value={goalContent}
-              onChangeText={setGoalContent}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
             />
           </View>
 
-          <View style={styles.inputContainer}>
+          <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: currentPalette.tertiary }]}>
-              Task
+              Goal (Optional)
             </Text>
             <TextInput
               style={[
-                styles.taskInput,
+                styles.textInput,
                 {
                   backgroundColor: currentPalette.secondary,
                   color: currentPalette.tertiary,
                   borderColor: currentPalette.border,
                 },
               ]}
-              placeholder="Enter your task..."
+              value={taskGoal}
+              onChangeText={setTaskGoal}
+              placeholder="Enter goal for this task..."
               placeholderTextColor={currentPalette.quinary}
-              value={taskContent}
-              onChangeText={setTaskContent}
               multiline
-              numberOfLines={4}
+              numberOfLines={2}
               textAlignVertical="top"
-              autoFocus
             />
           </View>
         </View>
@@ -182,60 +184,47 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "transparent", // Placeholder for border color
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
   },
   cancelButton: {
     fontSize: 16,
+    fontWeight: "500",
+  },
+  saveButton: {
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  saveButtonText: {
+    fontSize: 16,
     fontWeight: "600",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-  createButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-  },
-  createButtonDisabled: {
-    opacity: 0.7,
-  },
-  createButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
   content: {
+    flex: 1,
     padding: 20,
   },
-  inputContainer: {
-    marginBottom: 20,
+  inputGroup: {
+    marginBottom: 24,
   },
   label: {
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  goalInput: {
+  textInput: {
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 16,
     fontSize: 16,
+    borderWidth: 1,
     minHeight: 80,
-    textAlignVertical: "top",
-    borderWidth: 1,
-    borderColor: "transparent", // Placeholder for border color
-  },
-  taskInput: {
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    minHeight: 100,
-    textAlignVertical: "top",
-    borderWidth: 1,
-    borderColor: "transparent", // Placeholder for border color
   },
 });

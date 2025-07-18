@@ -7,28 +7,27 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import colorPalette from "../assets/colorPalette";
+import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
+import { Note, getNotes, createNote } from "../adapters/noteAdapters";
 
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: Date;
+interface NoteWithPosition extends Note {
   position: { x: number; y: number };
 }
 
-const { width, height } = Dimensions.get("window");
-const centerX = width / 2;
-const centerY = height / 2;
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const centerX = screenWidth / 2;
+const centerY = screenHeight / 2;
 
 export const HomeScreen = () => {
-  const { state: userState } = useUser();
   const navigation = useNavigation();
-  const [notes, setNotes] = useState<Note[]>([]);
+  const { currentPalette } = useTheme();
+  const { state: userState } = useUser();
+  const [notes, setNotes] = useState<NoteWithPosition[]>([]);
   const [starAnimations] = useState(() =>
     Array.from({ length: 20 }, () => ({
       opacity: new Animated.Value(0),
@@ -36,6 +35,7 @@ export const HomeScreen = () => {
       translateY: new Animated.Value(0),
     }))
   );
+  const [isLoading, setIsLoading] = useState(true);
 
   // Generate random positions for stars around the center
   const generateStarPosition = (index: number, total: number) => {
@@ -49,56 +49,39 @@ export const HomeScreen = () => {
     };
   };
 
-  // Mock notes data - in real app this would come from storage/API
+  // Load notes from API
   useEffect(() => {
-    // TODO: Get notes from API
-    const mockNotes: Note[] = [
-      {
-        id: "1",
-        title: "Project Notes",
-        content: "Some brilliant thoughts...",
-        createdAt: new Date(),
-        position: generateStarPosition(0, 8),
-      },
-      {
-        id: "2",
-        title: "Meeting Notes",
-        content: "Important discussion points...",
-        createdAt: new Date(),
-        position: generateStarPosition(1, 8),
-      },
-      {
-        id: "3",
-        title: "Daily Journal",
-        content: "Today was interesting...",
-        createdAt: new Date(),
-        position: generateStarPosition(2, 8),
-      },
-      {
-        id: "4",
-        title: "Recipe Notes",
-        content: "Delicious combinations...",
-        createdAt: new Date(),
-        position: generateStarPosition(3, 8),
-      },
-      {
-        id: "5",
-        title: "Travel Plans",
-        content: "Places to visit...",
-        createdAt: new Date(),
-        position: generateStarPosition(4, 8),
-      },
-      {
-        id: "6",
-        title: "Book Notes",
-        content: "Key insights...",
-        createdAt: new Date(),
-        position: generateStarPosition(5, 8),
-      },
-    ];
-    setNotes(mockNotes);
+    const loadNotes = async () => {
+      try {
+        const response = await getNotes();
+        if (response.ok) {
+          const apiNotes: Note[] = await response.json();
+          // Add position to each note for display
+          const notesWithPosition: NoteWithPosition[] = apiNotes.map(
+            (note, index) => ({
+              ...note,
+              position: generateStarPosition(
+                index,
+                Math.max(apiNotes.length, 8)
+              ),
+            })
+          );
+          setNotes(notesWithPosition);
+        } else {
+          console.error("Failed to load notes");
+        }
+      } catch (error) {
+        console.error("Error loading notes:", error);
+      }
+    };
 
-    // Start twinkling and drifting animation for stars
+    if (userState.user) {
+      loadNotes();
+    }
+  }, [userState.user]);
+
+  // Start twinkling and drifting animation for stars
+  useEffect(() => {
     starAnimations.forEach((anim, index) => {
       const startTwinkling = () => {
         Animated.sequence([
@@ -152,18 +135,73 @@ export const HomeScreen = () => {
     });
   }, []);
 
-  const handleNewNote = () => {
-    // Navigate to editor with new note
-    navigation.navigate("Insight" as never);
+  const handleNewNote = async () => {
+    // First, prompt user for note title
+    Alert.prompt(
+      "New Note",
+      "Enter a title for your note:",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Create",
+          onPress: async (title) => {
+            if (title && title.trim()) {
+              try {
+                // Create note in database first
+                const response = await createNote({ title: title.trim() });
+                if (response.ok) {
+                  const newNote = await response.json();
+                  console.log("Note created:", newNote);
+                  // Navigate to editor with the new note
+                  (navigation.navigate as any)("NoteEditor", {
+                    noteId: newNote.id,
+                    isNewNote: true,
+                  });
+                  // Reload notes to show the new one
+                  const notesResponse = await getNotes();
+                  if (notesResponse.ok) {
+                    const apiNotes: Note[] = await notesResponse.json();
+                    const notesWithPosition: NoteWithPosition[] = apiNotes.map(
+                      (note, index) => ({
+                        ...note,
+                        position: generateStarPosition(
+                          index,
+                          Math.max(apiNotes.length, 8)
+                        ),
+                      })
+                    );
+                    setNotes(notesWithPosition);
+                  }
+                } else {
+                  Alert.alert(
+                    "Error",
+                    "Failed to create note. Please try again."
+                  );
+                }
+              } catch (error) {
+                console.error("Error creating note:", error);
+                Alert.alert(
+                  "Error",
+                  "Failed to create note. Please try again."
+                );
+              }
+            } else {
+              Alert.alert("Error", "Please enter a valid title.");
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
   };
 
-  const handleNotePress = (note: Note) => {
+  const handleNotePress = (note: NoteWithPosition) => {
     // Navigate to editor with existing note
-    // In a real app, you'd pass the note data
-    navigation.navigate("Insight" as never);
+    console.log("Clicking note with ID:", note.id);
+    (navigation.navigate as any)("NoteEditor", { noteId: note.id });
   };
 
-  const renderNoteStar = (note: Note, index: number) => {
+  const renderNoteStar = (note: NoteWithPosition, index: number) => {
     const animatedValues = starAnimations[index] || {
       opacity: new Animated.Value(0.7),
       translateX: new Animated.Value(0),
@@ -191,8 +229,11 @@ export const HomeScreen = () => {
           onPress={() => handleNotePress(note)}
           activeOpacity={0.8}
         >
-          <Ionicons name="star" size={24} color={colorPalette.quaternary} />
-          <Text style={styles.starLabel} numberOfLines={1}>
+          <Ionicons name="star" size={24} color={currentPalette.quaternary} />
+          <Text
+            style={[styles.starLabel, { color: currentPalette.quinary }]}
+            numberOfLines={1}
+          >
             {note.title}
           </Text>
         </TouchableOpacity>
@@ -201,12 +242,18 @@ export const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: currentPalette.primary }]}
+    >
+      <View
+        style={[styles.container, { backgroundColor: currentPalette.primary }]}
+      >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Renaissance</Text>
-          <Text style={styles.subheader}>
+          <Text style={[styles.headerTitle, { color: currentPalette.quinary }]}>
+            Renaissance
+          </Text>
+          <Text style={[styles.subheader, { color: currentPalette.quinary }]}>
             Welcome back, {userState.user?.username}
           </Text>
         </View>
@@ -219,24 +266,46 @@ export const HomeScreen = () => {
           {/* Central New Note Button (like the cosmic torus) */}
           <View style={styles.centralButtonContainer}>
             <TouchableOpacity
-              style={styles.centralButton}
+              style={[
+                styles.centralButton,
+                {
+                  backgroundColor: currentPalette.quaternary,
+                  shadowColor: currentPalette.accent,
+                },
+              ]}
               onPress={handleNewNote}
               activeOpacity={0.9}
             >
               <View style={styles.buttonInner}>
-                <Ionicons name="add" size={32} color={colorPalette.quinary} />
-                <Text style={styles.buttonText}>New Note</Text>
+                <Ionicons
+                  name="add"
+                  size={32}
+                  color={currentPalette.tertiary}
+                />
+                <Text
+                  style={[
+                    styles.buttonText,
+                    { color: currentPalette.tertiary },
+                  ]}
+                >
+                  New Note
+                </Text>
               </View>
             </TouchableOpacity>
 
             {/* Cosmic ring effect */}
-            <View style={styles.cosmicRing} />
+            <View
+              style={[
+                styles.cosmicRing,
+                { borderColor: currentPalette.accent },
+              ]}
+            />
           </View>
         </View>
 
         {/* Bottom info */}
         <View style={styles.bottomInfo}>
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: currentPalette.quinary }]}>
             {notes.length} notes in your universe
           </Text>
         </View>
@@ -248,12 +317,10 @@ export const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colorPalette.primary,
     paddingTop: 36,
   },
   container: {
     flex: 1,
-    backgroundColor: colorPalette.primary,
   },
   header: {
     paddingHorizontal: 24,
@@ -261,14 +328,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    color: colorPalette.quinary,
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 8,
     textAlign: "center",
   },
   subheader: {
-    color: colorPalette.quinary,
     fontSize: 16,
     fontWeight: "400",
     textAlign: "center",
@@ -288,10 +353,8 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: colorPalette.quaternary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: colorPalette.accent,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 20,
@@ -303,7 +366,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   buttonText: {
-    color: colorPalette.tertiary,
     fontSize: 12,
     fontWeight: "600",
     marginTop: 4,
@@ -314,7 +376,6 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 80,
     borderWidth: 2,
-    borderColor: colorPalette.accent,
     opacity: 0.3,
     zIndex: 5,
   },
@@ -328,7 +389,6 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   starLabel: {
-    color: colorPalette.quinary,
     fontSize: 10,
     fontWeight: "500",
     marginTop: 2,
@@ -341,7 +401,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   infoText: {
-    color: colorPalette.quinary,
     fontSize: 14,
     fontWeight: "400",
     textAlign: "center",

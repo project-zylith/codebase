@@ -5,6 +5,7 @@ import * as ai from "./aiServices/taskInsights";
 import { checkAuthentication } from "../middleware/checkAuthentication";
 import * as auth from "../controllers/authControllers";
 import * as taskControllers from "../controllers/taskControllers";
+import * as noteControllers from "../controllers/noteControllers";
 import SchedulerService from "./scheduler";
 const session = require("express-session");
 const cors = require("cors");
@@ -95,6 +96,17 @@ app.delete(
   checkAuthentication,
   taskControllers.cleanupCompletedTasks
 );
+
+/////////////////////////////////
+// Note Routes (Authenticated)
+/////////////////////////////////
+
+// Note routes - all require authentication
+app.get("/api/notes", checkAuthentication, noteControllers.getNotes);
+app.post("/api/notes", checkAuthentication, noteControllers.createNote);
+app.get("/api/notes/:id", checkAuthentication, noteControllers.getNoteById);
+app.put("/api/notes/:id", checkAuthentication, noteControllers.updateNote);
+app.delete("/api/notes/:id", checkAuthentication, noteControllers.deleteNote);
 
 /////////////////////////////////
 // AI Routes
