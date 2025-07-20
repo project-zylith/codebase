@@ -6,6 +6,7 @@ import {
   usePreventRemove,
 } from "@react-navigation/native";
 import { TenTapEditorNew, TenTapEditorRef } from "./TenTapEditorNew";
+import { NoteInsightModal } from "./NoteInsightModal";
 import colorPalette from "../assets/colorPalette";
 import {
   Note,
@@ -13,6 +14,7 @@ import {
   updateNote,
   getNotes,
 } from "../adapters/noteAdapters";
+import { getGalaxyById, getGalaxyNotes } from "../adapters/galaxyAdapters";
 
 interface RouteParams {
   noteId?: number;
@@ -31,6 +33,9 @@ export const EditorScreen = () => {
   const isSavingRef = useRef(false);
   const lastSavedContentRef = useRef("");
   const editorRef = useRef<TenTapEditorRef>(null);
+  const [showInsightModal, setShowInsightModal] = useState(false);
+  const [galaxy, setGalaxy] = useState<any>(null);
+  const [relatedNotes, setRelatedNotes] = useState<any[]>([]);
 
   // Load note content
   useEffect(() => {
@@ -48,6 +53,8 @@ export const EditorScreen = () => {
             setInitialContent(note.content || "");
             setCurrentContent(note.content || "");
             lastSavedContentRef.current = note.content || "";
+            // Load galaxy data if note belongs to a galaxy
+            await loadGalaxyData(note);
           } else {
             console.error("Failed to load note, response not ok");
             Alert.alert("Error", "Failed to load note");
@@ -70,6 +77,8 @@ export const EditorScreen = () => {
               setInitialContent(mostRecentNote.content || "");
               setCurrentContent(mostRecentNote.content || "");
               lastSavedContentRef.current = mostRecentNote.content || "";
+              // Load galaxy data if note belongs to a galaxy
+              await loadGalaxyData(mostRecentNote);
             }
           }
         } catch (error) {
@@ -190,6 +199,38 @@ export const EditorScreen = () => {
     }
   };
 
+  const handleInsight = () => {
+    if (currentNote) {
+      setShowInsightModal(true);
+    }
+  };
+
+  const loadGalaxyData = async (note: Note) => {
+    if (note.galaxy_id) {
+      try {
+        // Load galaxy data
+        const galaxyResponse = await getGalaxyById(note.galaxy_id);
+        if (galaxyResponse.ok) {
+          const galaxyData = await galaxyResponse.json();
+          setGalaxy(galaxyData);
+        }
+
+        // Load related notes in the same galaxy
+        const relatedNotesResponse = await getGalaxyNotes(note.galaxy_id);
+        if (relatedNotesResponse.ok) {
+          const relatedNotesData = await relatedNotesResponse.json();
+          // Filter out the current note
+          const filteredNotes = relatedNotesData.filter(
+            (n: any) => n.id !== note.id
+          );
+          setRelatedNotes(filteredNotes);
+        }
+      } catch (error) {
+        console.error("Error loading galaxy data:", error);
+      }
+    }
+  };
+
   if (isLoading) {
     return <SafeAreaView style={styles.container} />;
   }
@@ -208,6 +249,35 @@ export const EditorScreen = () => {
         placeholder={`Start writing your note: ${
           currentNote?.title || "Untitled"
         }...`}
+        note={
+          currentNote
+            ? {
+                id: currentNote.id,
+                title: currentNote.title,
+                content: currentNote.content || "",
+                galaxy_id: currentNote.galaxy_id || undefined,
+              }
+            : null
+        }
+        galaxy={galaxy}
+        relatedNotes={relatedNotes}
+        onInsight={handleInsight}
+      />
+      <NoteInsightModal
+        visible={showInsightModal}
+        onClose={() => setShowInsightModal(false)}
+        note={
+          currentNote
+            ? {
+                id: currentNote.id,
+                title: currentNote.title,
+                content: currentNote.content || "",
+                galaxy_id: currentNote.galaxy_id || undefined,
+              }
+            : null
+        }
+        galaxy={galaxy}
+        relatedNotes={relatedNotes}
       />
     </SafeAreaView>
   );

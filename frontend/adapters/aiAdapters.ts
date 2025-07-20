@@ -15,3 +15,20 @@ export const finalInsight = async (goals: string[]) => {
     body: JSON.stringify({ goals: goals }),
   });
 };
+
+export const generateNoteInsight = async (
+  note: any,
+  galaxy?: any,
+  relatedNotes?: any[]
+) => {
+  return await fetch(API_ENDPOINTS.AI.NOTE_INSIGHT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      note,
+      galaxy,
+      relatedNotes,
+    }),
+  });
+};
