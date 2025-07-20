@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   PanResponder,
   Animated,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { generateGalaxies } from "../adapters/galaxyAdapters";
@@ -180,8 +181,9 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="pageSheet"
+      presentationStyle="fullScreen"
     >
+      <StatusBar hidden={true} />
       <Animated.View
         style={[
           styles.modalContainer,
@@ -190,7 +192,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
           },
         ]}
       >
-        <SafeAreaView
+        <View
           style={[
             styles.container,
             { backgroundColor: currentPalette.primary },
@@ -421,7 +423,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
               </View>
             )}
           </ScrollView>
-        </SafeAreaView>
+        </View>
       </Animated.View>
     </Modal>
   );
@@ -430,8 +432,6 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   container: {
     flex: 1,
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between", // Distribute items
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 50,
     paddingBottom: 20,
   },
   closeButton: {

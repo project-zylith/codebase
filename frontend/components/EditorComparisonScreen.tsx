@@ -1,103 +1,124 @@
+// DEPRECATED: This component is no longer used. Renaissance now uses TenTapEditorNew exclusively.
+// This file can be safely deleted after testing.
+
+/*
 import React, { useState } from "react";
 import {
-  StyleSheet,
-  SafeAreaView,
   View,
-  TouchableOpacity,
   Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { QuillWebViewEditor } from "./QuillWebViewEditor";
 import { TenTapEditorNew } from "./TenTapEditorNew";
-import colorPalette from "../assets/colorPalette";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const EditorComparisonScreen = () => {
-  const [activeEditor, setActiveEditor] = useState<"quill" | "tentap">("quill");
-  const [sharedContent, setSharedContent] = useState("");
+  const { currentPalette } = useTheme();
+  const [selectedEditor, setSelectedEditor] = useState<"quill" | "tentap">("tentap");
+
+  const handleEditorChange = (editor: "quill" | "tentap") => {
+    setSelectedEditor(editor);
+  };
 
   const handleContentChange = (html: string, text: string) => {
-    console.log(`${activeEditor} content changed:`, { html, text });
-    setSharedContent(html);
+    console.log("Content changed:", { html, text });
   };
 
   const handleSave = (html: string, text: string) => {
-    console.log(`${activeEditor} content saved:`, { html, text });
-    // Here you would typically save to backend or local storage
-  };
-
-  const switchEditor = (editor: "quill" | "tentap") => {
-    setActiveEditor(editor);
+    console.log("Saving content:", { html, text });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Editor Switch Header */}
-      <View style={styles.switchHeader}>
-        <Text style={styles.headerTitle}>Editor Comparison</Text>
-        <View style={styles.switchContainer}>
-          <TouchableOpacity
-            style={[
-              styles.switchButton,
-              activeEditor === "quill" && styles.activeSwitch,
-            ]}
-            onPress={() => switchEditor("quill")}
-          >
-            <Text
-              style={[
-                styles.switchText,
-                activeEditor === "quill" && styles.activeSwitchText,
-              ]}
-            >
-              Quill WebView
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.switchButton,
-              activeEditor === "tentap" && styles.activeSwitch,
-            ]}
-            onPress={() => switchEditor("tentap")}
-          >
-            <Text
-              style={[
-                styles.switchText,
-                activeEditor === "tentap" && styles.activeSwitchText,
-              ]}
-            >
-              TenTap Native
-            </Text>
-          </TouchableOpacity>
-        </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentPalette.primary }]}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: currentPalette.tertiary }]}>
+          Editor Comparison
+        </Text>
+        <Text style={[styles.subtitle, { color: currentPalette.quinary }]}>
+          Compare Quill vs TenTap editors
+        </Text>
       </View>
 
-      {/* Editor Content */}
-      <View style={styles.editorContent}>
-        {activeEditor === "quill" ? (
+      <View style={styles.selectorContainer}>
+        <TouchableOpacity
+          style={[
+            styles.selectorButton,
+            selectedEditor === "quill" && { backgroundColor: currentPalette.quaternary },
+          ]}
+          onPress={() => handleEditorChange("quill")}
+        >
+          <Ionicons
+            name="document-text"
+            size={20}
+            color={selectedEditor === "quill" ? currentPalette.primary : currentPalette.tertiary}
+          />
+          <Text
+            style={[
+              styles.selectorButtonText,
+              {
+                color: selectedEditor === "quill" ? currentPalette.primary : currentPalette.tertiary,
+              },
+            ]}
+          >
+            Quill Editor
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.selectorButton,
+            selectedEditor === "tentap" && { backgroundColor: currentPalette.quaternary },
+          ]}
+          onPress={() => handleEditorChange("tentap")}
+        >
+          <Ionicons
+            name="create"
+            size={20}
+            color={selectedEditor === "tentap" ? currentPalette.primary : currentPalette.tertiary}
+          />
+          <Text
+            style={[
+              styles.selectorButtonText,
+              {
+                color: selectedEditor === "tentap" ? currentPalette.primary : currentPalette.tertiary,
+              },
+            ]}
+          >
+            TenTap Editor
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.editorContainer}>
+        {selectedEditor === "quill" ? (
           <QuillWebViewEditor
-            initialContent={sharedContent}
+            initialContent="<p>This is the Quill WebView editor. It provides rich text editing capabilities through a WebView component.</p>"
             onContentChange={handleContentChange}
             onSave={handleSave}
-            placeholder="Start writing with Quill WebView..."
+            placeholder="Start writing with Quill..."
           />
         ) : (
           <TenTapEditorNew
-            initialContent={sharedContent}
+            initialContent="<p>This is the TenTap editor. It provides native rich text editing with better performance and mobile optimization.</p>"
             onContentChange={handleContentChange}
             onSave={handleSave}
-            placeholder="Start writing with TenTap Native..."
+            placeholder="Start writing with TenTap..."
           />
         )}
       </View>
 
-      {/* Info Footer */}
-      <View style={styles.infoFooter}>
-        <Text style={styles.infoText}>
-          Current:{" "}
-          {activeEditor === "quill"
-            ? "Quill.js WebView Editor"
-            : "TenTap Native Editor"}
+      <View style={styles.infoContainer}>
+        <Text style={[styles.infoTitle, { color: currentPalette.tertiary }]}>
+          Editor Information
         </Text>
-        <Text style={styles.infoSubtext}>
-          Switch between editors to compare functionality and performance
+        <Text style={[styles.infoText, { color: currentPalette.quinary }]}>
+          {selectedEditor === "quill"
+            ? "Quill Editor: Web-based rich text editor with extensive formatting options. Runs in a WebView for cross-platform compatibility."
+            : "TenTap Editor: Native React Native rich text editor optimized for mobile devices. Provides better performance and native feel."}
         </Text>
       </View>
     </SafeAreaView>
@@ -107,81 +128,58 @@ export const EditorComparisonScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colorPalette.primary,
   },
-  switchHeader: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colorPalette.secondary,
-    backgroundColor: colorPalette.primary,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colorPalette.quaternary,
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    backgroundColor: colorPalette.secondary,
-    borderRadius: 12,
-    padding: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  switchButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  header: {
+    padding: 20,
     alignItems: "center",
   },
-  activeSwitch: {
-    backgroundColor: colorPalette.quaternary,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 4,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 8,
   },
-  switchText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colorPalette.tertiary,
+  subtitle: {
+    fontSize: 16,
+    textAlign: "center",
   },
-  activeSwitchText: {
-    color: colorPalette.primary,
+  selectorContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
-  editorContent: {
+  selectorButton: {
     flex: 1,
-  },
-  infoFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: colorPalette.secondary,
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
+    marginHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  selectorButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  editorContainer: {
+    flex: 1,
+    marginHorizontal: 20,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  infoContainer: {
+    padding: 20,
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 8,
   },
   infoText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: colorPalette.quaternary,
-    textAlign: "center",
-  },
-  infoSubtext: {
-    fontSize: 10,
-    color: colorPalette.tertiary,
-    textAlign: "center",
-    marginTop: 2,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
+*/

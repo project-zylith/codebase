@@ -1,137 +1,176 @@
+// DEPRECATED: This component is not being used. Renaissance uses UserProfileScreen instead.
+// This file can be safely deleted after testing.
+
+/*
 import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
-import { AuthLogin } from "./AuthLogin";
-import colorPalette from "../assets/colorPalette";
 
 export const UserProfile: React.FC = () => {
-  const { state, logout } = useUser();
-
-  // This page is not being used right now.
+  const { currentPalette } = useTheme();
+  const { state: userState, logout } = useUser();
 
   const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Logout",
-        onPress: logout,
-      },
-    ]);
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
-  if (state.isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
-
-  if (!state.isAuthenticated || !state.user) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Please login to view your profile</Text>
-        <AuthLogin />
-      </View>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Welcome Back, {state.user.username}!</Text>
-
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>User ID:</Text>
-          <Text style={styles.value}>{state.user.id}</Text>
-        </View>
-
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{state.user.email}</Text>
-        </View>
-
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Account Created:</Text>
-          <Text style={styles.value}>
-            {new Date(state.user.created_at).toLocaleDateString()}
+    <SafeAreaView style={[styles.container, { backgroundColor: currentPalette.primary }]}>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.header}>
+          <Ionicons name="person-circle" size={80} color={currentPalette.quaternary} />
+          <Text style={[styles.username, { color: currentPalette.tertiary }]}>
+            {userState.user?.username || "User"}
+          </Text>
+          <Text style={[styles.email, { color: currentPalette.quinary }]}>
+            {userState.user?.email || "user@example.com"}
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
+            Account Settings
+          </Text>
+          
+          <TouchableOpacity style={[styles.menuItem, { backgroundColor: currentPalette.secondary }]}>
+            <Ionicons name="person" size={24} color={currentPalette.quaternary} />
+            <Text style={[styles.menuItemText, { color: currentPalette.tertiary }]}>
+              Edit Profile
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={currentPalette.quinary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.menuItem, { backgroundColor: currentPalette.secondary }]}>
+            <Ionicons name="lock-closed" size={24} color={currentPalette.quaternary} />
+            <Text style={[styles.menuItemText, { color: currentPalette.tertiary }]}>
+              Change Password
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={currentPalette.quinary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.menuItem, { backgroundColor: currentPalette.secondary }]}>
+            <Ionicons name="notifications" size={24} color={currentPalette.quaternary} />
+            <Text style={[styles.menuItemText, { color: currentPalette.tertiary }]}>
+              Notifications
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={currentPalette.quinary} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
+            App Settings
+          </Text>
+          
+          <TouchableOpacity style={[styles.menuItem, { backgroundColor: currentPalette.secondary }]}>
+            <Ionicons name="color-palette" size={24} color={currentPalette.quaternary} />
+            <Text style={[styles.menuItemText, { color: currentPalette.tertiary }]}>
+              Theme
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={currentPalette.quinary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.menuItem, { backgroundColor: currentPalette.secondary }]}>
+            <Ionicons name="help-circle" size={24} color={currentPalette.quaternary} />
+            <Text style={[styles.menuItemText, { color: currentPalette.tertiary }]}>
+              Help & Support
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={currentPalette.quinary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.menuItem, { backgroundColor: currentPalette.secondary }]}>
+            <Ionicons name="information-circle" size={24} color={currentPalette.quaternary} />
+            <Text style={[styles.menuItemText, { color: currentPalette.tertiary }]}>
+              About
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={currentPalette.quinary} />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.logoutButton, { backgroundColor: currentPalette.error }]}
+          onPress={handleLogout}
+        >
+          <Ionicons name="log-out" size={24} color="#FFFFFF" />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colorPalette.primary,
-    paddingTop: 36,
-  },
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: colorPalette.primary,
   },
-  title: {
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    alignItems: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  username: {
     fontSize: 24,
     fontWeight: "bold",
-    color: colorPalette.tertiary,
-    marginBottom: 30,
-    textAlign: "center",
+    marginTop: 16,
+    marginBottom: 4,
   },
-  userInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-    paddingHorizontal: 10,
-  },
-  label: {
+  email: {
     fontSize: 16,
-    color: colorPalette.quinary,
-    fontWeight: "600",
+    opacity: 0.8,
   },
-  value: {
-    fontSize: 16,
-    color: colorPalette.tertiary,
-    fontWeight: "400",
+  section: {
+    marginBottom: 32,
+    paddingHorizontal: 20,
   },
-  loadingText: {
+  sectionTitle: {
     fontSize: 18,
-    color: colorPalette.tertiary,
-    textAlign: "center",
-    marginTop: 50,
+    fontWeight: "600",
+    marginBottom: 16,
   },
-  errorText: {
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  menuItemText: {
+    flex: 1,
     fontSize: 16,
-    color: "#ff6b6b",
-    textAlign: "center",
-    marginTop: 50,
+    marginLeft: 12,
   },
   logoutButton: {
-    backgroundColor: "#ff6b6b",
-    borderRadius: 12,
-    paddingVertical: 15,
-    marginTop: 30,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginHorizontal: 20,
+    marginBottom: 40,
   },
   logoutButtonText: {
-    color: colorPalette.tertiary,
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
+    marginLeft: 8,
   },
 });
+*/

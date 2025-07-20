@@ -1,279 +1,147 @@
-import React, { useState } from "react";
+// DEPRECATED: This component has been replaced by TenTapEditorNew.
+// This file can be safely deleted after testing.
+
+/*
+import React, { useState, useRef, useEffect } from "react";
 import {
-  SafeAreaView,
   View,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
   Text,
+  StyleSheet,
   TouchableOpacity,
   Alert,
-  Keyboard,
+  Platform,
+  SafeAreaView,
+  KeyboardAvoidingView,
   ScrollView,
-  TouchableWithoutFeedback,
-  Modal,
 } from "react-native";
-import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
-import colorPalette from "../assets/colorPalette";
+import { useEditorBridge, RichText } from "@10play/tentap-editor";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const TenTapEditor = () => {
-  const [content, setContent] = useState("");
+  const { currentPalette } = useTheme();
+  const [currentHtmlContent, setCurrentHtmlContent] = useState("");
+  const [currentTextContent, setCurrentTextContent] = useState("");
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [lastUsedTool, setLastUsedTool] = useState<string | null>(null);
 
   const editor = useEditorBridge({
     autofocus: false,
     avoidIosKeyboard: true,
-    initialContent: "", // Clean start like Apple Notes
+    initialContent: "",
   });
 
-  // Listen for keyboard events
-  React.useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        setKeyboardVisible(true);
-        setIsEditing(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setKeyboardVisible(false);
-        setIsEditing(false);
-      }
-    );
+  // Content change listener
+  useEffect(() => {
+    const unsubscribe = editor._subscribeToEditorStateUpdate(() => {
+      getContent();
+    });
 
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
+    return unsubscribe;
+  }, [editor]);
 
-  // Clear last used tool after a delay
-  React.useEffect(() => {
-    if (lastUsedTool) {
-      const timer = setTimeout(() => {
-        setLastUsedTool(null);
-      }, 1000); // Clear highlight after 1 second
-
-      return () => clearTimeout(timer);
-    }
-  }, [lastUsedTool]);
-
-  const handleSave = async () => {
+  const getContent = async () => {
     try {
       const htmlContent = await editor.getHTML();
-      if (htmlContent.trim()) {
-        Alert.alert("Note Saved", "Your note has been saved successfully!");
-        console.log("Saved content:", htmlContent);
-        setContent(htmlContent);
-      } else {
-        Alert.alert("Nothing to Save", "Please write something first!");
-      }
+      const textContent = await editor.getText();
+
+      setCurrentHtmlContent(htmlContent);
+      setCurrentTextContent(textContent);
+
+      console.log("Content changed:", { html: htmlContent, text: textContent });
     } catch (error) {
-      Alert.alert("Error", "Failed to save note");
+      console.error("Error getting content:", error);
     }
-  };
-
-  const handleDone = async () => {
-    await handleSave();
-    dismissKeyboard();
-  };
-
-  const handleTools = () => {
-    setShowToolsDropdown(!showToolsDropdown);
-  };
-
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
-    editor.blur();
   };
 
   // Formatting functions
-  const toggleBold = () => {
-    editor.toggleBold();
-    setLastUsedTool("bold");
-    setShowToolsDropdown(false);
+  const toggleBold = async () => {
+    try {
+      await editor.toggleBold();
+      setLastUsedTool("bold");
+      setShowToolsDropdown(false);
+    } catch (error) {
+      console.error("Error toggling bold:", error);
+    }
   };
 
-  const toggleItalic = () => {
-    editor.toggleItalic();
-    setLastUsedTool("italic");
-    setShowToolsDropdown(false);
+  const toggleItalic = async () => {
+    try {
+      await editor.toggleItalic();
+      setLastUsedTool("italic");
+      setShowToolsDropdown(false);
+    } catch (error) {
+      console.error("Error toggling italic:", error);
+    }
   };
 
-  const toggleHeading1 = () => {
-    editor.toggleHeading(1);
-    setLastUsedTool("heading1");
-    setShowToolsDropdown(false);
+  const toggleUnderline = async () => {
+    try {
+      await editor.toggleUnderline();
+      setLastUsedTool("underline");
+      setShowToolsDropdown(false);
+    } catch (error) {
+      console.error("Error toggling underline:", error);
+    }
   };
 
-  const toggleHeading2 = () => {
-    editor.toggleHeading(2);
-    setLastUsedTool("heading2");
-    setShowToolsDropdown(false);
-  };
-
-  const toggleHeading3 = () => {
-    editor.toggleHeading(3);
-    setLastUsedTool("heading3");
-    setShowToolsDropdown(false);
-  };
-
-  const toggleUnderline = () => {
-    editor.toggleUnderline();
-    setLastUsedTool("underline");
-    setShowToolsDropdown(false);
-  };
-
-  const toggleStrikethrough = () => {
-    editor.toggleStrike();
-    setLastUsedTool("strikethrough");
-    setShowToolsDropdown(false);
+  const toggleStrikethrough = async () => {
+    try {
+      await editor.toggleStrikethrough();
+      setLastUsedTool("strikethrough");
+      setShowToolsDropdown(false);
+    } catch (error) {
+      console.error("Error toggling strikethrough:", error);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Done and Tools buttons */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={handleTools}>
-          <Text style={styles.headerButtonText}>Tools</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>Notes</Text>
-
-        <TouchableOpacity style={styles.headerButton} onPress={handleDone}>
-          <Text style={styles.headerButtonText}>Done</Text>
+        <TouchableOpacity
+          style={styles.insightButton}
+          onPress={() => Alert.alert("Insight", "Insight feature coming soon!")}
+        >
+          <Ionicons name="bulb" size={24} color={currentPalette.tertiary} />
         </TouchableOpacity>
       </View>
 
-      {/* Tools Dropdown */}
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <View style={styles.editorWrapper}>
+          <ScrollView
+            style={styles.scrollContainer}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.editorContainer}>
+              <RichText editor={editor} />
+            </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+
       {showToolsDropdown && (
         <View style={styles.toolsDropdown}>
           <TouchableOpacity onPress={toggleBold} style={styles.toolOption}>
-            <Text
-              style={[
-                styles.toolOptionText,
-                styles.boldText,
-                lastUsedTool === "bold" && styles.activeToolText,
-              ]}
-            >
+            <Text style={[styles.toolOptionText, lastUsedTool === "bold" && styles.activeToolText]}>
               Bold
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity onPress={toggleItalic} style={styles.toolOption}>
-            <Text
-              style={[
-                styles.toolOptionText,
-                styles.italicText,
-                lastUsedTool === "italic" && styles.activeToolText,
-              ]}
-            >
+            <Text style={[styles.toolOptionText, lastUsedTool === "italic" && styles.activeToolText]}>
               Italic
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity onPress={toggleUnderline} style={styles.toolOption}>
-            <Text
-              style={[
-                styles.toolOptionText,
-                styles.underlineText,
-                lastUsedTool === "underline" && styles.activeToolText,
-              ]}
-            >
+            <Text style={[styles.toolOptionText, lastUsedTool === "underline" && styles.activeToolText]}>
               Underline
             </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={toggleStrikethrough}
-            style={styles.toolOption}
-          >
-            <Text
-              style={[
-                styles.toolOptionText,
-                styles.strikethroughText,
-                lastUsedTool === "strikethrough" && styles.activeToolText,
-              ]}
-            >
+          <TouchableOpacity onPress={toggleStrikethrough} style={styles.toolOption}>
+            <Text style={[styles.toolOptionText, styles.strikethroughText, lastUsedTool === "strikethrough" && styles.activeToolText]}>
               Strikethrough
             </Text>
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity onPress={toggleHeading1} style={styles.toolOption}>
-            <Text
-              style={[
-                styles.toolOptionText,
-                lastUsedTool === "heading1" && styles.activeToolText,
-              ]}
-            >
-              Heading 1
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleHeading2} style={styles.toolOption}>
-            <Text
-              style={[
-                styles.toolOptionText,
-                lastUsedTool === "heading2" && styles.activeToolText,
-              ]}
-            >
-              Heading 2
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleHeading3} style={styles.toolOption}>
-            <Text
-              style={[
-                styles.toolOptionText,
-                lastUsedTool === "heading3" && styles.activeToolText,
-              ]}
-            >
-              Heading 3
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Main Content Area */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-        style={styles.contentContainer}
-      >
-        <TouchableWithoutFeedback
-          onPress={() => {
-            dismissKeyboard();
-            setShowToolsDropdown(false);
-          }}
-        >
-          <View style={styles.editorWrapper}>
-            <ScrollView
-              style={styles.scrollContainer}
-              contentContainerStyle={styles.scrollContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.editorContainer}>
-                <RichText editor={editor} />
-              </View>
-            </ScrollView>
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-
-      {/* Simple Done button above keyboard when typing */}
-      {isKeyboardVisible && (
-        <View style={styles.keyboardAccessory}>
-          <View style={styles.spacer} />
-          <TouchableOpacity style={styles.doneButton} onPress={dismissKeyboard}>
-            <Text style={styles.doneButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -284,136 +152,64 @@ export const TenTapEditor = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff", // Clean white background like Apple Notes
+    backgroundColor: "transparent",
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#ffffff",
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#e0e0e0",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#333333",
+  insightButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  editorWrapper: {
     flex: 1,
-    textAlign: "center",
+    paddingHorizontal: 16,
   },
-  headerButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 50,
+  scrollContainer: {
+    flex: 1,
   },
-  headerButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#007AFF",
+  editorContainer: {
+    flex: 1,
+    minHeight: 400,
+    paddingVertical: 16,
   },
   toolsDropdown: {
     position: "absolute",
-    top: 70,
-    left: 20,
-    backgroundColor: "#ffffff",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
     borderRadius: 12,
-    paddingVertical: 8,
-    minWidth: 160,
+    padding: 8,
+    minWidth: 120,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 8,
-    zIndex: 1000,
-    borderWidth: 0.5,
-    borderColor: "#e0e0e0",
   },
   toolOption: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
   },
   toolOptionText: {
-    fontSize: 16,
-    color: "#333333",
+    fontSize: 14,
+    color: "#FFFFFF",
     fontWeight: "500",
   },
   activeToolText: {
-    color: "#007AFF", // Blue when active
-  },
-  boldText: {
-    fontWeight: "800",
-  },
-  italicText: {
-    fontStyle: "italic",
-  },
-  underlineText: {
-    textDecorationLine: "underline",
+    color: "#4CAF50",
+    fontWeight: "700",
   },
   strikethroughText: {
     textDecorationLine: "line-through",
   },
-  divider: {
-    height: 0.5,
-    backgroundColor: "#e0e0e0",
-    marginVertical: 4,
-    marginHorizontal: 16,
-  },
-  contentContainer: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  editorWrapper: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    minHeight: "100%",
-  },
-  editorContainer: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-    minHeight: 500,
-  },
-  keyboardAccessory: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    borderTopWidth: 0.5,
-    borderTopColor: "#e0e0e0",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  spacer: {
-    flex: 1,
-  },
-  doneButton: {
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  doneButtonText: {
-    color: "#ffffff",
-    fontWeight: "600",
-    fontSize: 16,
-  },
 });
+*/

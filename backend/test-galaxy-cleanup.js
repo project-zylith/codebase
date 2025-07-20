@@ -1,85 +1,50 @@
-const fetch = require("node-fetch");
+// DEPRECATED: This test file is no longer needed for production.
+// This file can be safely deleted after testing.
 
-async function testGalaxyCleanup() {
+/*
+const knex = require("knex");
+const knexConfig = require("./knexfile");
+
+const db = knex(knexConfig.development);
+
+async function cleanupGalaxies() {
   try {
-    console.log("🧪 Testing galaxy cleanup functionality...\n");
+    console.log("🧹 Starting galaxy cleanup...");
 
-    // First, let's check the current state
-    console.log("📊 Checking current galaxies...");
-    const galaxiesResponse = await fetch("http://localhost:3000/api/galaxies", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: "sessionId=test-session-3", // Assuming user 3 session
-      },
-    });
+    // Get all galaxies
+    const galaxies = await db("galaxies").select("*");
+    console.log(`Found ${galaxies.length} galaxies`);
 
-    if (galaxiesResponse.ok) {
-      const galaxies = await galaxiesResponse.json();
-      console.log(`Found ${galaxies.length} existing galaxies`);
-      galaxies.forEach((galaxy) => {
-        console.log(`  - ID: ${galaxy.id}, Name: "${galaxy.name}"`);
-      });
-    }
+    // Get all notes
+    const notes = await db("notes").select("*");
+    console.log(`Found ${notes.length} notes`);
 
-    // Now let's generate new galaxies
-    console.log("\n🚀 Generating new galaxies...");
-    const notes = [
-      ["Test Note 1", "This is a test note for cleanup verification"],
-      ["Test Note 2", "Another test note to verify galaxy generation"],
-      ["Test Note 3", "Third test note for the cleanup test"],
-    ];
+    // Reset note galaxy assignments
+    const updatedNotes = await db("notes")
+      .whereNotNull("galaxy_id")
+      .update({ galaxy_id: null });
+    console.log(`Reset galaxy_id for ${updatedNotes} notes`);
 
-    const generateResponse = await fetch(
-      "http://localhost:3000/api/galaxies/generate",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Cookie: "sessionId=test-session-3",
-        },
-        body: JSON.stringify({ notes }),
-      }
-    );
+    // Delete all galaxies
+    const deletedGalaxies = await db("galaxies").del();
+    console.log(`Deleted ${deletedGalaxies} galaxies`);
 
-    if (generateResponse.ok) {
-      const result = await generateResponse.json();
-      console.log("✅ Galaxy generation successful!");
-      console.log(`  - Galaxies created: ${result.galaxiesCreated}`);
-      console.log(
-        `  - Previous galaxies deleted: ${result.previousGalaxiesDeleted}`
-      );
-      console.log(`  - Notes without galaxy: ${result.notesWithoutGalaxy}`);
-    } else {
-      console.error(
-        "❌ Galaxy generation failed:",
-        await generateResponse.text()
-      );
-    }
+    // Verify cleanup
+    const remainingGalaxies = await db("galaxies").select("*");
+    const notesWithGalaxies = await db("notes")
+      .whereNotNull("galaxy_id")
+      .select("*");
 
-    // Check the state after generation
-    console.log("\n📊 Checking galaxies after generation...");
-    const galaxiesAfterResponse = await fetch(
-      "http://localhost:3000/api/galaxies",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Cookie: "sessionId=test-session-3",
-        },
-      }
-    );
+    console.log(`Remaining galaxies: ${remainingGalaxies.length}`);
+    console.log(`Notes with galaxy assignments: ${notesWithGalaxies.length}`);
 
-    if (galaxiesAfterResponse.ok) {
-      const galaxiesAfter = await galaxiesAfterResponse.json();
-      console.log(`Found ${galaxiesAfter.length} galaxies after generation`);
-      galaxiesAfter.forEach((galaxy) => {
-        console.log(`  - ID: ${galaxy.id}, Name: "${galaxy.name}"`);
-      });
-    }
+    console.log("✅ Galaxy cleanup completed successfully!");
   } catch (error) {
-    console.error("❌ Test failed:", error);
+    console.error("❌ Error during galaxy cleanup:", error);
+  } finally {
+    await db.destroy();
   }
 }
 
-testGalaxyCleanup();
+cleanupGalaxies();
+*/
