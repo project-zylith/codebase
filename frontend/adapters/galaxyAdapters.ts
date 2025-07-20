@@ -1,0 +1,136 @@
+import { API_ENDPOINTS } from "../utils/apiConfig";
+
+export interface Galaxy {
+  id: number;
+  user_id: number;
+  name: string;
+  created_at: string;
+}
+
+export interface Note {
+  id: number;
+  user_id: number;
+  galaxy_id: number | null;
+  title: string;
+  content: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Get all galaxies for authenticated user
+export const getGalaxies = async () => {
+  return await fetch(API_ENDPOINTS.GALAXIES.LIST, {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+// Get galaxy by ID
+export const getGalaxyById = async (id: number) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.GET_BY_ID(id), {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+// Create new galaxy
+export const createGalaxy = async (data: { name: string }) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.CREATE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+};
+
+// Update galaxy
+export const updateGalaxy = async (id: number, data: { name: string }) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.UPDATE(id), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+};
+
+// Delete galaxy
+export const deleteGalaxy = async (id: number) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.DELETE(id), {
+    method: "DELETE",
+    credentials: "include",
+  });
+};
+
+// Get notes within a specific galaxy
+export const getGalaxyNotes = async (id: number) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.GET_NOTES(id), {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+// Assign note to galaxy
+export const assignNoteToGalaxy = async (data: {
+  galaxyId: number;
+  noteId: number;
+}) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.ASSIGN_NOTE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+};
+
+// Generate galaxies using AI
+export const generateGalaxies = async (notes: Note[]): Promise<any> => {
+  try {
+    console.log("🚀 Calling generateGalaxies with", notes.length, "notes");
+
+    const response = await fetch(API_ENDPOINTS.GALAXIES.GENERATE_GALAXIES, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        notes: notes.map((note) => [note.title, note.content]),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Generate galaxies failed:", response.status, errorText);
+      throw new Error(
+        `Failed to generate galaxies: ${response.status} ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("✅ Generate galaxies response:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Error in generateGalaxies:", error);
+    throw error;
+  }
+};
+
+// AI-powered galaxy re-sorting
+export const reSortGalaxy = async (notes: Array<[string, string]>) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.RESORT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ notes }),
+  });
+};
+
+// AI-powered galaxy insight generation
+export const generateGalaxyInsight = async (notes: Array<[string, string]>) => {
+  return await fetch(API_ENDPOINTS.GALAXIES.GENERATE_INSIGHT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ notes }),
+  });
+};

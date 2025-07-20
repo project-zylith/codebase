@@ -34,4 +34,17 @@ export const API_ENDPOINTS = {
     INSIGHTS: `${API_BASE_URL_HOME}/api/insights`,
     FINAL_INSIGHT: `${API_BASE_URL_HOME}/api/finalInsight`,
   },
+  GALAXIES: {
+    LIST: `${API_BASE_URL_HOME}/api/galaxies`,
+    CREATE: `${API_BASE_URL_HOME}/api/galaxies`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL_HOME}/api/galaxies/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL_HOME}/api/galaxies/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL_HOME}/api/galaxies/${id}`,
+    GET_NOTES: (id: number) => `${API_BASE_URL_HOME}/api/galaxies/${id}/notes`,
+    ASSIGN_NOTE: `${API_BASE_URL_HOME}/api/galaxies/assign-note`,
+    GENERATE: `${API_BASE_URL_HOME}/api/generateGalaxy`,
+    GENERATE_GALAXIES: `${API_BASE_URL_HOME}/api/galaxies/generate`,
+    RESORT: `${API_BASE_URL_HOME}/api/reSortGalaxy`,
+    GENERATE_INSIGHT: `${API_BASE_URL_HOME}/api/generateGalaxyInsight`,
+  },
 };

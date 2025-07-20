@@ -63,7 +63,7 @@ const IntroScreen2 = ({
       ]}
     >
       <Text style={[styles.screenTitle, { color: currentPalette.quaternary }]}>
-        Your Digital Mind Palace
+        Your Digital Mind Map
       </Text>
       <Text style={[styles.screenSubtitle, { color: currentPalette.tertiary }]}>
         Capture ideas, organize thoughts, and let AI help you achieve your goals

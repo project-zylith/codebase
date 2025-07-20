@@ -18,7 +18,8 @@
     "src/**/*.ts",
     "controllers/**/*.ts",
     "middleware/**/*.ts",
-    "database/**/*.ts"
+    "database/**/*.ts",
+    "knexfile.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

@@ -6,9 +6,14 @@ import { checkAuthentication } from "../middleware/checkAuthentication";
 import * as auth from "../controllers/authControllers";
 import * as taskControllers from "../controllers/taskControllers";
 import * as noteControllers from "../controllers/noteControllers";
+import * as galaxyControllers from "../controllers/galaxyControllers";
+import * as galaxyAi from "./aiServices/galaxyAi";
 import SchedulerService from "./scheduler";
 const session = require("express-session");
 const cors = require("cors");
+
+// Load environment variables from .env file
+require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -109,11 +114,56 @@ app.put("/api/notes/:id", checkAuthentication, noteControllers.updateNote);
 app.delete("/api/notes/:id", checkAuthentication, noteControllers.deleteNote);
 
 /////////////////////////////////
+// Galaxy Routes (Authenticated)
+/////////////////////////////////
+
+// Galaxy CRUD routes - all require authentication
+app.get("/api/galaxies", checkAuthentication, galaxyControllers.getGalaxies);
+app.post("/api/galaxies", checkAuthentication, galaxyControllers.createGalaxy);
+app.post(
+  "/api/galaxies/generate",
+  checkAuthentication,
+  galaxyControllers.generateGalaxies
+);
+app.get(
+  "/api/galaxies/:id",
+  checkAuthentication,
+  galaxyControllers.getGalaxyById
+);
+app.put(
+  "/api/galaxies/:id",
+  checkAuthentication,
+  galaxyControllers.updateGalaxy
+);
+app.delete(
+  "/api/galaxies/:id",
+  checkAuthentication,
+  galaxyControllers.deleteGalaxy
+);
+app.get(
+  "/api/galaxies/:id/notes",
+  checkAuthentication,
+  galaxyControllers.getGalaxyNotes
+);
+app.post(
+  "/api/galaxies/assign-note",
+  checkAuthentication,
+  galaxyControllers.assignNoteToGalaxy
+);
+
+/////////////////////////////////
 // AI Routes
 /////////////////////////////////
 
 app.post("/api/insights", ai.insights);
 app.post("/api/finalInsight", ai.finalInsight);
+// Galaxy Routes these should be used on the home screen, no I need a ai button
+console.log("🔧 Registering galaxy AI routes...");
+app.post("/api/generateGalaxy", galaxyAi.generateGalaxy);
+app.post("/api/reSortGalaxy", galaxyAi.reSortGalaxy);
+app.post("/api/generateGalaxyInsight", galaxyAi.generateGalaxyInsight);
+app.post("/api/generateGalaxyInsightAll", galaxyAi.generateGalaxyInsightAll);
+console.log("✅ Galaxy AI routes registered!");
 
 /////////////////////////////////
 // User Routes

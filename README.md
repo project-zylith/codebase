@@ -10,6 +10,63 @@ This guide will help you set up and run both the **backend** and **frontend** of
 
 ---
 
+## 🌌 AI Galaxy Generation
+
+Renaissance includes an intelligent AI-powered feature that automatically organizes your notes into themed collections called "galaxies."
+
+### How It Works
+
+1. **Create Notes**: Add multiple notes to your app with titles and content
+2. **Generate Galaxies**: Click the bulb icon (🤖) in the HomeScreen header
+3. **AI Analysis**: The AI analyzes your notes and suggests logical groupings
+4. **Review & Apply**: Preview the suggested galaxies and apply them to organize your notes
+
+### Features
+
+- **Smart Grouping**: AI identifies related notes based on content and themes
+- **Descriptive Names**: Galaxies are named clearly (e.g., "Programming Projects", "Health & Fitness")
+- **Preview Mode**: See suggested groupings before applying them
+- **Automatic Organization**: Notes are automatically assigned to appropriate galaxies
+- **Error Handling**: Graceful fallbacks and helpful error messages
+
+### Requirements
+
+- **Google AI API Key**: Set `API_KEY` in your backend `.env` file
+- **Multiple Notes**: Works best with 2+ notes (minimum 1 note required)
+- **Backend Running**: Ensure the backend server is running on port 3000
+
+### Setup
+
+1. **Get Google AI API Key**:
+
+   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Create a new API key
+   - Add it to your backend `.env` file: `API_KEY=your_api_key_here`
+
+2. **Test the Feature**:
+
+   ```bash
+   # Test the API directly
+   cd backend
+   node test-galaxy-api.mjs
+   ```
+
+3. **Use in App**:
+   - Create several notes with different themes
+   - Click the bulb icon in the header
+   - Follow the prompts to generate and apply galaxies
+
+### Example Galaxy Groupings
+
+The AI might group your notes like this:
+
+- **Software Development**: Programming notes, app development ideas, coding tutorials
+- **Health & Fitness**: Workout plans, nutrition notes, wellness goals
+- **Travel Planning**: Trip itineraries, budget planning, destination research
+- **Learning & Education**: Study notes, course materials, skill development
+
+---
+
 ## 1. Clone the Repository
 
 ```sh

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TouchableOpacity,
@@ -8,12 +8,15 @@ import {
   Dimensions,
   Animated,
   Alert,
+  Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import { Note, getNotes, createNote } from "../adapters/noteAdapters";
+import AIGalaxyModal from "./AIGalaxyModal";
+import GalaxyView from "./GalaxyView";
 
 interface NoteWithPosition extends Note {
   position: { x: number; y: number };
@@ -36,17 +39,56 @@ export const HomeScreen = () => {
     }))
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [showGalaxyModal, setShowGalaxyModal] = useState(false);
+  const [galaxyRefreshTrigger, setGalaxyRefreshTrigger] = useState(0);
 
-  // Generate random positions for stars around the center
+  // Generate random positions for stars around the center, avoiding restricted areas
   const generateStarPosition = (index: number, total: number) => {
     const angle = (index / total) * 2 * Math.PI;
     const radius = 80 + Math.random() * 120; // Random radius between 80-200
     const offsetAngle = (Math.random() - 0.5) * 0.8; // Random angle offset
 
-    return {
-      x: centerX + Math.cos(angle + offsetAngle) * radius - 60, // -60 to center the star
-      y: centerY + Math.sin(angle + offsetAngle) * radius - 100, // -100 to account for header
-    };
+    let x = centerX + Math.cos(angle + offsetAngle) * radius - 60; // -60 to center the star
+    let y = centerY + Math.sin(angle + offsetAngle) * radius - 100; // -100 to account for header
+
+    // Define safe zones and restricted areas
+    const starSize = 60; // Approximate size of star + label
+    const buttonSize = 160; // Size of the New Note button area
+    const buttonX = centerX - 60; // Button center X
+    const buttonY = centerY - 250; // Button center Y
+    const buttonRadius = buttonSize / 2; // Button radius
+
+    // Check if star is too close to the New Note button
+    const distanceFromButton = Math.sqrt(
+      Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
+    );
+    const minDistanceFromButton = buttonRadius + starSize / 2 + 20; // Extra padding
+
+    // If star is too close to button, reposition it
+    if (distanceFromButton < minDistanceFromButton) {
+      // Move star away from button
+      const angleFromButton = Math.atan2(y - buttonY, x - buttonX);
+      x = buttonX + Math.cos(angleFromButton) * minDistanceFromButton;
+      y = buttonY + Math.sin(angleFromButton) * minDistanceFromButton;
+    }
+
+    // Ensure star doesn't go off screen
+    const padding = 20;
+    const maxX = screenWidth - starSize - padding;
+    const maxY = screenHeight - starSize - padding;
+    const minX = padding;
+    const minY = padding + 100; // Extra padding for header
+
+    // Clamp X position
+    if (x < minX) x = minX;
+    if (x > maxX) x = maxX;
+
+    // Clamp Y position
+    if (y < minY) y = minY;
+    if (y > maxY) y = maxY;
+
+    return { x, y };
   };
 
   // Load notes from API
@@ -201,6 +243,40 @@ export const HomeScreen = () => {
     (navigation.navigate as any)("NoteEditor", { noteId: note.id });
   };
 
+  const handleGalaxiesGenerated = () => {
+    // Reload notes to show updated galaxy assignments
+    const loadNotes = async () => {
+      try {
+        const response = await getNotes();
+        if (response.ok) {
+          const apiNotes: Note[] = await response.json();
+          const notesWithPosition: NoteWithPosition[] = apiNotes.map(
+            (note, index) => ({
+              ...note,
+              position: generateStarPosition(
+                index,
+                Math.max(apiNotes.length, 8)
+              ),
+            })
+          );
+          setNotes(notesWithPosition);
+        }
+      } catch (error) {
+        console.error("Error reloading notes:", error);
+      }
+    };
+
+    if (userState.user) {
+      loadNotes();
+    }
+    setGalaxyRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleGalaxyRefresh = () => {
+    // This will be called when galaxies are generated to refresh the galaxy view
+    console.log("🔄 Refreshing galaxy view...");
+  };
+
   const renderNoteStar = (note: NoteWithPosition, index: number) => {
     const animatedValues = starAnimations[index] || {
       opacity: new Animated.Value(0.7),
@@ -250,12 +326,45 @@ export const HomeScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: currentPalette.quinary }]}>
-            Renaissance
-          </Text>
-          <Text style={[styles.subheader, { color: currentPalette.quinary }]}>
-            Welcome back, {userState.user?.username}
-          </Text>
+          {/* Centered Title and Welcome Message */}
+          <View style={styles.headerText}>
+            <Text
+              style={[styles.headerTitle, { color: currentPalette.quinary }]}
+            >
+              Renaissance
+            </Text>
+            <Text style={[styles.subheader, { color: currentPalette.quinary }]}>
+              Welcome back, {userState.user?.username}
+            </Text>
+          </View>
+
+          {/* Action Buttons Below */}
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setShowGalaxyModal(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="planet"
+                size={20}
+                color={currentPalette.tertiary}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setShowAIModal(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="bulb" size={20} color={currentPalette.tertiary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Cosmic Note Space */}
@@ -306,9 +415,34 @@ export const HomeScreen = () => {
         {/* Bottom info */}
         <View style={styles.bottomInfo}>
           <Text style={[styles.infoText, { color: currentPalette.quinary }]}>
-            {notes.length} notes in your universe
+            {notes.length} notes in your galaxy
           </Text>
         </View>
+
+        {/* AI Galaxy Modal */}
+        <AIGalaxyModal
+          visible={showAIModal}
+          onClose={() => setShowAIModal(false)}
+          onGalaxiesGenerated={handleGalaxiesGenerated}
+        />
+
+        {/* Galaxy View Modal */}
+        <Modal
+          visible={showGalaxyModal}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <GalaxyView
+            onRefresh={handleGalaxyRefresh}
+            refreshTrigger={galaxyRefreshTrigger}
+          />
+          <TouchableOpacity
+            style={styles.closeModalButton}
+            onPress={() => setShowGalaxyModal(false)}
+          >
+            <Ionicons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -326,6 +460,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 20,
     alignItems: "center",
+  },
+  headerText: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerButtons: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   headerTitle: {
     fontSize: 28,
@@ -404,6 +557,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "400",
     textAlign: "center",
+  },
+  closeModalButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 100,
   },
 });
 
