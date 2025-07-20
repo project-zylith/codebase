@@ -9,17 +9,25 @@ import {
   Animated,
   Alert,
   Modal,
+  PanResponder,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import { Note, getNotes, createNote } from "../adapters/noteAdapters";
+import { getGalaxies } from "../adapters/galaxyAdapters";
 import ZylithGalaxyModal from "./AIGalaxyModal";
 import GalaxyView from "./GalaxyView";
 
 interface NoteWithPosition extends Note {
   position: { x: number; y: number };
+}
+
+interface Galaxy {
+  id: number;
+  name: string;
+  created_at: string;
 }
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -31,6 +39,9 @@ export const HomeScreen = () => {
   const { currentPalette } = useTheme();
   const { state: userState } = useUser();
   const [notes, setNotes] = useState<NoteWithPosition[]>([]);
+  const [galaxies, setGalaxies] = useState<Galaxy[]>([]);
+  const [currentGalaxyIndex, setCurrentGalaxyIndex] = useState(-1); // -1 means home view
+  const [filteredNotes, setFilteredNotes] = useState<NoteWithPosition[]>([]);
   const [starAnimations] = useState(() =>
     Array.from({ length: 20 }, () => ({
       opacity: new Animated.Value(0),
@@ -42,36 +53,174 @@ export const HomeScreen = () => {
   const [showAIModal, setShowAIModal] = useState(false);
   const [showGalaxyModal, setShowGalaxyModal] = useState(false);
   const [galaxyRefreshTrigger, setGalaxyRefreshTrigger] = useState(0);
+  const [selectedGalaxyForModal, setSelectedGalaxyForModal] = useState<
+    number | undefined
+  >(undefined);
+
+  // PanResponder for Galaxy View Modal swipe-down-to-dismiss
+  const galaxyModalPanY = useRef(new Animated.Value(0)).current;
+  const galaxyModalPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // Only respond to vertical swipes
+        return (
+          Math.abs(gestureState.dy) > Math.abs(gestureState.dx) &&
+          gestureState.dy > 0
+        );
+      },
+      onPanResponderGrant: () => {
+        // Reset the value when starting a new gesture
+        galaxyModalPanY.setValue(0);
+      },
+      onPanResponderMove: (_, gestureState) => {
+        // Only allow downward swipes
+        if (gestureState.dy > 0) {
+          galaxyModalPanY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        // If swiped down more than 100px or with velocity > 500, dismiss the modal
+        if (gestureState.dy > 100 || gestureState.vy > 500) {
+          Animated.timing(galaxyModalPanY, {
+            toValue: 1000,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => {
+            handleCloseGalaxyModal();
+            galaxyModalPanY.setValue(0);
+          });
+        } else {
+          // Snap back to original position
+          Animated.spring(galaxyModalPanY, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  // Debug: Log current state
+  useEffect(() => {
+    console.log("Current galaxy index:", currentGalaxyIndex);
+    console.log("Number of galaxies:", galaxies.length);
+    console.log("Filtered notes count:", filteredNotes.length);
+  }, [currentGalaxyIndex, galaxies.length, filteredNotes.length]);
+
+  // Cleanup modal when navigating away
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      // Ensure modals are closed when screen comes into focus
+      setShowGalaxyModal(false);
+      setShowAIModal(false);
+      setSelectedGalaxyForModal(undefined);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // Double-tap navigation handlers
+  const lastTapTime = useRef(0);
+  const doubleTapDelay = 300; // milliseconds
+
+  const handleLeftSideTap = () => {
+    const now = Date.now();
+    const timeDiff = now - lastTapTime.current;
+
+    if (timeDiff < doubleTapDelay) {
+      // Double tap detected
+      console.log("Left side double-tapped");
+      previousGalaxy();
+      lastTapTime.current = 0; // Reset to prevent triple tap
+    } else {
+      // Single tap - just update the time
+      lastTapTime.current = now;
+    }
+  };
+
+  const handleRightSideTap = () => {
+    const now = Date.now();
+    const timeDiff = now - lastTapTime.current;
+
+    if (timeDiff < doubleTapDelay) {
+      // Double tap detected
+      console.log("Right side double-tapped");
+      nextGalaxy();
+      lastTapTime.current = 0; // Reset to prevent triple tap
+    } else {
+      // Single tap - just update the time
+      lastTapTime.current = now;
+    }
+  };
 
   // Generate random positions for stars around the center, avoiding restricted areas
-  const generateStarPosition = (index: number, total: number) => {
-    const angle = (index / total) * 2 * Math.PI;
-    const radius = 80 + Math.random() * 120; // Random radius between 80-200
-    const offsetAngle = (Math.random() - 0.5) * 0.8; // Random angle offset
-
-    let x = centerX + Math.cos(angle + offsetAngle) * radius - 60; // -60 to center the star
-    let y = centerY + Math.sin(angle + offsetAngle) * radius - 100; // -100 to account for header
-
-    // Define safe zones and restricted areas
+  const generateStarPosition = (
+    index: number,
+    total: number,
+    existingPositions: { x: number; y: number }[] = []
+  ) => {
+    const maxAttempts = 50; // Maximum attempts to find a non-overlapping position
     const starSize = 60; // Approximate size of star + label
-    const buttonSize = 160; // Size of the New Note button area
-    const buttonX = centerX - 60; // Button center X
-    const buttonY = centerY - 250; // Button center Y
-    const buttonRadius = buttonSize / 2; // Button radius
+    let attempts = 0;
 
-    // Check if star is too close to the New Note button
-    const distanceFromButton = Math.sqrt(
-      Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
-    );
-    const minDistanceFromButton = buttonRadius + starSize / 2 + 20; // Extra padding
+    while (attempts < maxAttempts) {
+      const angle = (index / total) * 2 * Math.PI;
+      const radius = 80 + Math.random() * 120; // Random radius between 80-200
+      const offsetAngle = (Math.random() - 0.5) * 0.8; // Random angle offset
 
-    // If star is too close to button, reposition it
-    if (distanceFromButton < minDistanceFromButton) {
-      // Move star away from button
-      const angleFromButton = Math.atan2(y - buttonY, x - buttonX);
-      x = buttonX + Math.cos(angleFromButton) * minDistanceFromButton;
-      y = buttonY + Math.sin(angleFromButton) * minDistanceFromButton;
+      let x = centerX + Math.cos(angle + offsetAngle) * radius - 60; // -60 to center the star
+      let y = centerY + Math.sin(angle + offsetAngle) * radius - 100; // -100 to account for header
+
+      // Define safe zones and restricted areas
+      const buttonSize = 160; // Size of the New Note button area
+      const buttonX = centerX - 60; // Button center X
+      const buttonY = centerY - 250; // Button center Y
+      const buttonRadius = buttonSize / 2; // Button radius
+
+      // Check if star is too close to the New Note button
+      const distanceFromButton = Math.sqrt(
+        Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
+      );
+      const minDistanceFromButton = buttonRadius + starSize / 2 + 20; // Extra padding
+
+      // If star is too close to button, reposition it
+      if (distanceFromButton < minDistanceFromButton) {
+        // Move star away from button
+        const angleFromButton = Math.atan2(y - buttonY, x - buttonX);
+        x = buttonX + Math.cos(angleFromButton) * minDistanceFromButton;
+        y = buttonY + Math.sin(angleFromButton) * minDistanceFromButton;
+      }
+
+      // Check collision with existing stars
+      const minDistanceBetweenStars = starSize + 10; // Minimum distance between stars
+      let hasCollision = false;
+
+      for (const existingPos of existingPositions) {
+        const distance = Math.sqrt(
+          Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
+        );
+        if (distance < minDistanceBetweenStars) {
+          hasCollision = true;
+          break;
+        }
+      }
+
+      // If no collision, return this position
+      if (!hasCollision) {
+        return { x, y };
+      }
+
+      attempts++;
     }
+
+    // If we can't find a non-overlapping position after max attempts,
+    // return a position with some offset to minimize overlap
+    const fallbackAngle =
+      (index / total) * 2 * Math.PI + (Math.random() - 0.5) * 0.5;
+    const fallbackRadius = 100 + Math.random() * 100;
+    let x = centerX + Math.cos(fallbackAngle) * fallbackRadius - 60;
+    let y = centerY + Math.sin(fallbackAngle) * fallbackRadius - 100;
 
     // Ensure star doesn't go off screen
     const padding = 20;
@@ -98,16 +247,23 @@ export const HomeScreen = () => {
         const response = await getNotes();
         if (response.ok) {
           const apiNotes: Note[] = await response.json();
-          // Add position to each note for display
-          const notesWithPosition: NoteWithPosition[] = apiNotes.map(
-            (note, index) => ({
+          // Add position to each note for display, avoiding overlaps
+          const notesWithPosition: NoteWithPosition[] = [];
+          const existingPositions: { x: number; y: number }[] = [];
+
+          apiNotes.forEach((note, index) => {
+            const position = generateStarPosition(
+              index,
+              Math.max(apiNotes.length, 8),
+              existingPositions
+            );
+            existingPositions.push(position);
+            notesWithPosition.push({
               ...note,
-              position: generateStarPosition(
-                index,
-                Math.max(apiNotes.length, 8)
-              ),
-            })
-          );
+              position,
+            });
+          });
+
           setNotes(notesWithPosition);
         } else {
           console.error("Failed to load notes");
@@ -121,6 +277,94 @@ export const HomeScreen = () => {
       loadNotes();
     }
   }, [userState.user]);
+
+  // Load galaxies from API
+  useEffect(() => {
+    const loadGalaxies = async () => {
+      try {
+        const response = await getGalaxies();
+        if (response.ok) {
+          const galaxiesData = await response.json();
+          setGalaxies(galaxiesData);
+        } else {
+          console.error("Failed to load galaxies");
+        }
+      } catch (error) {
+        console.error("Error loading galaxies:", error);
+      }
+    };
+
+    if (userState.user) {
+      loadGalaxies();
+    }
+  }, [userState.user, galaxyRefreshTrigger]);
+
+  // Filter notes by current galaxy
+  useEffect(() => {
+    if (currentGalaxyIndex === -1) {
+      // Home view - show all notes
+      setFilteredNotes(notes);
+    } else if (galaxies.length > 0 && notes.length > 0) {
+      const currentGalaxy = galaxies[currentGalaxyIndex];
+      if (currentGalaxy) {
+        const galaxyNotes = notes.filter(
+          (note) => note.galaxy_id === currentGalaxy.id
+        );
+        // Regenerate positions for the filtered notes, avoiding overlaps
+        const notesWithNewPositions: NoteWithPosition[] = [];
+        const existingPositions: { x: number; y: number }[] = [];
+
+        galaxyNotes.forEach((note, index) => {
+          const position = generateStarPosition(
+            index,
+            Math.max(galaxyNotes.length, 8),
+            existingPositions
+          );
+          existingPositions.push(position);
+          notesWithNewPositions.push({
+            ...note,
+            position,
+          });
+        });
+
+        setFilteredNotes(notesWithNewPositions);
+      } else {
+        setFilteredNotes(notes); // Show all notes if no galaxy selected
+      }
+    } else {
+      setFilteredNotes(notes); // Show all notes if no galaxies
+    }
+  }, [galaxies, currentGalaxyIndex, notes]);
+
+  // Carousel navigation functions
+  const nextGalaxy = () => {
+    if (currentGalaxyIndex === -1 && galaxies.length > 0) {
+      // From home to first galaxy
+      setCurrentGalaxyIndex(0);
+    } else if (
+      currentGalaxyIndex >= 0 &&
+      currentGalaxyIndex < galaxies.length - 1
+    ) {
+      // To next galaxy
+      setCurrentGalaxyIndex((prev) => prev + 1);
+    }
+  };
+
+  const previousGalaxy = () => {
+    if (currentGalaxyIndex === 0) {
+      // From first galaxy back to home
+      setCurrentGalaxyIndex(-1);
+    } else if (currentGalaxyIndex > 0) {
+      // To previous galaxy
+      setCurrentGalaxyIndex((prev) => prev - 1);
+    }
+  };
+
+  const getCurrentGalaxyName = () => {
+    if (currentGalaxyIndex === -1) return "Renaissance";
+    if (galaxies.length === 0) return "Renaissance";
+    return galaxies[currentGalaxyIndex]?.name || "Renaissance";
+  };
 
   // Start twinkling and drifting animation for stars
   useEffect(() => {
@@ -189,8 +433,16 @@ export const HomeScreen = () => {
           onPress: async (title) => {
             if (title && title.trim()) {
               try {
+                // Get current galaxy ID if in a galaxy view
+                const currentGalaxy =
+                  currentGalaxyIndex >= 0 ? galaxies[currentGalaxyIndex] : null;
+                const noteData = {
+                  title: title.trim(),
+                  galaxy_id: currentGalaxy?.id || null,
+                };
+
                 // Create note in database first
-                const response = await createNote({ title: title.trim() });
+                const response = await createNote(noteData);
                 if (response.ok) {
                   const newNote = await response.json();
                   console.log("Note created:", newNote);
@@ -199,21 +451,6 @@ export const HomeScreen = () => {
                     noteId: newNote.id,
                     isNewNote: true,
                   });
-                  // Reload notes to show the new one
-                  const notesResponse = await getNotes();
-                  if (notesResponse.ok) {
-                    const apiNotes: Note[] = await notesResponse.json();
-                    const notesWithPosition: NoteWithPosition[] = apiNotes.map(
-                      (note, index) => ({
-                        ...note,
-                        position: generateStarPosition(
-                          index,
-                          Math.max(apiNotes.length, 8)
-                        ),
-                      })
-                    );
-                    setNotes(notesWithPosition);
-                  }
                 } else {
                   Alert.alert(
                     "Error",
@@ -227,8 +464,6 @@ export const HomeScreen = () => {
                   "Failed to create note. Please try again."
                 );
               }
-            } else {
-              Alert.alert("Error", "Please enter a valid title.");
             }
           },
         },
@@ -268,13 +503,32 @@ export const HomeScreen = () => {
 
     if (userState.user) {
       loadNotes();
+      setGalaxyRefreshTrigger((prev) => prev + 1); // Refresh galaxies too
     }
-    setGalaxyRefreshTrigger((prev) => prev + 1);
   };
 
   const handleGalaxyRefresh = () => {
-    // This will be called when galaxies are generated to refresh the galaxy view
-    console.log("🔄 Refreshing galaxy view...");
+    setGalaxyRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleGalaxyButtonPress = () => {
+    if (currentGalaxyIndex === -1) {
+      // On home view - show galaxy modal with no pre-selection
+      setSelectedGalaxyForModal(undefined);
+      setShowGalaxyModal(true);
+    } else {
+      // In a galaxy - show all notes in this galaxy
+      const currentGalaxy = galaxies[currentGalaxyIndex];
+      if (currentGalaxy) {
+        setSelectedGalaxyForModal(currentGalaxy.id);
+        setShowGalaxyModal(true);
+      }
+    }
+  };
+
+  const handleCloseGalaxyModal = () => {
+    setShowGalaxyModal(false);
+    setSelectedGalaxyForModal(undefined);
   };
 
   const renderNoteStar = (note: NoteWithPosition, index: number) => {
@@ -331,7 +585,7 @@ export const HomeScreen = () => {
             <Text
               style={[styles.headerTitle, { color: currentPalette.quinary }]}
             >
-              Renaissance
+              {getCurrentGalaxyName()}
             </Text>
             <Text style={[styles.subheader, { color: currentPalette.quinary }]}>
               Welcome back, {userState.user?.username}
@@ -345,32 +599,40 @@ export const HomeScreen = () => {
                 styles.headerButton,
                 { backgroundColor: currentPalette.quaternary },
               ]}
-              onPress={() => setShowGalaxyModal(true)}
+              onPress={handleGalaxyButtonPress}
               activeOpacity={0.8}
             >
               <Ionicons
-                name="planet"
+                name={currentGalaxyIndex === -1 ? "planet" : "list"}
                 size={20}
                 color={currentPalette.tertiary}
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.headerButton,
-                { backgroundColor: currentPalette.quaternary },
-              ]}
-              onPress={() => setShowAIModal(true)}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="bulb" size={20} color={currentPalette.tertiary} />
-            </TouchableOpacity>
+
+            {/* Only show AI generation button on home view */}
+            {currentGalaxyIndex === -1 && (
+              <TouchableOpacity
+                style={[
+                  styles.headerButton,
+                  { backgroundColor: currentPalette.quaternary },
+                ]}
+                onPress={() => setShowAIModal(true)}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name="bulb"
+                  size={20}
+                  color={currentPalette.tertiary}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
         {/* Cosmic Note Space */}
         <View style={styles.cosmicSpace}>
           {/* Render note stars */}
-          {notes.map((note, index) => renderNoteStar(note, index))}
+          {filteredNotes.map((note, index) => renderNoteStar(note, index))}
 
           {/* Central New Note Button (like the cosmic torus) */}
           <View style={styles.centralButtonContainer}>
@@ -412,12 +674,58 @@ export const HomeScreen = () => {
           </View>
         </View>
 
+        {/* Double-tap Navigation Areas */}
+        <TouchableOpacity
+          style={styles.leftTapArea}
+          onPress={handleLeftSideTap}
+          activeOpacity={0.1}
+        />
+        <TouchableOpacity
+          style={styles.rightTapArea}
+          onPress={handleRightSideTap}
+          activeOpacity={0.1}
+        />
+
         {/* Bottom info */}
         <View style={styles.bottomInfo}>
           <Text style={[styles.infoText, { color: currentPalette.quinary }]}>
-            {notes.length} notes in your galaxy
+            {currentGalaxyIndex === -1
+              ? `${filteredNotes.length} notes in your universe`
+              : `${filteredNotes.length} notes in galaxy`}
           </Text>
         </View>
+
+        {/* Swipe Indicators */}
+        {galaxies.length > 0 && (
+          <View style={styles.swipeIndicators}>
+            <View style={styles.swipeIndicator}>
+              <Ionicons
+                name="chevron-back"
+                size={16}
+                color={currentPalette.quinary}
+              />
+              <Text
+                style={[styles.swipeText, { color: currentPalette.quinary }]}
+              >
+                {currentGalaxyIndex === -1 ? "Home" : "Previous"}
+              </Text>
+            </View>
+            <View style={styles.swipeIndicator}>
+              <Text
+                style={[styles.swipeText, { color: currentPalette.quinary }]}
+              >
+                {currentGalaxyIndex === -1
+                  ? "Swipe to galaxies"
+                  : `${currentGalaxyIndex + 1} of ${galaxies.length}`}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={currentPalette.quinary}
+              />
+            </View>
+          </View>
+        )}
 
         {/* Zylith Galaxy Modal */}
         <ZylithGalaxyModal
@@ -428,20 +736,29 @@ export const HomeScreen = () => {
 
         {/* Galaxy View Modal */}
         <Modal
+          key={`galaxy-modal-${showGalaxyModal}-${selectedGalaxyForModal}`}
           visible={showGalaxyModal}
           animationType="slide"
           presentationStyle="pageSheet"
+          transparent={false}
+          onRequestClose={handleCloseGalaxyModal}
         >
-          <GalaxyView
-            onRefresh={handleGalaxyRefresh}
-            refreshTrigger={galaxyRefreshTrigger}
-          />
-          <TouchableOpacity
-            style={styles.closeModalButton}
-            onPress={() => setShowGalaxyModal(false)}
+          <Animated.View
+            style={[
+              styles.modalContainer,
+              {
+                transform: [{ translateY: galaxyModalPanY }],
+              },
+            ]}
           >
-            <Ionicons name="close" size={24} color="#fff" />
-          </TouchableOpacity>
+            <GalaxyView
+              onRefresh={handleGalaxyRefresh}
+              refreshTrigger={galaxyRefreshTrigger}
+              preSelectedGalaxyId={selectedGalaxyForModal}
+              onClose={handleCloseGalaxyModal}
+              panResponder={galaxyModalPanResponder}
+            />
+          </Animated.View>
         </Modal>
       </View>
     </SafeAreaView>
@@ -550,7 +867,6 @@ const styles = StyleSheet.create({
   },
   bottomInfo: {
     paddingHorizontal: 24,
-    paddingBottom: 20,
     alignItems: "center",
   },
   infoText: {
@@ -569,6 +885,46 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
+  },
+  swipeIndicators: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "transparent",
+    marginTop: 10,
+  },
+  swipeIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  swipeText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  leftTapArea: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: screenWidth * 0.2, // 20% of screen width
+    backgroundColor: "transparent",
+    zIndex: 1,
+  },
+  rightTapArea: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: screenWidth * 0.2, // 20% of screen width
+    backgroundColor: "transparent",
+    zIndex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
   },
 });
 

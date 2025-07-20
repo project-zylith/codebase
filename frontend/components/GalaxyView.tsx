@@ -6,8 +6,11 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
+  SafeAreaView,
+  PanResponder,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../contexts/ThemeContext";
 import { getGalaxies, getGalaxyNotes } from "../adapters/galaxyAdapters";
 
@@ -26,13 +29,20 @@ interface GalaxyNote {
 interface GalaxyViewProps {
   onRefresh?: () => void;
   refreshTrigger?: number;
+  preSelectedGalaxyId?: number; // New prop for pre-selecting a galaxy
+  onClose?: () => void; // New prop for closing the modal
+  panResponder?: any; // New prop for PanResponder
 }
 
 const GalaxyView: React.FC<GalaxyViewProps> = ({
   onRefresh,
   refreshTrigger = 0,
+  preSelectedGalaxyId,
+  onClose,
+  panResponder,
 }) => {
   const { currentPalette } = useTheme();
+  const navigation = useNavigation();
   const [galaxies, setGalaxies] = useState<Galaxy[]>([]);
   const [selectedGalaxy, setSelectedGalaxy] = useState<Galaxy | null>(null);
   const [galaxyNotes, setGalaxyNotes] = useState<GalaxyNote[]>([]);
@@ -48,6 +58,16 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
       loadGalaxies();
     }
   }, [refreshTrigger]);
+
+  // Handle pre-selected galaxy
+  useEffect(() => {
+    if (preSelectedGalaxyId && galaxies.length > 0) {
+      const galaxy = galaxies.find((g) => g.id === preSelectedGalaxyId);
+      if (galaxy) {
+        handleGalaxyPress(galaxy);
+      }
+    }
+  }, [preSelectedGalaxyId, galaxies]);
 
   const loadGalaxies = async () => {
     try {
@@ -78,15 +98,40 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
   };
 
   const handleBackPress = () => {
+    if (preSelectedGalaxyId && onClose) {
+      // If we came from a pre-selected galaxy, close the modal entirely
+      onClose();
+      return;
+    }
     setSelectedGalaxy(null);
     setGalaxyNotes([]);
   };
 
+  const handleNotePress = (note: GalaxyNote) => {
+    // Close the modal first, then navigate to the editor
+    if (onClose) {
+      onClose();
+    }
+    // Navigate to the editor with the note ID
+    (navigation.navigate as any)("NoteEditor", { noteId: note.id });
+  };
+
   if (selectedGalaxy) {
     return (
-      <View
+      <SafeAreaView
         style={[styles.container, { backgroundColor: currentPalette.primary }]}
+        {...(panResponder?.panHandlers || {})}
       >
+        {/* Drag Indicator */}
+        <View style={styles.dragIndicator}>
+          <View
+            style={[
+              styles.dragHandle,
+              { backgroundColor: currentPalette.quinary },
+            ]}
+          />
+        </View>
+
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
@@ -121,18 +166,30 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
             </View>
           ) : (
             galaxyNotes.map((note) => (
-              <View
+              <TouchableOpacity
                 key={note.id}
                 style={[
                   styles.noteCard,
                   { backgroundColor: currentPalette.card },
                 ]}
+                onPress={() => handleNotePress(note)}
+                activeOpacity={0.8}
               >
-                <Text
-                  style={[styles.noteTitle, { color: currentPalette.tertiary }]}
-                >
-                  {note.title}
-                </Text>
+                <View style={styles.noteHeader}>
+                  <Text
+                    style={[
+                      styles.noteTitle,
+                      { color: currentPalette.tertiary },
+                    ]}
+                  >
+                    {note.title}
+                  </Text>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={currentPalette.quinary}
+                  />
+                </View>
                 <Text
                   style={[
                     styles.noteContent,
@@ -142,18 +199,29 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
                 >
                   {note.content?.replace(/<[^>]*>/g, "") || "No content"}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))
           )}
         </ScrollView>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View
+    <SafeAreaView
       style={[styles.container, { backgroundColor: currentPalette.primary }]}
+      {...(panResponder?.panHandlers || {})}
     >
+      {/* Drag Indicator */}
+      <View style={styles.dragIndicator}>
+        <View
+          style={[
+            styles.dragHandle,
+            { backgroundColor: currentPalette.quinary },
+          ]}
+        />
+      </View>
+
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: currentPalette.tertiary }]}>
@@ -222,13 +290,22 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
           ))
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  dragIndicator: {
+    alignItems: "center",
+    paddingTop: 10,
+  },
+  dragHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
   },
   header: {
     alignItems: "center",
@@ -300,10 +377,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
   },
+  noteHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   noteTitle: {
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 8,
   },
   noteContent: {
     fontSize: 14,
