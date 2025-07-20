@@ -15,7 +15,7 @@ if (!API_KEY) {
   console.error("❌ No API_KEY found in environment variables!");
 }
 
-const generateGalaxyPrompt = `You are an AI agent inside of a note taking/todo app. Your job is to create "galaxies", which are collections of related notes that help users organize their thoughts.
+const generateGalaxyPrompt = `You are Zylith, an AI assistant inside of a note taking/todo app. Your job is to create "galaxies", which are collections of related notes that help users organize their thoughts.
 
 You will be provided all of the notes with their title and content inside of a nested array: [[title, content], [title, content], [title, content], ...]
 
@@ -39,7 +39,7 @@ Guidelines for creating galaxies:
   * Work goals + Career notes → "Career Development"
 
 Make sure your response is valid JSON that can be parsed directly.`;
-const galaxyReSortPrompt = `You are an AI agent inside of a note taking/todo app. Your job is to re-sort existing galaxies based on the current notes.
+const galaxyReSortPrompt = `You are Zylith, an AI assistant inside of a note taking/todo app. Your job is to re-sort existing galaxies based on the current notes.
 
 You will be provided all of the notes with their title and content inside of a nested array: [[title, content], [title, content], [title, content], ...]
 
@@ -57,7 +57,7 @@ Guidelines for re-sorting:
 - You can create new galaxy names if the current organization doesn't make sense
 
 Make sure your response is valid JSON that can be parsed directly.`;
-const generateGalaxyInsightPrompt = `You are an AI agent inside of a note taking/todo app. Your job will be to take the provided galaxy and the notes contained within it, and give a general overview of the galaxy.
+const generateGalaxyInsightPrompt = `You are Zylith, an AI assistant inside of a note taking/todo app. Your job will be to take the provided galaxy and the notes contained within it, and give a general overview of the galaxy.
  So if the galaxy is about "Startup" and the notes are about building an app and starting a YC startup, you would return a summary of the galaxy like "This galaxy is about startups and the notes are about building an app and starting a YC startup. In the note, 'Building an app' you spoke of creating an app using the PERN stack using react native.". The point is to provide the user with a in depth breakdown of their thoughts and some actionable steps they can take to get closer to their goals. 
  You should return your response in a json format like {galaxyName: "Startup", galaxyInsight: "This galaxy is about startups and the notes are about building an app and starting a YC startup. In the note, 'Building an app' you spoke of creating an app using the PERN stack using react native."}.`;
 // If I can figure out how to let users add todos the ai gives from the galaxy insight to their todo list that would be great.
@@ -144,18 +144,18 @@ export const generateGalaxiesWithAI = async (
 
       if (Array.isArray(parsedResponse)) {
         console.log(
-          "✅ Successfully parsed AI response into",
+          "✅ Successfully parsed Zylith response into",
           parsedResponse.length,
           "galaxies"
         );
         return parsedResponse;
       } else {
-        console.error("❌ AI response is not an array:", parsedResponse);
-        throw new Error("AI response is not in expected array format");
+        console.error("❌ Zylith response is not an array:", parsedResponse);
+        throw new Error("Zylith response is not in expected array format");
       }
     } catch (parseError) {
-      console.error("❌ Failed to parse AI response as JSON:", parseError);
-      console.log("Raw AI response:", response);
+      console.error("❌ Failed to parse Zylith response as JSON:", parseError);
+      console.log("Raw Zylith response:", response);
 
       // Fallback: create a single galaxy with all notes
       console.log("🔄 Creating fallback galaxy with all notes");
@@ -208,7 +208,7 @@ export const generateGalaxy = async (
     const result = await model.generateContent(fullPrompt);
     const response = await result.response.text();
 
-    console.log("🤖 AI Response:", response);
+    console.log("🤖 Zylith Response:", response);
     res.status(200).send({ result: response });
   } catch (error) {
     console.error("❌ Error in generateGalaxy:", error);
@@ -240,7 +240,7 @@ export const reSortGalaxy = async (
     const result = await model.generateContent(fullPrompt);
     const response = await result.response.text();
 
-    console.log("🤖 AI Re-sort Response:", response);
+    console.log("🤖 Zylith Re-sort Response:", response);
     res.status(200).send({ result: response });
   } catch (error) {
     console.error("❌ Error in reSortGalaxy:", error);
@@ -265,7 +265,7 @@ export const generateGalaxyInsight = async (
     const result = await model.generateContent(fullPrompt);
     const response = await result.response.text();
 
-    console.log("🤖 AI Insight Response:", response);
+    console.log("🤖 Zylith Insight Response:", response);
     res.status(200).send({ result: response });
   } catch (error) {
     console.error("❌ Error in generateGalaxyInsight:", error);

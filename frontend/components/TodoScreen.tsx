@@ -246,10 +246,10 @@ export const TodoScreen = () => {
           <Text
             style={[
               styles.aiGeneratedLabel,
-              { color: currentPalette.tertiary },
+              { color: currentPalette.quaternary },
             ]}
           >
-            AI GENERATED
+            ZYLITH GENERATED
           </Text>
         </View>
       )}

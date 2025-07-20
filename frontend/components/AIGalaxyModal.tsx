@@ -15,7 +15,7 @@ import { generateGalaxies } from "../adapters/galaxyAdapters";
 import { getNotes, Note } from "../adapters/noteAdapters";
 import { useTheme } from "../contexts/ThemeContext";
 
-interface AIGalaxyModalProps {
+interface ZylithGalaxyModalProps {
   visible: boolean;
   onClose: () => void;
   onGalaxiesGenerated: () => void;
@@ -26,7 +26,7 @@ interface GalaxyPreview {
   notes: string[];
 }
 
-const AIGalaxyModal: React.FC<AIGalaxyModalProps> = ({
+const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
   visible,
   onClose,
   onGalaxiesGenerated,
@@ -60,14 +60,14 @@ const AIGalaxyModal: React.FC<AIGalaxyModalProps> = ({
         return;
       }
 
-      setLoadingStep("Analyzing notes with AI...");
+      setLoadingStep("Analyzing notes with Zylith...");
 
       // Step 2: Generate galaxies using AI (this now handles everything)
       // Cast notes to the expected type for generateGalaxies
       const result = await generateGalaxies(notes as any);
 
       if (!result.success) {
-        throw new Error("AI failed to generate galaxies");
+        throw new Error("Zylith failed to generate galaxies");
       }
 
       console.log("✅ Galaxy generation successful:", result);
@@ -88,8 +88,9 @@ const AIGalaxyModal: React.FC<AIGalaxyModalProps> = ({
       Alert.alert(
         "Generation Failed",
         `Failed to generate galaxies: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        [{ text: "OK" }]
       );
     } finally {
       setLoading(false);
@@ -134,7 +135,7 @@ const AIGalaxyModal: React.FC<AIGalaxyModalProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, { color: currentPalette.tertiary }]}>
-            AI Galaxy Generator
+            Zylith Galaxy Generator
           </Text>
           <TouchableOpacity style={styles.closeButton} onPress={handleCancel}>
             <Ionicons name="close" size={24} color={currentPalette.tertiary} />
@@ -155,12 +156,12 @@ const AIGalaxyModal: React.FC<AIGalaxyModalProps> = ({
               <Text
                 style={[styles.introText, { color: currentPalette.tertiary }]}
               >
-                Let AI organize your notes into themed galaxies!
+                Let Zylith organize your notes into themed galaxies!
               </Text>
               <Text
                 style={[styles.description, { color: currentPalette.quinary }]}
               >
-                AI will analyze your notes and group them into meaningful
+                Zylith will analyze your notes and group them into meaningful
                 collections based on their content and themes.
               </Text>
 
@@ -185,7 +186,8 @@ const AIGalaxyModal: React.FC<AIGalaxyModalProps> = ({
                       { color: currentPalette.quinary },
                     ]}
                   >
-                    AI is analyzing your notes and creating themed collections
+                    Zylith is analyzing your notes and creating themed
+                    collections
                   </Text>
                 </View>
               ) : (
@@ -471,4 +473,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AIGalaxyModal;
+export default ZylithGalaxyModal;

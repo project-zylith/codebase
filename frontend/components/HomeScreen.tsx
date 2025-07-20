@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import { Note, getNotes, createNote } from "../adapters/noteAdapters";
-import AIGalaxyModal from "./AIGalaxyModal";
+import ZylithGalaxyModal from "./AIGalaxyModal";
 import GalaxyView from "./GalaxyView";
 
 interface NoteWithPosition extends Note {
@@ -419,8 +419,8 @@ export const HomeScreen = () => {
           </Text>
         </View>
 
-        {/* AI Galaxy Modal */}
-        <AIGalaxyModal
+        {/* Zylith Galaxy Modal */}
+        <ZylithGalaxyModal
           visible={showAIModal}
           onClose={() => setShowAIModal(false)}
           onGalaxiesGenerated={handleGalaxiesGenerated}

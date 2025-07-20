@@ -159,9 +159,6 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
         <Text style={[styles.headerTitle, { color: currentPalette.tertiary }]}>
           Your Galaxies
         </Text>
-        <TouchableOpacity onPress={loadGalaxies} style={styles.refreshButton}>
-          <Ionicons name="refresh" size={24} color={currentPalette.tertiary} />
-        </TouchableOpacity>
       </View>
 
       {/* Galaxies List */}
@@ -187,7 +184,7 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
             <Text
               style={[styles.emptySubtext, { color: currentPalette.quinary }]}
             >
-              Use the AI generator to create your first galaxy
+              Use the Zylith generator to create your first galaxy
             </Text>
           </View>
         ) : (
@@ -234,9 +231,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
@@ -246,9 +241,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   backButton: {
-    padding: 8,
-  },
-  refreshButton: {
     padding: 8,
   },
   placeholder: {

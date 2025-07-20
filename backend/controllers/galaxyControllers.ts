@@ -105,11 +105,11 @@ export const generateGalaxies = async (
     if (!aiResponse || !Array.isArray(aiResponse)) {
       res
         .status(500)
-        .json({ error: "AI failed to generate valid galaxy structure" });
+        .json({ error: "Zylith failed to generate valid galaxy structure" });
       return;
     }
 
-    console.log(`🤖 AI generated ${aiResponse.length} galaxies`);
+    console.log(`🤖 Zylith generated ${aiResponse.length} galaxies`);
 
     const results = [];
     const errors = [];

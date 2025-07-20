@@ -66,7 +66,8 @@ const IntroScreen2 = ({
         Your Digital Mind Map
       </Text>
       <Text style={[styles.screenSubtitle, { color: currentPalette.tertiary }]}>
-        Capture ideas, organize thoughts, and let AI help you achieve your goals
+        Capture ideas, organize thoughts, and let Zylith help you achieve your
+        goals
       </Text>
     </Animated.View>
   </TouchableOpacity>
