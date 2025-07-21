@@ -7,21 +7,34 @@ import {
   Alert,
   StyleSheet,
   ScrollView,
+  Dimensions,
+  Animated,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../contexts/UserContext";
 import { useTheme } from "../contexts/ThemeContext";
 import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
+import { SubscriptionModal } from "./SubscriptionModal";
+
+const { width } = Dimensions.get("window");
 
 export const AccountScreen = () => {
   const { state: userState, logout } = useUser();
   const { currentPalette, currentPaletteId, paletteOptions, switchPalette } =
     useTheme();
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [selectedPaletteId, setSelectedPaletteId] = useState(currentPaletteId);
+  const [scaleAnim] = useState(new Animated.Value(1));
 
   useEffect(() => {
     console.log("AccountScreen: userState changed", userState);
   }, [userState]);
+
+  useEffect(() => {
+    setSelectedPaletteId(currentPaletteId);
+  }, [currentPaletteId]);
 
   const handleLogout = async () => {
     try {
@@ -35,57 +48,190 @@ export const AccountScreen = () => {
 
   const handlePaletteChange = async (paletteId: string) => {
     try {
+      setSelectedPaletteId(paletteId);
+
+      // Animate the selection
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.95,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
       await switchPalette(paletteId);
     } catch (error) {
       console.error("Error switching palette:", error);
       Alert.alert("Error", "Failed to switch color palette");
+      setSelectedPaletteId(currentPaletteId);
     }
   };
 
-  const renderPaletteSelector = () => (
+  const handleUpgradeSubscription = (planId: string) => {
+    Alert.alert(
+      "Subscription Upgrade",
+      `You've selected the ${planId} plan. This feature will be fully implemented with Stripe integration.`,
+      [{ text: "OK" }]
+    );
+  };
+
+  const renderSubscriptionSection = () => (
+    <View
+      style={[
+        styles.subscriptionSection,
+        { backgroundColor: currentPalette.card },
+      ]}
+    >
+      <View style={styles.sectionHeader}>
+        <Ionicons name="diamond" size={24} color={currentPalette.quaternary} />
+        <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
+          Subscription
+        </Text>
+      </View>
+
+      <View style={styles.subscriptionContent}>
+        <View style={styles.subscriptionInfo}>
+          <Text
+            style={[
+              styles.subscriptionStatus,
+              { color: currentPalette.quaternary },
+            ]}
+          >
+            Free Plan
+          </Text>
+          <Text
+            style={[
+              styles.subscriptionDescription,
+              { color: currentPalette.quinary },
+            ]}
+          >
+            Basic features with limited usage
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.upgradeButton,
+            { backgroundColor: currentPalette.quaternary },
+          ]}
+          onPress={() => setShowSubscriptionModal(true)}
+        >
+          <Ionicons name="arrow-up" size={16} color={currentPalette.tertiary} />
+          <Text
+            style={[
+              styles.upgradeButtonText,
+              { color: currentPalette.tertiary },
+            ]}
+          >
+            Upgrade
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderStylishPaletteSelector = () => (
     <View
       style={[styles.paletteSection, { backgroundColor: currentPalette.card }]}
     >
-      <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
-        Color Theme
+      <View style={styles.sectionHeader}>
+        <Ionicons
+          name="color-palette"
+          size={24}
+          color={currentPalette.quaternary}
+        />
+        <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
+          Choose Your Theme
+        </Text>
+      </View>
+
+      <Text style={[styles.sectionSubtitle, { color: currentPalette.quinary }]}>
+        Personalize your Renaissance experience
       </Text>
+
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.paletteContainer}
+        contentContainerStyle={styles.paletteContent}
       >
-        {paletteOptions.map((option) => (
-          <TouchableOpacity
-            key={option.id}
-            style={[
-              styles.paletteButton,
-              { backgroundColor: option.palette.primary },
-              currentPaletteId === option.id && [
-                styles.selectedPalette,
-                { borderColor: currentPalette.accent },
-              ],
-            ]}
-            onPress={() => handlePaletteChange(option.id)}
-          >
-            <View
+        {paletteOptions.map((option) => {
+          const isSelected = selectedPaletteId === option.id;
+          const palette = option.palette;
+
+          return (
+            <TouchableOpacity
+              key={option.id}
               style={[
-                styles.palettePreview,
-                { backgroundColor: option.palette.primary },
+                styles.paletteCard,
+                { backgroundColor: palette.card },
+                isSelected && [
+                  styles.selectedPaletteCard,
+                  { borderColor: palette.quaternary },
+                ],
               ]}
+              onPress={() => handlePaletteChange(option.id)}
             >
-              <View
+              <Animated.View
                 style={[
-                  styles.paletteAccent,
-                  { backgroundColor: option.palette.quaternary },
+                  styles.paletteCardContent,
+                  isSelected && { transform: [{ scale: scaleAnim }] },
                 ]}
-              />
-            </View>
-          </TouchableOpacity>
-        ))}
+              >
+                {/* Color Preview */}
+                <View style={styles.colorPreview}>
+                  <View
+                    style={[
+                      styles.colorSwatch,
+                      { backgroundColor: palette.primary },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.colorSwatch,
+                      { backgroundColor: palette.secondary },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.colorSwatch,
+                      { backgroundColor: palette.tertiary },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.colorSwatch,
+                      { backgroundColor: palette.quaternary },
+                    ]}
+                  />
+                </View>
+
+                {/* Palette Name */}
+                <Text style={[styles.paletteName, { color: palette.tertiary }]}>
+                  {option.name}
+                </Text>
+
+                {/* Selection Indicator */}
+                {isSelected && (
+                  <View
+                    style={[
+                      styles.selectionIndicator,
+                      { backgroundColor: palette.quaternary },
+                    ]}
+                  >
+                    <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                  </View>
+                )}
+              </Animated.View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
-      <Text style={[styles.paletteLabel, { color: currentPalette.quinary }]}>
-        {paletteOptions.find((p) => p.id === currentPaletteId)?.name}
-      </Text>
     </View>
   );
 
@@ -93,49 +239,83 @@ export const AccountScreen = () => {
     if (!userState.user) return null;
 
     return (
-      <View
-        style={[styles.content, { backgroundColor: currentPalette.background }]}
+      <ScrollView
+        style={[styles.content, { backgroundColor: currentPalette.primary }]}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.mainContent}>
-          <Text style={[styles.title, { color: currentPalette.tertiary }]}>
-            Account
-          </Text>
-
-          <View style={styles.profileSection}>
-            <View style={styles.userInfoContainer}>
-              <Text
-                style={[styles.username, { color: currentPalette.tertiary }]}
-              >
-                {userState.user.username}
-              </Text>
-              <Text style={[styles.email, { color: currentPalette.quinary }]}>
-                {userState.user.email}
-              </Text>
-            </View>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <View
+            style={[
+              styles.avatarContainer,
+              { backgroundColor: currentPalette.quaternary },
+            ]}
+          >
+            <Text
+              style={[styles.avatarText, { color: currentPalette.tertiary }]}
+            >
+              {userState.user.username.charAt(0).toUpperCase()}
+            </Text>
           </View>
 
-          {renderPaletteSelector()}
+          <Text style={[styles.username, { color: currentPalette.tertiary }]}>
+            {userState.user.username}
+          </Text>
+
+          <Text style={[styles.email, { color: currentPalette.quinary }]}>
+            {userState.user.email}
+          </Text>
         </View>
 
-        <View style={styles.bottomSection}>
+        {/* Subscription Section */}
+        {renderSubscriptionSection()}
+
+        {/* Theme Selector */}
+        {renderStylishPaletteSelector()}
+
+        {/* Account Actions */}
+        <View
+          style={[
+            styles.actionsSection,
+            { backgroundColor: currentPalette.card },
+          ]}
+        >
+          <View style={styles.sectionHeader}>
+            <Ionicons
+              name="settings"
+              size={24}
+              color={currentPalette.quaternary}
+            />
+            <Text
+              style={[styles.sectionTitle, { color: currentPalette.tertiary }]}
+            >
+              Account Settings
+            </Text>
+          </View>
+
           <TouchableOpacity
             style={[
-              styles.logoutButton,
+              styles.actionButton,
               { backgroundColor: currentPalette.button },
             ]}
             onPress={handleLogout}
           >
+            <Ionicons
+              name="log-out"
+              size={20}
+              color={currentPalette.buttonText}
+            />
             <Text
               style={[
-                styles.logoutButtonText,
+                styles.actionButtonText,
                 { color: currentPalette.buttonText },
               ]}
             >
-              Logout
+              Sign Out
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     );
   };
 
@@ -146,14 +326,19 @@ export const AccountScreen = () => {
       >
         <View
           style={[
-            styles.container,
+            styles.loadingContainer,
             { backgroundColor: currentPalette.primary },
           ]}
         >
+          <Ionicons
+            name="refresh"
+            size={32}
+            color={currentPalette.quaternary}
+          />
           <Text
             style={[styles.loadingText, { color: currentPalette.tertiary }]}
           >
-            Loading...
+            Loading your account...
           </Text>
         </View>
       </SafeAreaView>
@@ -190,6 +375,11 @@ export const AccountScreen = () => {
           </View>
         )}
       </View>
+      <SubscriptionModal
+        visible={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        onUpgrade={handleUpgradeSubscription}
+      />
     </SafeAreaView>
   );
 };
@@ -203,32 +393,30 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-  },
-  mainContent: {
+  content: {
     flex: 1,
   },
-  bottomSection: {
+  headerSection: {
     alignItems: "center",
-    marginTop: 40,
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
-  profileSection: {
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 40,
-    marginBottom: 40,
+    marginBottom: 10,
   },
-  userInfoContainer: {
-    alignItems: "center",
-    paddingHorizontal: 20,
+  avatarText: {
+    fontSize: 36,
+    fontWeight: "bold",
   },
   username: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 5,
     textAlign: "center",
   },
   email: {
@@ -236,73 +424,143 @@ const styles = StyleSheet.create({
     textAlign: "center",
     opacity: 0.8,
   },
+  subscriptionSection: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+  },
+  subscriptionContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 15,
+  },
+  subscriptionInfo: {
+    flex: 1,
+  },
+  subscriptionStatus: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  subscriptionDescription: {
+    fontSize: 14,
+  },
+  upgradeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    marginLeft: 10,
+  },
+  upgradeButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginLeft: 5,
+  },
   paletteSection: {
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 16,
+    marginLeft: 10,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
     textAlign: "center",
+    marginBottom: 15,
   },
   paletteContainer: {
     flexDirection: "row",
-    marginBottom: 12,
   },
-  paletteButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginHorizontal: 6,
-    justifyContent: "center",
-    alignItems: "center",
+  paletteContent: {
+    paddingHorizontal: 10,
+  },
+  paletteCard: {
+    width: width * 0.4,
+    height: 120,
+    borderRadius: 16,
+    marginHorizontal: 8,
+    overflow: "hidden",
     borderWidth: 2,
     borderColor: "transparent",
   },
-  selectedPalette: {
+  selectedPaletteCard: {
     borderWidth: 2,
-    transform: [{ scale: 1.1 }],
+    transform: [{ scale: 1.05 }],
   },
-  palettePreview: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  paletteCardContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 15,
+  },
+  colorPreview: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginBottom: 10,
+  },
+  colorSwatch: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  paletteName: {
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  selectionIndicator: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
-  paletteAccent: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  paletteLabel: {
-    fontSize: 14,
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  logoutButton: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    alignItems: "center",
+  actionsSection: {
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 20,
     marginBottom: 40,
   },
-  logoutButtonText: {
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 15,
+  },
+  actionButtonText: {
     fontSize: 16,
     fontWeight: "600",
+    marginLeft: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
   loadingText: {
-    fontSize: 18,
-    textAlign: "center",
-    marginTop: 50,
-  },
-  errorText: {
     fontSize: 16,
-    color: "#ff6b6b",
     textAlign: "center",
-    marginTop: 50,
+    marginTop: 15,
   },
   authContainer: {
     flex: 1,
@@ -312,15 +570,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   switchButton: {
-    marginTop: 8,
+    marginTop: 20,
     paddingVertical: 10,
   },
   switchText: {
     fontSize: 16,
     textAlign: "center",
     textDecorationLine: "underline",
-  },
-  content: {
-    flex: 1,
   },
 });
