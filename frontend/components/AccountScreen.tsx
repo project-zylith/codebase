@@ -16,6 +16,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
 import { SubscriptionModal } from "./SubscriptionModal";
+import { getUserSubscription } from "../adapters/subscriptionAdapters";
 
 const { width } = Dimensions.get("window");
 
@@ -27,10 +28,31 @@ export const AccountScreen = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [selectedPaletteId, setSelectedPaletteId] = useState(currentPaletteId);
   const [scaleAnim] = useState(new Animated.Value(1));
+  const [subscription, setSubscription] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(false);
 
   useEffect(() => {
     console.log("AccountScreen: userState changed", userState);
   }, [userState]);
+
+  // Fetch user subscription when authenticated
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (userState.isAuthenticated) {
+        setLoadingSubscription(true);
+        try {
+          const result = await getUserSubscription();
+          setSubscription(result.subscription);
+        } catch (error) {
+          console.error("Error fetching subscription:", error);
+        } finally {
+          setLoadingSubscription(false);
+        }
+      }
+    };
+
+    fetchSubscription();
+  }, [userState.isAuthenticated]);
 
   useEffect(() => {
     setSelectedPaletteId(currentPaletteId);
@@ -96,22 +118,62 @@ export const AccountScreen = () => {
 
       <View style={styles.subscriptionContent}>
         <View style={styles.subscriptionInfo}>
-          <Text
-            style={[
-              styles.subscriptionStatus,
-              { color: currentPalette.quaternary },
-            ]}
-          >
-            Free Plan
-          </Text>
-          <Text
-            style={[
-              styles.subscriptionDescription,
-              { color: currentPalette.quinary },
-            ]}
-          >
-            Basic features with limited usage
-          </Text>
+          {loadingSubscription ? (
+            <Text
+              style={[
+                styles.subscriptionStatus,
+                { color: currentPalette.quinary },
+              ]}
+            >
+              Loading...
+            </Text>
+          ) : subscription ? (
+            <>
+              <Text
+                style={[
+                  styles.subscriptionStatus,
+                  { color: currentPalette.quaternary },
+                ]}
+              >
+                {subscription.plan_name}
+              </Text>
+              <Text
+                style={[
+                  styles.subscriptionDescription,
+                  { color: currentPalette.quinary },
+                ]}
+              >
+                {subscription.description}
+              </Text>
+              <Text
+                style={[
+                  styles.subscriptionStatus,
+                  { color: currentPalette.quinary, fontSize: 12 },
+                ]}
+              >
+                Status: {subscription.status}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text
+                style={[
+                  styles.subscriptionStatus,
+                  { color: currentPalette.quaternary },
+                ]}
+              >
+                Free Plan
+              </Text>
+              <Text
+                style={[
+                  styles.subscriptionDescription,
+                  { color: currentPalette.quinary },
+                ]}
+              >
+                Basic features with limited usage
+              </Text>
+            </>
+          )}
         </View>
 
         <TouchableOpacity

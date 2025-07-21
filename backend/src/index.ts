@@ -8,6 +8,7 @@ import * as auth from "../controllers/authControllers";
 import * as taskControllers from "../controllers/taskControllers";
 import * as noteControllers from "../controllers/noteControllers";
 import * as galaxyControllers from "../controllers/galaxyControllers";
+import * as subscriptionControllers from "../controllers/subscriptionControllers";
 import * as galaxyAi from "./aiServices/galaxyAi";
 import SchedulerService from "./scheduler";
 const session = require("express-session");
@@ -175,6 +176,43 @@ app.post("/api/auth/register", auth.registerUser);
 app.post("/api/auth/login", auth.loginUser);
 app.get("/api/auth/me", checkAuthentication, auth.showMe);
 app.delete("/api/auth/logout", auth.logoutUser);
+
+/////////////////////////////////
+// Subscription Routes
+/////////////////////////////////
+
+// Public routes
+app.get(
+  "/api/subscriptions/plans",
+  subscriptionControllers.getSubscriptionPlans
+);
+app.post(
+  "/api/subscriptions/webhook",
+  express.raw({ type: "application/json" }),
+  subscriptionControllers.handleWebhook
+);
+
+// Authenticated routes
+app.get(
+  "/api/subscriptions/user",
+  checkAuthentication,
+  subscriptionControllers.getUserSubscription
+);
+app.post(
+  "/api/subscriptions/create",
+  checkAuthentication,
+  subscriptionControllers.createSubscription
+);
+app.post(
+  "/api/subscriptions/cancel",
+  checkAuthentication,
+  subscriptionControllers.cancelSubscription
+);
+app.post(
+  "/api/subscriptions/payment-intent",
+  checkAuthentication,
+  subscriptionControllers.createPaymentIntent
+);
 
 app.listen(Number(port), "0.0.0.0", () => {
   console.log(`🚀 Backend server listening at http://0.0.0.0:${port}`);
