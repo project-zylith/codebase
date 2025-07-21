@@ -246,7 +246,7 @@ export const TodoScreen = () => {
           <Text
             style={[
               styles.aiGeneratedLabel,
-              { color: currentPalette.quaternary },
+              { color: currentPalette.tertiary },
             ]}
           >
             ZYLITH GENERATED
@@ -468,16 +468,21 @@ const styles = StyleSheet.create({
   },
   aiGeneratedTaskRow: {
     borderWidth: 2,
+    borderColor: "transparent", // Will be overridden by inline style
   },
   aiGeneratedHeader: {
-    paddingVertical: 6,
     paddingHorizontal: 12,
-    alignItems: "center",
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 8,
+    alignSelf: "stretch", // Make it span full width
+    width: "100%", // Ensure full width
   },
   aiGeneratedLabel: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "700",
     letterSpacing: 0.5,
+    textAlign: "center", // Center the text
   },
   taskContent: {
     flexDirection: "row",

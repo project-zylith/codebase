@@ -17,6 +17,7 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   Modal,
+  Clipboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RichText, Toolbar, useEditorBridge } from "@10play/tentap-editor";
@@ -27,6 +28,22 @@ interface TenTapEditorNewProps {
   onSave?: (html: string, text: string) => void;
   onSaveAndExit?: (html: string, text: string) => void;
   placeholder?: string;
+  note?: {
+    id: number;
+    title: string;
+    content: string;
+    galaxy_id?: number;
+  } | null;
+  galaxy?: {
+    id: number;
+    name: string;
+  } | null;
+  relatedNotes?: Array<{
+    id: number;
+    title: string;
+    content: string;
+  }> | null;
+  onInsight?: () => void;
 }
 
 export interface TenTapEditorRef {
@@ -45,6 +62,10 @@ export const TenTapEditorNew = forwardRef<
       onSave,
       onSaveAndExit,
       placeholder = "Start writing your note...",
+      note,
+      galaxy,
+      relatedNotes,
+      onInsight,
     },
     ref
   ) => {
@@ -53,7 +74,6 @@ export const TenTapEditorNew = forwardRef<
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showToolsDropdown, setShowToolsDropdown] = useState(false);
-    const [showMenuDropdown, setShowMenuDropdown] = useState(false);
     const [lastUsedTool, setLastUsedTool] = useState<string | null>(null);
 
     const editor = useEditorBridge({
@@ -187,13 +207,9 @@ export const TenTapEditorNew = forwardRef<
       }
     };
 
-    const handleMenu = () => {
-      setShowMenuDropdown(!showMenuDropdown);
-    };
-
     const handleSaveOnly = async () => {
       await handleSave();
-      setShowMenuDropdown(false);
+      setShowToolsDropdown(false);
     };
 
     const handleSaveAndExit = async () => {
@@ -206,12 +222,18 @@ export const TenTapEditorNew = forwardRef<
         // Fallback to regular save
         await handleSave();
       }
-      setShowMenuDropdown(false);
+      setShowToolsDropdown(false);
       dismissKeyboard();
     };
 
     const handleTools = () => {
       setShowToolsDropdown(!showToolsDropdown);
+    };
+
+    const handleInsight = () => {
+      if (onInsight) {
+        onInsight();
+      }
     };
 
     const dismissKeyboard = () => {
@@ -262,6 +284,23 @@ export const TenTapEditorNew = forwardRef<
       setShowToolsDropdown(false);
     };
 
+    const handlePaste = async () => {
+      try {
+        const text = await Clipboard.getString();
+        if (text) {
+          // Get current content and append the pasted text
+          const currentContent = await editor.getHTML();
+          const newContent = currentContent + text;
+          await editor.setContent(newContent);
+        }
+      } catch (error) {
+        console.error("Error pasting text:", error);
+        Alert.alert("Error", "Failed to paste text");
+      }
+      setLastUsedTool("paste");
+      setShowToolsDropdown(false);
+    };
+
     return (
       <SafeAreaView style={styles.container}>
         {/* Header with Done and Tools buttons */}
@@ -272,8 +311,8 @@ export const TenTapEditorNew = forwardRef<
 
           <Text style={styles.title}>Notes</Text>
 
-          <TouchableOpacity style={styles.headerButton} onPress={handleMenu}>
-            <Ionicons name="menu" size={20} color="#007AFF" />
+          <TouchableOpacity style={styles.headerButton} onPress={handleInsight}>
+            <Ionicons name="bulb-outline" size={20} color="#007AFF" />
           </TouchableOpacity>
         </View>
 
@@ -336,6 +375,10 @@ export const TenTapEditorNew = forwardRef<
 
             <View style={styles.divider} />
 
+            <TouchableOpacity onPress={handlePaste} style={styles.toolOption}>
+              <Text style={styles.toolOptionText}>Paste</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               onPress={toggleHeading1}
               style={styles.toolOption}
@@ -380,27 +423,6 @@ export const TenTapEditorNew = forwardRef<
           </View>
         )}
 
-        {/* Menu Dropdown */}
-        {showMenuDropdown && (
-          <View style={styles.menuDropdown}>
-            <TouchableOpacity
-              onPress={handleSaveOnly}
-              style={styles.menuOption}
-            >
-              <Text style={styles.menuOptionText}>Save</Text>
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            <TouchableOpacity
-              onPress={handleSaveAndExit}
-              style={styles.menuOption}
-            >
-              <Text style={styles.menuOptionText}>Exit</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         {/* Main Content Area */}
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -411,7 +433,6 @@ export const TenTapEditorNew = forwardRef<
             onPress={() => {
               dismissKeyboard();
               setShowToolsDropdown(false);
-              setShowMenuDropdown(false);
             }}
           >
             <View style={styles.editorWrapper}>
@@ -567,31 +588,5 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontWeight: "600",
     fontSize: 16,
-  },
-  menuDropdown: {
-    position: "absolute",
-    top: 70,
-    right: 16,
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    paddingVertical: 8,
-    minWidth: 120,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-    zIndex: 1000,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
-  menuOption: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  menuOptionText: {
-    fontSize: 16,
-    color: "#333333",
-    fontWeight: "500",
   },
 });

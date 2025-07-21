@@ -2,6 +2,7 @@
 import express, { Request, Response } from "express";
 import { testConnection } from "./database";
 import * as ai from "./aiServices/taskInsights";
+import * as noteInsights from "./aiServices/noteInsights";
 import { checkAuthentication } from "../middleware/checkAuthentication";
 import * as auth from "../controllers/authControllers";
 import * as taskControllers from "../controllers/taskControllers";
@@ -157,6 +158,7 @@ app.post(
 
 app.post("/api/insights", ai.insights);
 app.post("/api/finalInsight", ai.finalInsight);
+app.post("/api/noteInsight", noteInsights.generateNoteInsight);
 // Galaxy Routes these should be used on the home screen, no I need a ai button
 console.log("🔧 Registering galaxy AI routes...");
 app.post("/api/generateGalaxy", galaxyAi.generateGalaxy);

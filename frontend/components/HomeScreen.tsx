@@ -15,7 +15,12 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
-import { Note, getNotes, createNote } from "../adapters/noteAdapters";
+import {
+  Note,
+  getNotes,
+  createNote,
+  deleteNote,
+} from "../adapters/noteAdapters";
 import { getGalaxies } from "../adapters/galaxyAdapters";
 import ZylithGalaxyModal from "./AIGalaxyModal";
 import GalaxyView from "./GalaxyView";
@@ -56,6 +61,12 @@ export const HomeScreen = () => {
   const [selectedGalaxyForModal, setSelectedGalaxyForModal] = useState<
     number | undefined
   >(undefined);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
+    null
+  );
+  const [longPressNote, setLongPressNote] = useState<NoteWithPosition | null>(
+    null
+  );
 
   // PanResponder for Galaxy View Modal swipe-down-to-dismiss
   const galaxyModalPanY = useRef(new Animated.Value(0)).current;
@@ -478,6 +489,63 @@ export const HomeScreen = () => {
     (navigation.navigate as any)("NoteEditor", { noteId: note.id });
   };
 
+  const handleNoteLongPress = (note: NoteWithPosition) => {
+    // Start 3-second timer
+    const timer = setTimeout(() => {
+      Alert.alert(
+        "Delete Note",
+        `Are you sure you want to delete "${note.title}"?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: () => handleDeleteNote(note),
+          },
+        ]
+      );
+    }, 3000);
+
+    setLongPressTimer(timer);
+    setLongPressNote(note);
+  };
+
+  const handleNotePressIn = (note: NoteWithPosition) => {
+    // Clear any existing timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+    }
+    handleNoteLongPress(note);
+  };
+
+  const handleNotePressOut = () => {
+    // Clear timer if user releases before 3 seconds
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    setLongPressNote(null);
+  };
+
+  const handleDeleteNote = async (note: NoteWithPosition) => {
+    try {
+      const response = await deleteNote(note.id);
+      if (response.ok) {
+        // Remove note from state
+        setNotes((prevNotes) => prevNotes.filter((n) => n.id !== note.id));
+        setFilteredNotes((prevNotes) =>
+          prevNotes.filter((n) => n.id !== note.id)
+        );
+        Alert.alert("Success", "Note deleted successfully");
+      } else {
+        Alert.alert("Error", "Failed to delete note");
+      }
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      Alert.alert("Error", "Failed to delete note");
+    }
+  };
+
   const handleGalaxiesGenerated = () => {
     // Reload notes to show updated galaxy assignments
     const loadNotes = async () => {
@@ -557,6 +625,9 @@ export const HomeScreen = () => {
         <TouchableOpacity
           style={styles.starButton}
           onPress={() => handleNotePress(note)}
+          onLongPress={() => handleNoteLongPress(note)}
+          onPressIn={() => handleNotePressIn(note)}
+          onPressOut={handleNotePressOut}
           activeOpacity={0.8}
         >
           <Ionicons name="star" size={24} color={currentPalette.quaternary} />

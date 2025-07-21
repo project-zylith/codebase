@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   PanResponder,
   Animated,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { generateGalaxies } from "../adapters/galaxyAdapters";
@@ -180,8 +181,9 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="pageSheet"
+      presentationStyle="fullScreen"
     >
+      <StatusBar hidden={true} />
       <Animated.View
         style={[
           styles.modalContainer,
@@ -190,7 +192,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
           },
         ]}
       >
-        <SafeAreaView
+        <View
           style={[
             styles.container,
             { backgroundColor: currentPalette.primary },
@@ -211,9 +213,21 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
 
           {/* Header */}
           <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleCancel}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="close"
+                size={24}
+                color={currentPalette.tertiary}
+              />
+            </TouchableOpacity>
             <Text style={[styles.title, { color: currentPalette.tertiary }]}>
               Zylith Galaxy Generator
             </Text>
+            <View style={styles.placeholder} />
           </View>
 
           {/* Content */}
@@ -409,7 +423,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
               </View>
             )}
           </ScrollView>
-        </SafeAreaView>
+        </View>
       </Animated.View>
     </Modal>
   );
@@ -418,8 +432,6 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   container: {
     flex: 1,
@@ -445,15 +457,23 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between", // Distribute items
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 50,
     paddingBottom: 20,
+  },
+  closeButton: {
+    padding: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: "700",
+    flex: 1, // Allow title to take available space
+    textAlign: "center",
+  },
+  placeholder: {
+    width: 40, // Placeholder for close button
   },
   content: {
     flex: 1,

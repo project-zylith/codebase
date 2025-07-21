@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
   AI: {
     INSIGHTS: `${API_BASE_URL_HOME}/api/insights`,
     FINAL_INSIGHT: `${API_BASE_URL_HOME}/api/finalInsight`,
+    NOTE_INSIGHT: `${API_BASE_URL_HOME}/api/noteInsight`,
   },
   GALAXIES: {
     LIST: `${API_BASE_URL_HOME}/api/galaxies`,
