@@ -208,6 +208,137 @@ export const cancelSubscription = async (
   }
 };
 
+// Resubscribe to canceled subscription
+export const resubscribe = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.session?.userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
+
+    const userId = req.session.userId;
+
+    // Get user's canceled subscription
+    const userSubscription = await db("user_subscriptions")
+      .where("user_id", userId)
+      .where("status", "canceled")
+      .first();
+
+    if (!userSubscription) {
+      return res.status(404).json({ error: "No canceled subscription found" });
+    }
+
+    // Check if subscription period has ended
+    const endDate = new Date(userSubscription.end_date);
+    if (endDate < new Date()) {
+      return res.status(400).json({
+        error:
+          "Subscription period has ended. Please create a new subscription.",
+      });
+    }
+
+    if (!userSubscription.stripe_subscription_id) {
+      return res
+        .status(400)
+        .json({ error: "No Stripe subscription to reactivate" });
+    }
+
+    // Reactivate in Stripe
+    await stripe.subscriptions.update(userSubscription.stripe_subscription_id, {
+      cancel_at_period_end: false,
+    });
+
+    // Update database
+    await db("user_subscriptions").where("user_id", userId).update({
+      status: "active",
+      canceled_at: null,
+    });
+
+    res.json({ message: "Subscription reactivated successfully" });
+  } catch (error) {
+    console.error("Error reactivating subscription:", error);
+    res.status(500).json({ error: "Failed to reactivate subscription" });
+  }
+};
+
+// Switch subscription plan
+export const switchPlan = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.session?.userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
+
+    const userId = req.session.userId;
+    const { planId } = req.body;
+
+    if (!planId) {
+      return res.status(400).json({ error: "Plan ID is required" });
+    }
+
+    // Get user's subscription
+    const userSubscription = await db("user_subscriptions")
+      .where("user_id", userId)
+      .first();
+
+    if (!userSubscription) {
+      return res.status(404).json({ error: "No subscription found" });
+    }
+
+    if (!userSubscription.stripe_subscription_id) {
+      return res
+        .status(400)
+        .json({ error: "No Stripe subscription to modify" });
+    }
+
+    // Get the new plan details
+    const newPlan = await db("subscription_plans").where("id", planId).first();
+    if (!newPlan) {
+      return res.status(404).json({ error: "Plan not found" });
+    }
+
+    // Create new price in Stripe
+    const price = await stripe.prices.create({
+      unit_amount: Math.round(newPlan.price * 100),
+      currency: "usd",
+      recurring: {
+        interval: newPlan.duration_days === 365 ? "year" : "month",
+      },
+      product_data: {
+        name: newPlan.plan_name,
+      },
+    });
+
+    // Update subscription in Stripe
+    const subscription = await stripe.subscriptions.retrieve(
+      userSubscription.stripe_subscription_id
+    );
+    const currentItem = subscription.items.data[0];
+
+    await stripe.subscriptions.update(userSubscription.stripe_subscription_id, {
+      items: [
+        {
+          id: currentItem.id,
+          price: price.id,
+        },
+      ],
+      proration_behavior: "create_prorations",
+    });
+
+    // Update database
+    await db("user_subscriptions").where("user_id", userId).update({
+      plan_id: planId,
+    });
+
+    res.json({
+      message: "Plan switched successfully",
+      newPlan: newPlan.plan_name,
+      effectiveDate: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error switching plan:", error);
+    res.status(500).json({ error: "Failed to switch plan" });
+  }
+};
+
 // Handle Stripe webhooks
 export const handleWebhook = async (req: Request, res: Response) => {
   console.log(

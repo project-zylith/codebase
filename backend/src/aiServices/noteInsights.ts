@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 const express = require("express");
 import type { Request, Response } from "express";
+import { SubscriptionLimitService } from "../services/subscriptionLimitService";
+import { db } from "../database";
 
 const API_KEY = process.env.API_KEY as string;
 
@@ -61,13 +63,30 @@ export const generateNoteInsight = async (
   try {
     console.log("🤖 Generating note insight:", req.body);
 
-    const { note, galaxy, relatedNotes } = req.body;
+    const { note, galaxy, relatedNotes, userId } = req.body;
 
     if (!note || !note.title || !note.content) {
       res
         .status(400)
         .json({ error: "Note with title and content is required" });
       return;
+    }
+
+    // Check AI insight limits if userId is provided
+    if (userId) {
+      const limitCheck = await SubscriptionLimitService.canUseAIInsight(userId);
+
+      if (!limitCheck.allowed) {
+        const limitText =
+          limitCheck.limit === -1 ? "unlimited" : limitCheck.limit;
+        res.status(403).json({
+          error: `AI insight limit reached. You have used ${limitCheck.current} insights today and your plan allows ${limitText} insights per day. Please upgrade your subscription to use more AI insights.`,
+          current: limitCheck.current,
+          limit: limitCheck.limit,
+          type: "ai_insight_limit",
+        });
+        return;
+      }
     }
 
     if (!API_KEY) {
@@ -159,6 +178,23 @@ export const generateNoteInsight = async (
       const parsedResponse = JSON.parse(responseToParse);
 
       console.log("✅ Successfully parsed note insight response");
+
+      // Save insight to database if userId is provided
+      if (userId && note.id) {
+        try {
+          await db("insights").insert({
+            note_id: note.id,
+            user_id: userId,
+            content: JSON.stringify(parsedResponse),
+            created_at: new Date(),
+          });
+          console.log("💾 Insight saved to database");
+        } catch (dbError) {
+          console.error("❌ Error saving insight to database:", dbError);
+          // Don't fail the request if saving fails
+        }
+      }
+
       res.status(200).json({ result: parsedResponse });
     } catch (parseError) {
       console.error("❌ Failed to parse AI response as JSON:", parseError);

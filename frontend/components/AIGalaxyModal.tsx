@@ -139,13 +139,29 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
       setLoadingStep("");
     } catch (error) {
       console.error("❌ Error generating galaxies:", error);
-      Alert.alert(
-        "Generation Failed",
-        `Failed to generate galaxies: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-        [{ text: "OK" }]
-      );
+
+      if (error instanceof Error && error.message.startsWith("GALAXY_LIMIT:")) {
+        const errorMessage = error.message.replace("GALAXY_LIMIT: ", "");
+        Alert.alert("Galaxy Limit Reached", errorMessage, [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Upgrade",
+            onPress: () => {
+              // Navigate to subscription modal or account screen
+              // You might need to pass a navigation prop or use a different approach
+              onClose();
+            },
+          },
+        ]);
+      } else {
+        Alert.alert(
+          "Generation Failed",
+          `Failed to generate galaxies: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+          [{ text: "OK" }]
+        );
+      }
     } finally {
       setLoading(false);
     }

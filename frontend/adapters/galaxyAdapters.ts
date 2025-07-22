@@ -99,11 +99,11 @@ export const generateGalaxies = async (notes: Note[]): Promise<any> => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Generate galaxies failed:", response.status, errorText);
-      throw new Error(
-        `Failed to generate galaxies: ${response.status} ${errorText}`
-      );
+      const errorData = await response.json();
+      if (response.status === 403 && errorData.type === "galaxy_limit") {
+        throw new Error(`GALAXY_LIMIT: ${errorData.error}`);
+      }
+      throw new Error(errorData.error || "Failed to generate galaxies");
     }
 
     const data = await response.json();

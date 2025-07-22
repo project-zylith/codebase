@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/checkAuthentication";
 const knex = require("../database/database");
 import * as galaxyAi from "../src/aiServices/galaxyAi";
+import { SubscriptionLimitService } from "../src/services/subscriptionLimitService";
 
 // Get all galaxies for authenticated user
 export const getGalaxies = async (
@@ -239,6 +240,23 @@ export const createGalaxy = async (
 
     if (!name) {
       res.status(400).json({ error: "Galaxy name is required" });
+      return;
+    }
+
+    // Check subscription limits before creating galaxy
+    const limitCheck = await SubscriptionLimitService.canCreateGalaxy(
+      req.session.userId
+    );
+
+    if (!limitCheck.allowed) {
+      const limitText =
+        limitCheck.limit === -1 ? "unlimited" : limitCheck.limit;
+      res.status(403).json({
+        error: `Galaxy limit reached. You have ${limitCheck.current} galaxies and your plan allows ${limitText} galaxies. Please upgrade your subscription to create more galaxies.`,
+        current: limitCheck.current,
+        limit: limitCheck.limit,
+        type: "galaxy_limit",
+      });
       return;
     }
 

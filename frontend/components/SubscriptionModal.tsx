@@ -22,6 +22,8 @@ import {
 import {
   getSubscriptionPlans,
   createSubscription,
+  cancelSubscription,
+  switchPlan,
   SubscriptionPlan,
 } from "../adapters/subscriptionAdapters";
 
@@ -38,6 +40,7 @@ interface SubscriptionModalProps {
   visible: boolean;
   onClose: () => void;
   onUpgrade: (planId: string) => void;
+  currentSubscription?: any;
 }
 
 const localSubscriptionPlans: LocalSubscriptionPlan[] = [
@@ -101,6 +104,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   visible,
   onClose,
   onUpgrade,
+  currentSubscription,
 }) => {
   const { currentPalette } = useTheme();
   const [selectedPlan, setSelectedPlan] = useState<string>("free");
@@ -144,7 +148,99 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       return;
     }
 
+    // If user has an active subscription, offer to switch plans
+    if (currentSubscription && currentSubscription.status === "active") {
+      // Check if they're selecting a different plan
+      if (currentSubscription.plan_name.toLowerCase() !== selectedPlan) {
+        handleSwitchPlan(serverPlan.id, serverPlan.plan_name);
+        return;
+      } else {
+        Alert.alert("Same Plan", "You're already on this plan!");
+        return;
+      }
+    }
+
     setShowPaymentForm(true);
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!currentSubscription || currentSubscription.status !== "active") {
+      Alert.alert(
+        "No Active Subscription",
+        "You don't have an active subscription to cancel."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Cancel Subscription",
+      "Are you sure you want to cancel your subscription? You'll lose access to premium features at the end of your current billing period.",
+      [
+        { text: "Keep Subscription", style: "cancel" },
+        {
+          text: "Cancel Subscription",
+          style: "destructive",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await cancelSubscription();
+              Alert.alert(
+                "Success",
+                "Your subscription has been canceled. You'll have access until the end of your current billing period."
+              );
+              onClose();
+            } catch (error) {
+              console.error("Error canceling subscription:", error);
+              Alert.alert(
+                "Error",
+                "Failed to cancel subscription. Please try again."
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleSwitchPlan = async (planId: number, planName: string) => {
+    if (!currentSubscription || currentSubscription.status !== "active") {
+      Alert.alert(
+        "No Active Subscription",
+        "You need an active subscription to switch plans."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Switch Plan",
+      `Are you sure you want to switch to the ${planName} plan? The change will take effect immediately.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Switch Plan",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              const result = await switchPlan(planId);
+              Alert.alert(
+                "Plan Switch Successful",
+                `Switching to ${result.newPlan} on ${new Date(
+                  result.effectiveDate
+                ).toLocaleDateString()}`
+              );
+              onClose();
+            } catch (error) {
+              console.error("Error switching plan:", error);
+              Alert.alert("Error", "Failed to switch plan. Please try again.");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handlePayment = async () => {
@@ -231,6 +327,79 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           <Text style={[styles.subtitle, { color: currentPalette.quinary }]}>
             Unlock the full potential of Renaissance
           </Text>
+
+          {/* Current Subscription Status */}
+          {currentSubscription && (
+            <View
+              style={[
+                styles.currentSubscriptionCard,
+                { backgroundColor: currentPalette.card },
+              ]}
+            >
+              <View style={styles.currentSubscriptionHeader}>
+                <Ionicons
+                  name="information-circle"
+                  size={20}
+                  color={currentPalette.quaternary}
+                />
+                <Text
+                  style={[
+                    styles.currentSubscriptionTitle,
+                    { color: currentPalette.tertiary },
+                  ]}
+                >
+                  Current Subscription
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.currentSubscriptionPlan,
+                  { color: currentPalette.quaternary },
+                ]}
+              >
+                {currentSubscription.plan_name}
+              </Text>
+              <Text
+                style={[
+                  styles.currentSubscriptionStatus,
+                  { color: currentPalette.quinary },
+                ]}
+              >
+                Status: {currentSubscription.status}
+              </Text>
+              {currentSubscription.status === "active" && (
+                <Text
+                  style={[
+                    styles.currentSubscriptionDate,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Next billing:{" "}
+                  {new Date(currentSubscription.end_date).toLocaleDateString()}
+                </Text>
+              )}
+              {currentSubscription.status === "canceled" && (
+                <Text
+                  style={[styles.currentSubscriptionDate, { color: "#ff4444" }]}
+                >
+                  Access until:{" "}
+                  {new Date(currentSubscription.end_date).toLocaleDateString()}
+                </Text>
+              )}
+              {currentSubscription.status === "active" && (
+                <TouchableOpacity
+                  style={[styles.cancelButton, { backgroundColor: "#ff4444" }]}
+                  onPress={handleCancelSubscription}
+                  disabled={loading}
+                >
+                  <Ionicons name="close-circle" size={16} color="#FFFFFF" />
+                  <Text style={styles.cancelButtonText}>
+                    Cancel Subscription
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
 
           {/* Plans */}
           <View style={styles.plansContainer}>
@@ -555,6 +724,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginBottom: 30,
+  },
+  currentSubscriptionCard: {
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  currentSubscriptionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+  currentSubscriptionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  currentSubscriptionPlan: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  currentSubscriptionStatus: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  currentSubscriptionDate: {
+    fontSize: 14,
+    marginBottom: 12,
   },
   plansContainer: {
     gap: 16,

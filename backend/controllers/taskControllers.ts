@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { TaskService } from "../src/services/taskService";
+import { SubscriptionLimitService } from "../src/services/subscriptionLimitService";
 
 interface AuthenticatedRequest extends Request {
   session?: {
@@ -55,6 +56,22 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
   }
 
   try {
+    // Check subscription limits before creating task
+    const limitCheck = await SubscriptionLimitService.canCreateTask(
+      req.session.userId
+    );
+
+    if (!limitCheck.allowed) {
+      const limitText =
+        limitCheck.limit === -1 ? "unlimited" : limitCheck.limit;
+      return res.status(403).send({
+        message: `Task limit reached. You have ${limitCheck.current} tasks and your plan allows ${limitText} tasks. Please upgrade your subscription to create more tasks.`,
+        current: limitCheck.current,
+        limit: limitCheck.limit,
+        type: "task_limit",
+      });
+    }
+
     const task = await TaskService.createTask({
       user_id: req.session.userId,
       content,

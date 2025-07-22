@@ -146,6 +146,73 @@ export const cancelSubscription = async (): Promise<{ message: string }> => {
   }
 };
 
+// Resubscribe to canceled subscription
+export const resubscribe = async (): Promise<{ message: string }> => {
+  try {
+    const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.RESUBSCRIBE, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (parseError) {
+        const textError = await response.text();
+        errorMessage = textError || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error resubscribing:", error);
+    throw error;
+  }
+};
+
+// Switch subscription plan
+export const switchPlan = async (
+  planId: number
+): Promise<{
+  message: string;
+  newPlan: string;
+  effectiveDate: string;
+}> => {
+  try {
+    const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.SWITCH_PLAN, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ planId }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (parseError) {
+        const textError = await response.text();
+        errorMessage = textError || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error switching plan:", error);
+    throw error;
+  }
+};
+
 // Create payment intent for client-side confirmation
 export const createPaymentIntent = async (
   amount: number,

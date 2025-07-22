@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
+import { useUser } from "../contexts/UserContext";
 import { generateNoteInsight } from "../adapters/aiAdapters";
 import { createTask } from "../adapters/todoAdapters";
 
@@ -58,6 +59,7 @@ export const NoteInsightModal: React.FC<NoteInsightModalProps> = ({
   relatedNotes,
 }) => {
   const { currentPalette } = useTheme();
+  const { state: userState } = useUser();
   const [insightData, setInsightData] = useState<InsightData | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -75,16 +77,34 @@ export const NoteInsightModal: React.FC<NoteInsightModalProps> = ({
       const response = await generateNoteInsight(
         note,
         galaxy,
-        relatedNotes || []
+        relatedNotes || [],
+        userState.user?.id
       );
 
       if (response.ok) {
         const data = await response.json();
         setInsightData(data.result);
       } else {
-        const errorText = await response.text();
-        console.error("Failed to generate insight:", errorText);
-        Alert.alert("Error", "Failed to generate insight. Please try again.");
+        const errorData = await response.json();
+        if (response.status === 403 && errorData.type === "ai_insight_limit") {
+          Alert.alert("AI Insight Limit Reached", errorData.error, [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Upgrade",
+              onPress: () => {
+                // Navigate to subscription modal or account screen
+                // You might need to pass a navigation prop or use a different approach
+                onClose();
+              },
+            },
+          ]);
+        } else {
+          console.error("Failed to generate insight:", errorData);
+          Alert.alert(
+            "Error",
+            errorData.error || "Failed to generate insight. Please try again."
+          );
+        }
       }
     } catch (error) {
       console.error("Error generating insight:", error);

@@ -16,7 +16,11 @@ import { useTheme } from "../contexts/ThemeContext";
 import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
 import { SubscriptionModal } from "./SubscriptionModal";
-import { getUserSubscription } from "../adapters/subscriptionAdapters";
+import {
+  getUserSubscription,
+  resubscribe,
+  switchPlan,
+} from "../adapters/subscriptionAdapters";
 
 const { width } = Dimensions.get("window");
 
@@ -31,26 +35,26 @@ export const AccountScreen = () => {
   const [subscription, setSubscription] = useState<any>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
 
+  const fetchSubscription = async () => {
+    if (userState.isAuthenticated) {
+      setLoadingSubscription(true);
+      try {
+        const result = await getUserSubscription();
+        setSubscription(result.subscription);
+      } catch (error) {
+        console.error("Error fetching subscription:", error);
+      } finally {
+        setLoadingSubscription(false);
+      }
+    }
+  };
+
   useEffect(() => {
     console.log("AccountScreen: userState changed", userState);
   }, [userState]);
 
   // Fetch user subscription when authenticated
   useEffect(() => {
-    const fetchSubscription = async () => {
-      if (userState.isAuthenticated) {
-        setLoadingSubscription(true);
-        try {
-          const result = await getUserSubscription();
-          setSubscription(result.subscription);
-        } catch (error) {
-          console.error("Error fetching subscription:", error);
-        } finally {
-          setLoadingSubscription(false);
-        }
-      }
-    };
-
     fetchSubscription();
   }, [userState.isAuthenticated]);
 
@@ -102,6 +106,36 @@ export const AccountScreen = () => {
     );
   };
 
+  const handleResubscribe = async () => {
+    try {
+      await resubscribe();
+      Alert.alert("Success", "Your subscription has been reactivated!");
+      fetchSubscription(); // Refresh subscription data
+    } catch (error) {
+      console.error("Error resubscribing:", error);
+      Alert.alert(
+        "Error",
+        "Failed to reactivate subscription. Please try again."
+      );
+    }
+  };
+
+  const handleSwitchPlan = async (planId: number, planName: string) => {
+    try {
+      const result = await switchPlan(planId);
+      Alert.alert(
+        "Plan Switch Successful",
+        `Switching to ${result.newPlan} on ${new Date(
+          result.effectiveDate
+        ).toLocaleDateString()}`
+      );
+      fetchSubscription(); // Refresh subscription data
+    } catch (error) {
+      console.error("Error switching plan:", error);
+      Alert.alert("Error", "Failed to switch plan. Please try again.");
+    }
+  };
+
   const renderSubscriptionSection = () => (
     <View
       style={[
@@ -114,6 +148,21 @@ export const AccountScreen = () => {
         <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
           Subscription
         </Text>
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={fetchSubscription}
+          disabled={loadingSubscription}
+        >
+          <Ionicons
+            name="refresh"
+            size={20}
+            color={
+              loadingSubscription
+                ? currentPalette.quinary
+                : currentPalette.quaternary
+            }
+          />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.subscriptionContent}>
@@ -145,14 +194,57 @@ export const AccountScreen = () => {
               >
                 {subscription.description}
               </Text>
-              <Text
-                style={[
-                  styles.subscriptionStatus,
-                  { color: currentPalette.quinary, fontSize: 12 },
-                ]}
-              >
-                Status: {subscription.status}
-              </Text>
+
+              <View style={styles.subscriptionDetails}>
+                <Text
+                  style={[
+                    styles.subscriptionDetail,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Status: {subscription.status}
+                </Text>
+                <Text
+                  style={[
+                    styles.subscriptionDetail,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Price: ${subscription.price}/month
+                </Text>
+                <Text
+                  style={[
+                    styles.subscriptionDetail,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Started:{" "}
+                  {new Date(subscription.start_date).toLocaleDateString()}
+                </Text>
+                {subscription.end_date && (
+                  <Text
+                    style={[
+                      styles.subscriptionDetail,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    {subscription.status === "canceled"
+                      ? "Access until"
+                      : "Next billing"}
+                    : {new Date(subscription.end_date).toLocaleDateString()}
+                  </Text>
+                )}
+                {subscription.status === "canceled" && (
+                  <Text
+                    style={[
+                      styles.subscriptionChangeNotice,
+                      { color: currentPalette.quaternary },
+                    ]}
+                  >
+                    ⚠️ You can reactivate your subscription before this date
+                  </Text>
+                )}
+              </View>
             </>
           ) : (
             <>
@@ -181,7 +273,34 @@ export const AccountScreen = () => {
             styles.upgradeButton,
             { backgroundColor: currentPalette.quaternary },
           ]}
-          onPress={() => setShowSubscriptionModal(true)}
+          onPress={() => {
+            if (subscription && subscription.status === "canceled") {
+              // Check if subscription period has ended
+              const endDate = new Date(subscription.end_date);
+              if (endDate < new Date()) {
+                Alert.alert(
+                  "Subscription Expired",
+                  "Your subscription period has ended. Please create a new subscription.",
+                  [{ text: "OK" }]
+                );
+                return;
+              }
+              // Show resubscribe confirmation
+              Alert.alert(
+                "Reactivate Subscription",
+                "Would you like to reactivate your subscription? You'll continue with the same plan and billing cycle.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Reactivate",
+                    onPress: handleResubscribe,
+                  },
+                ]
+              );
+            } else {
+              setShowSubscriptionModal(true);
+            }
+          }}
         >
           <Ionicons name="arrow-up" size={16} color={currentPalette.tertiary} />
           <Text
@@ -190,7 +309,9 @@ export const AccountScreen = () => {
               { color: currentPalette.tertiary },
             ]}
           >
-            Upgrade
+            {subscription && subscription.status === "canceled"
+              ? "Reactivate"
+              : "Upgrade"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -329,11 +450,11 @@ export const AccountScreen = () => {
           </Text>
         </View>
 
-        {/* Subscription Section */}
-        {renderSubscriptionSection()}
-
         {/* Theme Selector */}
         {renderStylishPaletteSelector()}
+
+        {/* Subscription Section */}
+        {renderSubscriptionSection()}
 
         {/* Account Actions */}
         <View
@@ -441,6 +562,7 @@ export const AccountScreen = () => {
         visible={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
         onUpgrade={handleUpgradeSubscription}
+        currentSubscription={subscription}
       />
     </SafeAreaView>
   );
@@ -508,6 +630,40 @@ const styles = StyleSheet.create({
   subscriptionDescription: {
     fontSize: 14,
   },
+  subscriptionDetails: {
+    marginTop: 8,
+  },
+  subscriptionDetail: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  subscriptionChangeNotice: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 8,
+    fontStyle: "italic",
+  },
+  subscriptionActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 15,
+    gap: 8,
+  },
+  cancelButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  cancelButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginLeft: 4,
+    color: "#FFFFFF",
+  },
   upgradeButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -535,6 +691,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginLeft: 10,
+    flex: 1,
+  },
+  refreshButton: {
+    padding: 5,
   },
   sectionSubtitle: {
     fontSize: 14,

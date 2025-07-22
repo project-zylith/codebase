@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/checkAuthentication";
 import { NoteService } from "../src/services/noteService";
+import { SubscriptionLimitService } from "../src/services/subscriptionLimitService";
 
 export const getNotes = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 getNotes controller hit!");
@@ -50,6 +51,22 @@ export const createNote = async (req: AuthenticatedRequest, res: Response) => {
   }
 
   try {
+    // Check subscription limits before creating note
+    const limitCheck = await SubscriptionLimitService.canCreateNote(
+      req.session.userId
+    );
+
+    if (!limitCheck.allowed) {
+      const limitText =
+        limitCheck.limit === -1 ? "unlimited" : limitCheck.limit;
+      return res.status(403).send({
+        message: `Note limit reached. You have ${limitCheck.current} notes and your plan allows ${limitText} notes. Please upgrade your subscription to create more notes.`,
+        current: limitCheck.current,
+        limit: limitCheck.limit,
+        type: "note_limit",
+      });
+    }
+
     const note = await NoteService.createNote({
       user_id: req.session.userId,
       title,

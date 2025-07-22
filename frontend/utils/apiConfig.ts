@@ -56,6 +56,8 @@ export const API_ENDPOINTS = {
     USER: `${API_BASE_URL_HOME}/api/subscriptions/user`,
     CREATE: `${API_BASE_URL_HOME}/api/subscriptions/create`,
     CANCEL: `${API_BASE_URL_HOME}/api/subscriptions/cancel`,
+    RESUBSCRIBE: `${API_BASE_URL_HOME}/api/subscriptions/resubscribe`,
+    SWITCH_PLAN: `${API_BASE_URL_HOME}/api/subscriptions/switch-plan`,
     PAYMENT_INTENT: `${API_BASE_URL_HOME}/api/subscriptions/payment-intent`,
     WEBHOOK: `${API_BASE_URL_HOME}/api/subscriptions/webhook`,
   },

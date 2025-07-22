@@ -62,7 +62,21 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         onClose();
       } else {
         const errorData = response ? await response.json() : null;
-        Alert.alert("Error", errorData?.message || "Failed to create task");
+        if (response?.status === 403 && errorData?.type === "task_limit") {
+          Alert.alert("Task Limit Reached", errorData.message, [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Upgrade",
+              onPress: () => {
+                // Navigate to subscription modal or account screen
+                // You might need to pass a navigation prop or use a different approach
+                onClose();
+              },
+            },
+          ]);
+        } else {
+          Alert.alert("Error", errorData?.message || "Failed to create task");
+        }
       }
     } catch (error) {
       console.error("Error creating task:", error);

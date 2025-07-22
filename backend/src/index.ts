@@ -213,6 +213,16 @@ app.post(
   checkAuthentication,
   subscriptionControllers.createPaymentIntent
 );
+app.post(
+  "/api/subscriptions/resubscribe",
+  checkAuthentication,
+  subscriptionControllers.resubscribe
+);
+app.post(
+  "/api/subscriptions/switch-plan",
+  checkAuthentication,
+  subscriptionControllers.switchPlan
+);
 
 app.listen(Number(port), "0.0.0.0", () => {
   console.log(`🚀 Backend server listening at http://0.0.0.0:${port}`);
