@@ -5,6 +5,9 @@ export const API_BASE_URL_MARCY = "http://10.0.13.161:3000";
 export const API_BASE_URL_WORKING = "http://192.168.56.1:3000"; // This IP works based on connection test
 export const API_URL_TEMP = "http://192.168.86.44:3000";
 
+// Use localhost for development, or the working URL if needed
+export const API_BASE_URL = "http://localhost:3000";
+
 // API Endpoints
 export const API_ENDPOINTS = {
   AUTH: {
@@ -47,5 +50,15 @@ export const API_ENDPOINTS = {
     GENERATE_GALAXIES: `${API_BASE_URL_HOME}/api/galaxies/generate`,
     RESORT: `${API_BASE_URL_HOME}/api/reSortGalaxy`,
     GENERATE_INSIGHT: `${API_BASE_URL_HOME}/api/generateGalaxyInsight`,
+  },
+  SUBSCRIPTIONS: {
+    PLANS: `${API_BASE_URL_HOME}/api/subscriptions/plans`,
+    USER: `${API_BASE_URL_HOME}/api/subscriptions/user`,
+    CREATE: `${API_BASE_URL_HOME}/api/subscriptions/create`,
+    CANCEL: `${API_BASE_URL_HOME}/api/subscriptions/cancel`,
+    RESUBSCRIBE: `${API_BASE_URL_HOME}/api/subscriptions/resubscribe`,
+    SWITCH_PLAN: `${API_BASE_URL_HOME}/api/subscriptions/switch-plan`,
+    PAYMENT_INTENT: `${API_BASE_URL_HOME}/api/subscriptions/payment-intent`,
+    WEBHOOK: `${API_BASE_URL_HOME}/api/subscriptions/webhook`,
   },
 };

@@ -12,8 +12,22 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
+import {
+  StripeProvider,
+  CardField,
+  useStripe,
+  useConfirmPayment,
+  createToken,
+} from "@stripe/stripe-react-native";
+import {
+  getSubscriptionPlans,
+  createSubscription,
+  cancelSubscription,
+  switchPlan,
+  SubscriptionPlan,
+} from "../adapters/subscriptionAdapters";
 
-interface SubscriptionPlan {
+interface LocalSubscriptionPlan {
   id: string;
   name: string;
   price: number;
@@ -26,9 +40,10 @@ interface SubscriptionModalProps {
   visible: boolean;
   onClose: () => void;
   onUpgrade: (planId: string) => void;
+  currentSubscription?: any;
 }
 
-const subscriptionPlans: SubscriptionPlan[] = [
+const localSubscriptionPlans: LocalSubscriptionPlan[] = [
   {
     id: "free",
     name: "Free",
@@ -89,10 +104,33 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   visible,
   onClose,
   onUpgrade,
+  currentSubscription,
 }) => {
   const { currentPalette } = useTheme();
   const [selectedPlan, setSelectedPlan] = useState<string>("free");
   const [loading, setLoading] = useState(false);
+  const [serverPlans, setServerPlans] = useState<SubscriptionPlan[]>([]);
+  const [cardDetails, setCardDetails] = useState<any>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [cardValidationStatus, setCardValidationStatus] = useState({
+    number: false,
+    expiry: false,
+    cvc: false,
+    complete: false,
+  });
+
+  // Fetch subscription plans from server
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const plans = await getSubscriptionPlans();
+        setServerPlans(plans);
+      } catch (error) {
+        console.error("Error fetching plans:", error);
+      }
+    };
+    fetchPlans();
+  }, []);
 
   const handleUpgrade = async () => {
     if (selectedPlan === "free") {
@@ -100,14 +138,150 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       return;
     }
 
+    // Find the corresponding server plan
+    const serverPlan = serverPlans.find((plan) =>
+      plan.plan_name.toLowerCase().includes(selectedPlan)
+    );
+
+    if (!serverPlan) {
+      Alert.alert("Error", "Selected plan not found on server");
+      return;
+    }
+
+    // If user has an active subscription, offer to switch plans
+    if (currentSubscription && currentSubscription.status === "active") {
+      // Check if they're selecting a different plan
+      if (currentSubscription.plan_name.toLowerCase() !== selectedPlan) {
+        handleSwitchPlan(serverPlan.id, serverPlan.plan_name);
+        return;
+      } else {
+        Alert.alert("Same Plan", "You're already on this plan!");
+        return;
+      }
+    }
+
+    setShowPaymentForm(true);
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!currentSubscription || currentSubscription.status !== "active") {
+      Alert.alert(
+        "No Active Subscription",
+        "You don't have an active subscription to cancel."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Cancel Subscription",
+      "Are you sure you want to cancel your subscription? You'll lose access to premium features at the end of your current billing period.",
+      [
+        { text: "Keep Subscription", style: "cancel" },
+        {
+          text: "Cancel Subscription",
+          style: "destructive",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await cancelSubscription();
+              Alert.alert(
+                "Success",
+                "Your subscription has been canceled. You'll have access until the end of your current billing period."
+              );
+              onClose();
+            } catch (error) {
+              console.error("Error canceling subscription:", error);
+              Alert.alert(
+                "Error",
+                "Failed to cancel subscription. Please try again."
+              );
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleSwitchPlan = async (planId: number, planName: string) => {
+    if (!currentSubscription || currentSubscription.status !== "active") {
+      Alert.alert(
+        "No Active Subscription",
+        "You need an active subscription to switch plans."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Switch Plan",
+      `Are you sure you want to switch to the ${planName} plan? The change will take effect immediately.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Switch Plan",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              const result = await switchPlan(planId);
+              Alert.alert(
+                "Plan Switch Successful",
+                `Switching to ${result.newPlan} on ${new Date(
+                  result.effectiveDate
+                ).toLocaleDateString()}`
+              );
+              onClose();
+            } catch (error) {
+              console.error("Error switching plan:", error);
+              Alert.alert("Error", "Failed to switch plan. Please try again.");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handlePayment = async () => {
+    // Enhanced card validation
+    const validationMessage = getValidationMessage();
+    if (validationMessage) {
+      Alert.alert("Error", validationMessage);
+      return;
+    }
+
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Find the corresponding server plan
+      const serverPlan = serverPlans.find((plan) =>
+        plan.plan_name.toLowerCase().includes(selectedPlan)
+      );
+
+      if (!serverPlan) {
+        throw new Error("Selected plan not found on server");
+      }
+
+      // For now, let's use a test payment method ID since we need to implement
+      // proper payment method creation. This will work for testing.
+      const testPaymentMethodId = "pm_card_visa"; // Stripe test payment method
+
+      // Create subscription with Stripe using the test payment method
+      const result = await createSubscription(
+        serverPlan.id,
+        testPaymentMethodId
+      );
+
+      Alert.alert("Success", "Subscription created successfully!");
       onUpgrade(selectedPlan);
       onClose();
     } catch (error) {
-      Alert.alert("Error", "Failed to upgrade subscription");
+      console.error("Payment error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to process payment. Please try again.";
+      Alert.alert("Payment Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -116,6 +290,17 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const formatPrice = (price: number, period: string) => {
     if (price === 0) return "Free";
     return `$${price}/${period}`;
+  };
+
+  const getValidationMessage = () => {
+    if (!cardDetails) return "Please enter your card details";
+    if (!cardDetails.complete) return "Please complete all card details";
+    if (cardDetails.error)
+      return cardDetails.error.message || "Invalid card details";
+    if (!cardValidationStatus.number) return "Please enter a valid card number";
+    if (!cardValidationStatus.expiry) return "Please enter a valid expiry date";
+    if (!cardValidationStatus.cvc) return "Please enter a valid CVC";
+    return null; // All valid
   };
 
   return (
@@ -143,9 +328,82 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             Unlock the full potential of Renaissance
           </Text>
 
+          {/* Current Subscription Status */}
+          {currentSubscription && (
+            <View
+              style={[
+                styles.currentSubscriptionCard,
+                { backgroundColor: currentPalette.card },
+              ]}
+            >
+              <View style={styles.currentSubscriptionHeader}>
+                <Ionicons
+                  name="information-circle"
+                  size={20}
+                  color={currentPalette.quaternary}
+                />
+                <Text
+                  style={[
+                    styles.currentSubscriptionTitle,
+                    { color: currentPalette.tertiary },
+                  ]}
+                >
+                  Current Subscription
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.currentSubscriptionPlan,
+                  { color: currentPalette.quaternary },
+                ]}
+              >
+                {currentSubscription.plan_name}
+              </Text>
+              <Text
+                style={[
+                  styles.currentSubscriptionStatus,
+                  { color: currentPalette.quinary },
+                ]}
+              >
+                Status: {currentSubscription.status}
+              </Text>
+              {currentSubscription.status === "active" && (
+                <Text
+                  style={[
+                    styles.currentSubscriptionDate,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Next billing:{" "}
+                  {new Date(currentSubscription.end_date).toLocaleDateString()}
+                </Text>
+              )}
+              {currentSubscription.status === "canceled" && (
+                <Text
+                  style={[styles.currentSubscriptionDate, { color: "#ff4444" }]}
+                >
+                  Access until:{" "}
+                  {new Date(currentSubscription.end_date).toLocaleDateString()}
+                </Text>
+              )}
+              {currentSubscription.status === "active" && (
+                <TouchableOpacity
+                  style={[styles.cancelButton, { backgroundColor: "#ff4444" }]}
+                  onPress={handleCancelSubscription}
+                  disabled={loading}
+                >
+                  <Ionicons name="close-circle" size={16} color="#FFFFFF" />
+                  <Text style={styles.cancelButtonText}>
+                    Cancel Subscription
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
           {/* Plans */}
           <View style={styles.plansContainer}>
-            {subscriptionPlans.map((plan) => {
+            {localSubscriptionPlans.map((plan: LocalSubscriptionPlan) => {
               const isSelected = selectedPlan === plan.id;
               const isPopular = plan.popular;
 
@@ -198,7 +456,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   </View>
 
                   <View style={styles.featuresList}>
-                    {plan.features.map((feature, index) => (
+                    {plan.features.map((feature: string, index: number) => (
                       <View key={index} style={styles.featureItem}>
                         <Ionicons
                           name="checkmark-circle"
@@ -233,37 +491,195 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </View>
 
           {/* Upgrade Button */}
-          <TouchableOpacity
-            style={[
-              styles.upgradeButton,
-              { backgroundColor: currentPalette.quaternary },
-              loading && styles.disabledButton,
-            ]}
-            onPress={handleUpgrade}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color={currentPalette.tertiary} />
-            ) : (
-              <>
-                <Ionicons
-                  name="diamond"
-                  size={20}
+          {showPaymentForm ? (
+            <View style={styles.paymentForm}>
+              <Text
+                style={[
+                  styles.paymentTitle,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                Enter Payment Details
+              </Text>
+              <CardField
+                postalCodeEnabled={false}
+                placeholders={{
+                  number: "4242 4242 4242 4242",
+                }}
+                cardStyle={{
+                  backgroundColor: currentPalette.card,
+                  textColor: currentPalette.tertiary,
+                  borderRadius: 8,
+                }}
+                style={styles.cardField}
+                onCardChange={(cardDetails) => {
+                  setCardDetails(cardDetails);
+                  setCardValidationStatus({
+                    number: cardDetails?.validNumber === "Valid",
+                    expiry: cardDetails?.validExpiryDate === "Valid",
+                    cvc: cardDetails?.validCVC === "Valid",
+                    complete: cardDetails?.complete || false,
+                  });
+                }}
+              />
+
+              {/* Card Validation Status */}
+              <View style={styles.validationStatus}>
+                <View style={styles.validationItem}>
+                  <Ionicons
+                    name={
+                      cardValidationStatus.number
+                        ? "checkmark-circle"
+                        : "ellipse-outline"
+                    }
+                    size={16}
+                    color={
+                      cardValidationStatus.number
+                        ? currentPalette.quaternary
+                        : currentPalette.quinary
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.validationText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    Card Number
+                  </Text>
+                </View>
+                <View style={styles.validationItem}>
+                  <Ionicons
+                    name={
+                      cardValidationStatus.expiry
+                        ? "checkmark-circle"
+                        : "ellipse-outline"
+                    }
+                    size={16}
+                    color={
+                      cardValidationStatus.expiry
+                        ? currentPalette.quaternary
+                        : currentPalette.quinary
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.validationText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    Expiry Date
+                  </Text>
+                </View>
+                <View style={styles.validationItem}>
+                  <Ionicons
+                    name={
+                      cardValidationStatus.cvc
+                        ? "checkmark-circle"
+                        : "ellipse-outline"
+                    }
+                    size={16}
+                    color={
+                      cardValidationStatus.cvc
+                        ? currentPalette.quaternary
+                        : currentPalette.quinary
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.validationText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    CVC
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.paymentButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.cancelButton,
+                    { borderColor: currentPalette.quinary },
+                  ]}
+                  onPress={() => setShowPaymentForm(false)}
+                >
+                  <Text
+                    style={[
+                      styles.cancelButtonText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.payButton,
+                    {
+                      backgroundColor: getValidationMessage()
+                        ? currentPalette.quinary
+                        : currentPalette.quaternary,
+                    },
+                    loading && styles.disabledButton,
+                  ]}
+                  onPress={handlePayment}
+                  disabled={loading || !!getValidationMessage()}
+                >
+                  {loading ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={currentPalette.tertiary}
+                    />
+                  ) : (
+                    <Text
+                      style={[
+                        styles.payButtonText,
+                        { color: currentPalette.tertiary },
+                      ]}
+                    >
+                      Pay Now
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={[
+                styles.upgradeButton,
+                { backgroundColor: currentPalette.quaternary },
+                loading && styles.disabledButton,
+              ]}
+              onPress={handleUpgrade}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator
+                  size="small"
                   color={currentPalette.tertiary}
                 />
-                <Text
-                  style={[
-                    styles.upgradeButtonText,
-                    { color: currentPalette.tertiary },
-                  ]}
-                >
-                  {selectedPlan === "free"
-                    ? "Stay on Free Plan"
-                    : "Upgrade Now"}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
+              ) : (
+                <>
+                  <Ionicons
+                    name="diamond"
+                    size={20}
+                    color={currentPalette.tertiary}
+                  />
+                  <Text
+                    style={[
+                      styles.upgradeButtonText,
+                      { color: currentPalette.tertiary },
+                    ]}
+                  >
+                    {selectedPlan === "free"
+                      ? "Stay on Free Plan"
+                      : "Upgrade Now"}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
 
           <Text style={[styles.disclaimer, { color: currentPalette.quinary }]}>
             You can change or cancel your subscription anytime from your account
@@ -308,6 +724,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginBottom: 30,
+  },
+  currentSubscriptionCard: {
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  currentSubscriptionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+  currentSubscriptionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  currentSubscriptionPlan: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  currentSubscriptionStatus: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  currentSubscriptionDate: {
+    fontSize: 14,
+    marginBottom: 12,
   },
   plansContainer: {
     gap: 16,
@@ -397,5 +843,57 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     lineHeight: 16,
+  },
+  paymentForm: {
+    marginTop: 20,
+  },
+  paymentTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  cardField: {
+    height: 50,
+    marginBottom: 20,
+  },
+  paymentButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  payButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  payButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  validationStatus: {
+    marginBottom: 20,
+    gap: 8,
+  },
+  validationItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  validationText: {
+    fontSize: 14,
   },
 });

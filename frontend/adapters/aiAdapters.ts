@@ -19,7 +19,8 @@ export const finalInsight = async (goals: string[]) => {
 export const generateNoteInsight = async (
   note: any,
   galaxy?: any,
-  relatedNotes?: any[]
+  relatedNotes?: any[],
+  userId?: number
 ) => {
   return await fetch(API_ENDPOINTS.AI.NOTE_INSIGHT, {
     method: "POST",
@@ -29,6 +30,7 @@ export const generateNoteInsight = async (
       note,
       galaxy,
       relatedNotes,
+      userId,
     }),
   });
 };

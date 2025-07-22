@@ -119,17 +119,52 @@ export const HomeScreen = () => {
     console.log("Filtered notes count:", filteredNotes.length);
   }, [currentGalaxyIndex, galaxies.length, filteredNotes.length]);
 
-  // Cleanup modal when navigating away
+  // Cleanup modal when navigating away and refresh notes
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       // Ensure modals are closed when screen comes into focus
       setShowGalaxyModal(false);
       setShowAIModal(false);
       setSelectedGalaxyForModal(undefined);
+
+      // Refresh notes when screen comes into focus
+      if (userState.user) {
+        const loadNotes = async () => {
+          try {
+            const response = await getNotes();
+            if (response.ok) {
+              const apiNotes: Note[] = await response.json();
+              // Add position to each note for display, avoiding overlaps
+              const notesWithPosition: NoteWithPosition[] = [];
+              const existingPositions: { x: number; y: number }[] = [];
+
+              apiNotes.forEach((note, index) => {
+                const position = generateStarPosition(
+                  index,
+                  Math.max(apiNotes.length, 8),
+                  existingPositions
+                );
+                existingPositions.push(position);
+                notesWithPosition.push({
+                  ...note,
+                  position,
+                });
+              });
+
+              setNotes(notesWithPosition);
+            } else {
+              console.error("Failed to load notes");
+            }
+          } catch (error) {
+            console.error("Error loading notes:", error);
+          }
+        };
+        loadNotes();
+      }
     });
 
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, userState.user]);
 
   // Double-tap navigation handlers
   const lastTapTime = useRef(0);
@@ -463,10 +498,28 @@ export const HomeScreen = () => {
                     isNewNote: true,
                   });
                 } else {
-                  Alert.alert(
-                    "Error",
-                    "Failed to create note. Please try again."
-                  );
+                  const errorData = await response.json();
+                  if (
+                    response.status === 403 &&
+                    errorData.type === "note_limit"
+                  ) {
+                    Alert.alert("Note Limit Reached", errorData.message, [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Upgrade",
+                        onPress: () => {
+                          // Navigate to subscription modal or account screen
+                          (navigation.navigate as any)("Account");
+                        },
+                      },
+                    ]);
+                  } else {
+                    Alert.alert(
+                      "Error",
+                      errorData.message ||
+                        "Failed to create note. Please try again."
+                    );
+                  }
                 }
               } catch (error) {
                 console.error("Error creating note:", error);
