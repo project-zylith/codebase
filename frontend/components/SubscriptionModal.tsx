@@ -58,8 +58,8 @@ const localSubscriptionPlans: LocalSubscriptionPlan[] = [
     ],
   },
   {
-    id: "basic",
-    name: "Basic",
+    id: "basic-monthly",
+    name: "Basic Monthly",
     price: 9.99,
     period: "month",
     features: [
@@ -71,8 +71,22 @@ const localSubscriptionPlans: LocalSubscriptionPlan[] = [
     ],
   },
   {
-    id: "pro",
-    name: "Pro",
+    id: "basic-annual",
+    name: "Basic Annual",
+    price: 99.99,
+    period: "year",
+    features: [
+      "100 notes",
+      "50 tasks",
+      "10 galaxies",
+      "20 AI insights per day",
+      "Priority support",
+      "Save 17%",
+    ],
+  },
+  {
+    id: "pro-monthly",
+    name: "Pro Monthly",
     price: 19.99,
     period: "month",
     features: [
@@ -82,6 +96,21 @@ const localSubscriptionPlans: LocalSubscriptionPlan[] = [
       "Unlimited AI insights",
       "Advanced features",
       "Priority support",
+    ],
+  },
+  {
+    id: "pro-annual",
+    name: "Pro Annual",
+    price: 199.99,
+    period: "year",
+    features: [
+      "Unlimited notes",
+      "Unlimited tasks",
+      "Unlimited galaxies",
+      "Unlimited AI insights",
+      "Advanced features",
+      "Priority support",
+      "Save 17%",
     ],
     popular: true,
   },
@@ -138,9 +167,25 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       return;
     }
 
+    // Map local plan IDs to server plan names
+    const planMapping: { [key: string]: string } = {
+      free: "Free Tier",
+      "basic-monthly": "Basic Monthly",
+      "basic-annual": "Basic Annual",
+      "pro-monthly": "Pro Monthly",
+      "pro-annual": "Pro Annual",
+      enterprise: "Enterprise",
+    };
+
+    const targetPlanName = planMapping[selectedPlan];
+    if (!targetPlanName) {
+      Alert.alert("Error", "Invalid plan selection");
+      return;
+    }
+
     // Find the corresponding server plan
-    const serverPlan = serverPlans.find((plan) =>
-      plan.plan_name.toLowerCase().includes(selectedPlan)
+    const serverPlan = serverPlans.find(
+      (plan) => plan.plan_name === targetPlanName
     );
 
     if (!serverPlan) {
@@ -151,7 +196,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     // If user has an active subscription, offer to switch plans
     if (currentSubscription && currentSubscription.status === "active") {
       // Check if they're selecting a different plan
-      if (currentSubscription.plan_name.toLowerCase() !== selectedPlan) {
+      if (currentSubscription.plan_name !== targetPlanName) {
         handleSwitchPlan(serverPlan.id, serverPlan.plan_name);
         return;
       } else {
@@ -253,9 +298,24 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
     setLoading(true);
     try {
+      // Map local plan IDs to server plan names
+      const planMapping: { [key: string]: string } = {
+        free: "Free Tier",
+        "basic-monthly": "Basic Monthly",
+        "basic-annual": "Basic Annual",
+        "pro-monthly": "Pro Monthly",
+        "pro-annual": "Pro Annual",
+        enterprise: "Enterprise",
+      };
+
+      const targetPlanName = planMapping[selectedPlan];
+      if (!targetPlanName) {
+        throw new Error("Invalid plan selection");
+      }
+
       // Find the corresponding server plan
-      const serverPlan = serverPlans.find((plan) =>
-        plan.plan_name.toLowerCase().includes(selectedPlan)
+      const serverPlan = serverPlans.find(
+        (plan) => plan.plan_name === targetPlanName
       );
 
       if (!serverPlan) {
@@ -289,6 +349,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   const formatPrice = (price: number, period: string) => {
     if (price === 0) return "Free";
+    if (period === "year") return `$${price}/year`;
+    if (period === "month") return `$${price}/month`;
+    if (period === "forever") return "Free";
     return `$${price}/${period}`;
   };
 
@@ -490,6 +553,28 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             })}
           </View>
 
+          {/* Feature in Development Message */}
+          <View
+            style={[
+              styles.developmentMessage,
+              { backgroundColor: currentPalette.card },
+            ]}
+          >
+            <Ionicons
+              name="construct"
+              size={20}
+              color={currentPalette.quaternary}
+            />
+            <Text
+              style={[
+                styles.developmentText,
+                { color: currentPalette.quaternary },
+              ]}
+            >
+              Feature in Development
+            </Text>
+          </View>
+
           {/* Upgrade Button */}
           {showPaymentForm ? (
             <View style={styles.paymentForm}>
@@ -617,30 +702,20 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   style={[
                     styles.payButton,
                     {
-                      backgroundColor: getValidationMessage()
-                        ? currentPalette.quinary
-                        : currentPalette.quaternary,
+                      backgroundColor: currentPalette.quinary,
                     },
-                    loading && styles.disabledButton,
+                    styles.disabledButton,
                   ]}
-                  onPress={handlePayment}
-                  disabled={loading || !!getValidationMessage()}
+                  disabled={true}
                 >
-                  {loading ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={currentPalette.tertiary}
-                    />
-                  ) : (
-                    <Text
-                      style={[
-                        styles.payButtonText,
-                        { color: currentPalette.tertiary },
-                      ]}
-                    >
-                      Pay Now
-                    </Text>
-                  )}
+                  <Text
+                    style={[
+                      styles.payButtonText,
+                      { color: currentPalette.tertiary },
+                    ]}
+                  >
+                    Pay Now
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -648,36 +723,24 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <TouchableOpacity
               style={[
                 styles.upgradeButton,
-                { backgroundColor: currentPalette.quaternary },
-                loading && styles.disabledButton,
+                { backgroundColor: currentPalette.quinary },
+                styles.disabledButton,
               ]}
-              onPress={handleUpgrade}
-              disabled={loading}
+              disabled={true}
             >
-              {loading ? (
-                <ActivityIndicator
-                  size="small"
-                  color={currentPalette.tertiary}
-                />
-              ) : (
-                <>
-                  <Ionicons
-                    name="diamond"
-                    size={20}
-                    color={currentPalette.tertiary}
-                  />
-                  <Text
-                    style={[
-                      styles.upgradeButtonText,
-                      { color: currentPalette.tertiary },
-                    ]}
-                  >
-                    {selectedPlan === "free"
-                      ? "Stay on Free Plan"
-                      : "Upgrade Now"}
-                  </Text>
-                </>
-              )}
+              <Ionicons
+                name="diamond"
+                size={20}
+                color={currentPalette.tertiary}
+              />
+              <Text
+                style={[
+                  styles.upgradeButtonText,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                {selectedPlan === "free" ? "Stay on Free Plan" : "Upgrade Now"}
+              </Text>
             </TouchableOpacity>
           )}
 
@@ -895,5 +958,21 @@ const styles = StyleSheet.create({
   },
   validationText: {
     fontSize: 14,
+  },
+  developmentMessage: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  developmentText: {
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

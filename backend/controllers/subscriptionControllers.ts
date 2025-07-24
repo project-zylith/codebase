@@ -111,22 +111,17 @@ export const createSubscription = async (
       },
     });
 
-    // Create Stripe price (you might want to pre-create these in Stripe dashboard)
-    const price = await stripe.prices.create({
-      unit_amount: Math.round(plan.price * 100), // Convert to cents
-      currency: "usd",
-      recurring: {
-        interval: plan.duration_days === 365 ? "year" : "month",
-      },
-      product_data: {
-        name: plan.plan_name,
-      },
-    });
+    // Use pre-created Stripe price ID from database
+    if (!plan.stripe_price_id) {
+      return res.status(400).json({
+        error: "Plan not configured with Stripe. Please contact support.",
+      });
+    }
 
-    // Create Stripe subscription
+    // Create Stripe subscription using the pre-created price
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
-      items: [{ price: price.id }],
+      items: [{ price: plan.stripe_price_id }],
       payment_behavior: "default_incomplete",
       payment_settings: { save_default_payment_method: "on_subscription" },
       expand: ["latest_invoice.payment_intent"],
@@ -184,24 +179,50 @@ export const cancelSubscription = async (
       return res.status(404).json({ error: "No subscription found" });
     }
 
+    // If no Stripe subscription exists, just update the database
     if (!userSubscription.stripe_subscription_id) {
-      return res
-        .status(400)
-        .json({ error: "No Stripe subscription to cancel" });
+      await db("user_subscriptions").where("user_id", userId).update({
+        status: "canceled",
+        canceled_at: new Date(),
+      });
+
+      return res.json({
+        message: "Subscription canceled successfully (database only)",
+      });
     }
 
-    // Cancel in Stripe
-    await stripe.subscriptions.update(userSubscription.stripe_subscription_id, {
-      cancel_at_period_end: true,
-    });
+    try {
+      // Cancel in Stripe
+      await stripe.subscriptions.update(
+        userSubscription.stripe_subscription_id,
+        {
+          cancel_at_period_end: true,
+        }
+      );
 
-    // Update database
-    await db("user_subscriptions").where("user_id", userId).update({
-      status: "canceled",
-      canceled_at: new Date(),
-    });
+      // Update database
+      await db("user_subscriptions").where("user_id", userId).update({
+        status: "canceled",
+        canceled_at: new Date(),
+      });
 
-    res.json({ message: "Subscription canceled successfully" });
+      res.json({ message: "Subscription canceled successfully" });
+    } catch (stripeError: any) {
+      // If Stripe subscription doesn't exist, just update the database
+      if (stripeError.code === "resource_missing") {
+        await db("user_subscriptions").where("user_id", userId).update({
+          status: "canceled",
+          canceled_at: new Date(),
+          stripe_subscription_id: null, // Clear the invalid Stripe ID
+        });
+
+        return res.json({
+          message:
+            "Subscription canceled successfully (database only - Stripe subscription was invalid)",
+        });
+      }
+      throw stripeError;
+    }
   } catch (error) {
     console.error("Error canceling subscription:", error);
     res.status(500).json({ error: "Failed to cancel subscription" });
@@ -283,56 +304,79 @@ export const switchPlan = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ error: "No subscription found" });
     }
 
-    if (!userSubscription.stripe_subscription_id) {
-      return res
-        .status(400)
-        .json({ error: "No Stripe subscription to modify" });
-    }
-
     // Get the new plan details
     const newPlan = await db("subscription_plans").where("id", planId).first();
     if (!newPlan) {
       return res.status(404).json({ error: "Plan not found" });
     }
 
-    // Create new price in Stripe
-    const price = await stripe.prices.create({
-      unit_amount: Math.round(newPlan.price * 100),
-      currency: "usd",
-      recurring: {
-        interval: newPlan.duration_days === 365 ? "year" : "month",
-      },
-      product_data: {
-        name: newPlan.plan_name,
-      },
-    });
+    // If no Stripe subscription exists, just update the database
+    if (!userSubscription.stripe_subscription_id) {
+      await db("user_subscriptions").where("user_id", userId).update({
+        plan_id: planId,
+      });
 
-    // Update subscription in Stripe
-    const subscription = await stripe.subscriptions.retrieve(
-      userSubscription.stripe_subscription_id
-    );
-    const currentItem = subscription.items.data[0];
+      return res.json({
+        message: "Plan switched successfully (database only)",
+        newPlan: newPlan.plan_name,
+        effectiveDate: new Date().toISOString(),
+      });
+    }
 
-    await stripe.subscriptions.update(userSubscription.stripe_subscription_id, {
-      items: [
+    // Use pre-created Stripe price ID from database
+    if (!newPlan.stripe_price_id) {
+      return res.status(400).json({
+        error: "Plan not configured with Stripe. Please contact support.",
+      });
+    }
+
+    try {
+      // Update subscription in Stripe using the pre-created price
+      const subscription = await stripe.subscriptions.retrieve(
+        userSubscription.stripe_subscription_id
+      );
+      const currentItem = subscription.items.data[0];
+
+      await stripe.subscriptions.update(
+        userSubscription.stripe_subscription_id,
         {
-          id: currentItem.id,
-          price: price.id,
-        },
-      ],
-      proration_behavior: "create_prorations",
-    });
+          items: [
+            {
+              id: currentItem.id,
+              price: newPlan.stripe_price_id,
+            },
+          ],
+          proration_behavior: "create_prorations",
+        }
+      );
 
-    // Update database
-    await db("user_subscriptions").where("user_id", userId).update({
-      plan_id: planId,
-    });
+      // Update database
+      await db("user_subscriptions").where("user_id", userId).update({
+        plan_id: planId,
+      });
 
-    res.json({
-      message: "Plan switched successfully",
-      newPlan: newPlan.plan_name,
-      effectiveDate: new Date().toISOString(),
-    });
+      res.json({
+        message: "Plan switched successfully",
+        newPlan: newPlan.plan_name,
+        effectiveDate: new Date().toISOString(),
+      });
+    } catch (stripeError: any) {
+      // If Stripe subscription doesn't exist, just update the database
+      if (stripeError.code === "resource_missing") {
+        await db("user_subscriptions").where("user_id", userId).update({
+          plan_id: planId,
+          stripe_subscription_id: null, // Clear the invalid Stripe ID
+        });
+
+        return res.json({
+          message:
+            "Plan switched successfully (database only - Stripe subscription was invalid)",
+          newPlan: newPlan.plan_name,
+          effectiveDate: new Date().toISOString(),
+        });
+      }
+      throw stripeError;
+    }
   } catch (error) {
     console.error("Error switching plan:", error);
     res.status(500).json({ error: "Failed to switch plan" });

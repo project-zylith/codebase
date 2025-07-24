@@ -5,6 +5,11 @@ import colorPalette, {
   colorPalette3,
   colorPalette4,
   colorPalette5,
+  colorPalette6,
+  colorPalette7,
+  colorPalette8,
+  colorPalette9,
+  colorPalette10,
 } from "../assets/colorPalette";
 import { useUser } from "./UserContext";
 
@@ -29,11 +34,16 @@ export interface PaletteOption {
 }
 
 const paletteOptions: PaletteOption[] = [
-  { id: "default", name: "Dark Purple", palette: colorPalette },
-  { id: "palette2", name: "Watercolor", palette: colorPalette2 },
-  { id: "palette3", name: "Night Sky", palette: colorPalette3 },
-  { id: "palette4", name: "Mint Green", palette: colorPalette4 },
-  { id: "palette5", name: "Monochrome", palette: colorPalette5 },
+  { id: "default", name: "Navy & Cyan", palette: colorPalette8 },
+  { id: "palette2", name: "Night Sky", palette: colorPalette3 },
+  { id: "palette3", name: "Dark Purple", palette: colorPalette },
+  { id: "palette4", name: "Watercolor", palette: colorPalette2 },
+  { id: "palette5", name: "Mint Green", palette: colorPalette4 },
+  { id: "palette6", name: "Monochrome", palette: colorPalette5 },
+  { id: "palette7", name: "Amber & Slate", palette: colorPalette6 },
+  { id: "palette8", name: "Royal Purple & Pink", palette: colorPalette7 },
+  { id: "palette9", name: "Terracotta & Red", palette: colorPalette9 },
+  { id: "palette10", name: "Emerald & Green", palette: colorPalette10 },
 ];
 
 interface ThemeContextType {
@@ -51,7 +61,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   const { state: userState } = useUser();
   const [currentPaletteId, setCurrentPaletteId] = useState<string>("default");
   const [currentPalette, setCurrentPalette] =
-    useState<ColorPalette>(colorPalette);
+    useState<ColorPalette>(colorPalette8);
 
   // Get user-specific storage key
   const getStorageKey = (userId: number) => `selectedPalette_user_${userId}`;
@@ -62,7 +72,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       // Reset to default when no user is logged in
       setCurrentPaletteId("default");
-      setCurrentPalette(colorPalette);
+      setCurrentPalette(colorPalette8);
     }
   }, [userState.user?.id]);
 
@@ -79,13 +89,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       } else {
         // No saved palette for this user, use default
         setCurrentPaletteId("default");
-        setCurrentPalette(colorPalette);
+        setCurrentPalette(colorPalette8);
       }
     } catch (error) {
       console.error("Error loading saved palette:", error);
       // Fallback to default on error
       setCurrentPaletteId("default");
-      setCurrentPalette(colorPalette);
+      setCurrentPalette(colorPalette8);
     }
   };
 

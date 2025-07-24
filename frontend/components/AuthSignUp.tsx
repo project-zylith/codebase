@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { registerUser } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
-import colorPalette from "../assets/colorPalette";
+import { useTheme } from "../contexts/ThemeContext";
 
 const AuthSignUp: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -18,6 +18,7 @@ const AuthSignUp: React.FC = () => {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const { login } = useUser();
+  const { currentPalette } = useTheme();
 
   const handleSubmit = async () => {
     if (password !== passwordConfirmation) {
@@ -50,45 +51,82 @@ const AuthSignUp: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Username</Text>
+      <Text style={[styles.label, { color: currentPalette.tertiary }]}>
+        Username
+      </Text>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          {
+            backgroundColor: currentPalette.secondary,
+            color: currentPalette.tertiary,
+          },
+        ]}
         placeholder="Enter username"
-        placeholderTextColor={colorPalette.quinary}
+        placeholderTextColor={currentPalette.quinary}
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
       />
-      <Text style={styles.label}>Email</Text>
+      <Text style={[styles.label, { color: currentPalette.tertiary }]}>
+        Email
+      </Text>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          {
+            backgroundColor: currentPalette.secondary,
+            color: currentPalette.tertiary,
+          },
+        ]}
         placeholder="Enter email"
-        placeholderTextColor={colorPalette.quinary}
+        placeholderTextColor={currentPalette.quinary}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      <Text style={styles.label}>Password</Text>
+      <Text style={[styles.label, { color: currentPalette.tertiary }]}>
+        Password
+      </Text>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          {
+            backgroundColor: currentPalette.secondary,
+            color: currentPalette.tertiary,
+          },
+        ]}
         placeholder="Enter password"
-        placeholderTextColor={colorPalette.quinary}
+        placeholderTextColor={currentPalette.quinary}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Text style={styles.label}>Password Confirmation</Text>
+      <Text style={[styles.label, { color: currentPalette.tertiary }]}>
+        Password Confirmation
+      </Text>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          {
+            backgroundColor: currentPalette.secondary,
+            color: currentPalette.tertiary,
+          },
+        ]}
         placeholder="Enter password confirmation"
-        placeholderTextColor={colorPalette.quinary}
+        placeholderTextColor={currentPalette.quinary}
         value={passwordConfirmation}
         onChangeText={setPasswordConfirmation}
         secureTextEntry
       />
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Register</Text>
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: currentPalette.quaternary }]}
+        onPress={handleSubmit}
+      >
+        <Text style={[styles.buttonText, { color: currentPalette.tertiary }]}>
+          Register
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -104,15 +142,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   label: {
-    color: colorPalette.tertiary,
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 8,
     marginTop: 12,
   },
   input: {
-    backgroundColor: colorPalette.secondary,
-    color: colorPalette.tertiary,
     borderRadius: 16,
     paddingHorizontal: 18,
     paddingVertical: 14,
@@ -123,7 +158,6 @@ const styles = StyleSheet.create({
     minHeight: 50,
   },
   button: {
-    backgroundColor: colorPalette.quaternary,
     borderRadius: 24,
     paddingVertical: 10,
     alignItems: "center",
@@ -131,7 +165,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   buttonText: {
-    color: colorPalette.tertiary,
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,

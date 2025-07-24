@@ -96,6 +96,76 @@ const colorPalette5 = {
   buttonText: "#FFFFFF", // White text on dark buttons
 };
 
+const colorPalette6 = {
+  primary: "#1F2937", // Deep slate gray
+  secondary: "#374151", // Medium slate for cards/containers
+  tertiary: "#F9FAFB", // Off-white for text
+  quaternary: "#F59E0B", // Warm amber for buttons/accents
+  quinary: "#9CA3AF", // Light gray for subtle text
+  accent: "#FBBF24", // Bright amber accent
+  background: "#111827", // Very dark slate background
+  card: "#4B5563", // Medium gray card background
+  border: "#F59E0B", // Amber border accent
+  button: "#F59E0B", // Amber button background
+  buttonText: "#1F2937", // Dark text on amber buttons
+};
+
+const colorPalette7 = {
+  primary: "#2D1B69", // Deep royal purple
+  secondary: "#4C1D95", // Medium purple for cards/containers
+  tertiary: "#F3E8FF", // Light lavender for text
+  quaternary: "#EC4899", // Hot pink for buttons/accents
+  quinary: "#C084FC", // Light purple for subtle text
+  accent: "#F472B6", // Bright pink accent
+  background: "#1E1B4B", // Very dark purple background
+  card: "#5B21B6", // Medium purple card background
+  border: "#EC4899", // Pink border accent
+  button: "#EC4899", // Pink button background
+  buttonText: "#F3E8FF", // Light text on pink buttons
+};
+
+const colorPalette8 = {
+  primary: "#0F172A", // Deep navy blue
+  secondary: "#1E293B", // Medium navy for cards/containers
+  tertiary: "#F1F5F9", // Light blue-gray for text
+  quaternary: "#06B6D4", // Cyan for buttons/accents
+  quinary: "#94A3B8", // Light blue-gray for subtle text
+  accent: "#22D3EE", // Bright cyan accent
+  background: "#020617", // Very dark navy background
+  card: "#334155", // Medium blue-gray card background
+  border: "#06B6D4", // Cyan border accent
+  button: "#06B6D4", // Cyan button background
+  buttonText: "#0F172A", // Dark text on cyan buttons
+};
+
+const colorPalette9 = {
+  primary: "#451A03", // Deep terracotta
+  secondary: "#7C2D12", // Medium terracotta for cards/containers
+  tertiary: "#FEF3C7", // Light cream for text
+  quaternary: "#DC2626", // Red for buttons/accents
+  quinary: "#FCA5A5", // Light red for subtle text
+  accent: "#EF4444", // Bright red accent
+  background: "#2D0A02", // Very dark terracotta background
+  card: "#991B1B", // Medium red card background
+  border: "#DC2626", // Red border accent
+  button: "#DC2626", // Red button background
+  buttonText: "#FEF3C7", // Light text on red buttons
+};
+
+const colorPalette10 = {
+  primary: "#064E3B", // Deep emerald
+  secondary: "#065F46", // Medium emerald for cards/containers
+  tertiary: "#ECFDF5", // Light green-white for text
+  quaternary: "#059669", // Emerald green for buttons/accents
+  quinary: "#6EE7B7", // Light emerald for subtle text
+  accent: "#10B981", // Bright emerald accent
+  background: "#022C22", // Very dark emerald background
+  card: "#047857", // Medium emerald card background
+  border: "#059669", // Emerald border accent
+  button: "#059669", // Emerald button background
+  buttonText: "#ECFDF5", // Light text on emerald buttons
+};
+
 // It would be cool to have a color palette that is random. Which I can achieve by making a number of different palettes and then randomly selecting one.
 // Creating each how I have the first one and putting them in an array would work.
 
@@ -105,6 +175,9 @@ export {
   colorPalette3,
   colorPalette4,
   colorPalette5,
-  // colorPalette6,
-  // colorPalette7,
+  colorPalette6,
+  colorPalette7,
+  colorPalette8,
+  colorPalette9,
+  colorPalette10,
 };

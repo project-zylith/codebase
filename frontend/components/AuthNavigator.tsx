@@ -1,20 +1,24 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { AuthLogin } from "./AuthLogin";
+import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
+import { useTheme } from "../contexts/ThemeContext";
 
 const Stack = createStackNavigator();
 
 export const AuthNavigator: React.FC = () => {
+  const { currentPalette } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#111",
+          backgroundColor: currentPalette.primary,
         },
-        headerTintColor: "#fff",
+        headerTintColor: currentPalette.tertiary,
         headerTitleStyle: {
           fontWeight: "bold",
+          color: currentPalette.tertiary,
         },
       }}
     >
