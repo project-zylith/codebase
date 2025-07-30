@@ -166,6 +166,20 @@ const colorPalette10 = {
   buttonText: "#ECFDF5", // Light text on emerald buttons
 };
 
+const nebula = {
+  primary: "#0A0A1A", // Deep space black (main background)
+  secondary: "#1A0A2A", // Dark cosmic purple for cards/containers
+  tertiary: "#FFFFFF", // Pure white for text
+  quaternary: "#FF6B9D", // Vibrant pink for buttons/accents
+  quinary: "#00D4FF", // Electric cyan for subtle text
+  accent: "#FFFFF0", // Ivory for highlights
+  background: "#050510", // Very dark nebula background
+  card: "#150A25", // Dark cosmic card background
+  border: "#FF6B9D", // Pink border accent
+  button: "#FF6B9D", // Pink button background
+  buttonText: "#FFFFFF", // White text on pink buttons
+};
+
 // It would be cool to have a color palette that is random. Which I can achieve by making a number of different palettes and then randomly selecting one.
 // Creating each how I have the first one and putting them in an array would work.
 
@@ -180,4 +194,5 @@ export {
   colorPalette8,
   colorPalette9,
   colorPalette10,
+  nebula,
 };

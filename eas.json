@@ -16,12 +16,6 @@
     }
   },
   "submit": {
-    "production": {
-      "ios": {
-        "appleId": "ikhudson@icloud.com",
-        "ascAppId": "EX1753366495565",
-        "appleTeamId": ""
-      }
-    }
+    "production": {}
   }
 }

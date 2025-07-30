@@ -10,6 +10,7 @@ import colorPalette, {
   colorPalette8,
   colorPalette9,
   colorPalette10,
+  nebula,
 } from "../assets/colorPalette";
 import { useUser } from "./UserContext";
 
@@ -35,6 +36,7 @@ export interface PaletteOption {
 
 const paletteOptions: PaletteOption[] = [
   { id: "default", name: "Navy & Cyan", palette: colorPalette8 },
+  { id: "nebula", name: "Nebula", palette: nebula },
   { id: "palette2", name: "Night Sky", palette: colorPalette3 },
   { id: "palette3", name: "Dark Purple", palette: colorPalette },
   { id: "palette4", name: "Watercolor", palette: colorPalette2 },
