@@ -839,7 +839,7 @@ export const HomeScreen = () => {
                 style={[styles.swipeText, { color: currentPalette.quinary }]}
               >
                 {currentGalaxyIndex === -1
-                  ? "Swipe to galaxies"
+                  ? "Double tap to galaxies"
                   : `${currentGalaxyIndex + 1} of ${galaxies.length}`}
               </Text>
               <Ionicons

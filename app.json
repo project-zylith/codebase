@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "edaab702-85e1-4899-9245-d4bab7ef1645"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.apiary.renaissance",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

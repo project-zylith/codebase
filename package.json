@@ -23,6 +23,7 @@
     "@react-native-async-storage/async-storage": "^2.2.0",
     "expo-asset": "^11.1.7",
     "expo-file-system": "^18.1.11",
-    "knex": "^3.1.0"
+    "knex": "^3.1.0",
+    "expo-dev-client": "~5.2.4"
   }
 }

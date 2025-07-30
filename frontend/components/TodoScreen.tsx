@@ -8,6 +8,7 @@ import {
   Alert,
   StyleSheet,
   Modal,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -21,6 +22,19 @@ import { NewTaskModal } from "./NewTaskModal";
 import { EditTaskModal } from "./EditTaskModal";
 import { useTheme } from "../contexts/ThemeContext";
 
+// Filter types
+type StatusFilter = "all" | "active" | "completed";
+type PriorityFilter = "all" | "favorites" | "ai-generated" | "user-created";
+type TimeFilter = "all" | "today" | "this-week" | "this-month" | "older";
+type GoalFilter = "all" | "with-goals" | "without-goals";
+
+interface FilterState {
+  status: StatusFilter;
+  priority: PriorityFilter;
+  time: TimeFilter;
+  goal: GoalFilter;
+}
+
 export const TodoScreen = () => {
   const { currentPalette } = useTheme();
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -30,6 +44,17 @@ export const TodoScreen = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showMenuForTask, setShowMenuForTask] = useState<number | null>(null);
+
+  // Filter states
+  const [filters, setFilters] = useState<FilterState>({
+    status: "all",
+    priority: "all",
+    time: "all",
+    goal: "all",
+  });
+  const [activeFilterModal, setActiveFilterModal] = useState<
+    keyof FilterState | null
+  >(null);
 
   const fetchTasks = async () => {
     try {
@@ -134,7 +159,107 @@ export const TodoScreen = () => {
     });
   };
 
-  const sortedTasks = tasks.sort((a, b) => {
+  // Filter helper functions
+  const isTaskInTimeRange = (task: Task, timeFilter: TimeFilter): boolean => {
+    const taskDate = new Date(task.created_at);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    switch (timeFilter) {
+      case "today":
+        return taskDate >= today;
+      case "this-week":
+        return taskDate >= weekAgo;
+      case "this-month":
+        return taskDate >= monthAgo;
+      case "older":
+        return taskDate < monthAgo;
+      default:
+        return true;
+    }
+  };
+
+  const applyFilters = (tasks: Task[]): Task[] => {
+    return tasks.filter((task) => {
+      // Status filter
+      if (filters.status === "active" && task.is_completed) return false;
+      if (filters.status === "completed" && !task.is_completed) return false;
+
+      // Priority filter
+      if (filters.priority === "favorites" && !task.is_favorite) return false;
+      if (filters.priority === "ai-generated" && !task.is_ai_generated)
+        return false;
+      if (filters.priority === "user-created" && task.is_ai_generated)
+        return false;
+
+      // Time filter
+      if (!isTaskInTimeRange(task, filters.time)) return false;
+
+      // Goal filter
+      if (filters.goal === "with-goals" && !task.goal) return false;
+      if (filters.goal === "without-goals" && task.goal) return false;
+
+      return true;
+    });
+  };
+
+  const getFilterDisplayName = (
+    filterType: keyof FilterState,
+    value: string
+  ): string => {
+    const displayNames = {
+      status: {
+        all: "All",
+        active: "Active",
+        completed: "Completed",
+      },
+      priority: {
+        all: "All",
+        favorites: "Favorites",
+        "ai-generated": "AI Generated",
+        "user-created": "User Created",
+      },
+      time: {
+        all: "All Time",
+        today: "Today",
+        "this-week": "This Week",
+        "this-month": "This Month",
+        older: "Older",
+      },
+      goal: {
+        all: "All",
+        "with-goals": "With Goals",
+        "without-goals": "Without Goals",
+      },
+    };
+    return (
+      displayNames[filterType][
+        value as keyof (typeof displayNames)[typeof filterType]
+      ] || value
+    );
+  };
+
+  const hasActiveFilters = (): boolean => {
+    return (
+      filters.status !== "all" ||
+      filters.priority !== "all" ||
+      filters.time !== "all" ||
+      filters.goal !== "all"
+    );
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      status: "all",
+      priority: "all",
+      time: "all",
+      goal: "all",
+    });
+  };
+
+  const filteredAndSortedTasks = applyFilters(tasks).sort((a, b) => {
     // Completed tasks go to bottom
     if (a.is_completed && !b.is_completed) return 1;
     if (!a.is_completed && b.is_completed) return -1;
@@ -155,6 +280,106 @@ export const TodoScreen = () => {
     // Finally, sort by creation date (newest first)
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
+
+  const renderFilterModal = () => {
+    if (!activeFilterModal) return null;
+
+    const filterOptions = {
+      status: ["all", "active", "completed"] as StatusFilter[],
+      priority: [
+        "all",
+        "favorites",
+        "ai-generated",
+        "user-created",
+      ] as PriorityFilter[],
+      time: [
+        "all",
+        "today",
+        "this-week",
+        "this-month",
+        "older",
+      ] as TimeFilter[],
+      goal: ["all", "with-goals", "without-goals"] as GoalFilter[],
+    };
+
+    const modalTitles = {
+      status: "Filter by Status",
+      priority: "Filter by Priority",
+      time: "Filter by Time",
+      goal: "Filter by Goal",
+    };
+
+    return (
+      <Modal
+        visible={!!activeFilterModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActiveFilterModal(null)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setActiveFilterModal(null)}
+        >
+          <View
+            style={[
+              styles.filterModalContainer,
+              { backgroundColor: currentPalette.secondary },
+            ]}
+          >
+            <Text
+              style={[
+                styles.filterModalTitle,
+                { color: currentPalette.tertiary },
+              ]}
+            >
+              {modalTitles[activeFilterModal]}
+            </Text>
+            <ScrollView style={styles.filterOptionsContainer}>
+              {filterOptions[activeFilterModal].map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.filterOption,
+                    filters[activeFilterModal] === option && {
+                      backgroundColor: currentPalette.quaternary,
+                    },
+                  ]}
+                  onPress={() => {
+                    setFilters((prev) => ({
+                      ...prev,
+                      [activeFilterModal]: option,
+                    }));
+                    setActiveFilterModal(null);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.filterOptionText,
+                      { color: currentPalette.tertiary },
+                      filters[activeFilterModal] === option && {
+                        color: currentPalette.primary,
+                        fontWeight: "600",
+                      },
+                    ]}
+                  >
+                    {getFilterDisplayName(activeFilterModal, option)}
+                  </Text>
+                  {filters[activeFilterModal] === option && (
+                    <Ionicons
+                      name="checkmark"
+                      size={20}
+                      color={currentPalette.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
 
   const renderTaskMenu = (task: Task) => (
     <Modal
@@ -367,6 +592,112 @@ export const TodoScreen = () => {
           Your Tasks
         </Text>
 
+        {/* Filter Bar */}
+        <View style={styles.filterBar}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setActiveFilterModal("status")}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                Status: {getFilterDisplayName("status", filters.status)}
+              </Text>
+              <Ionicons
+                name="chevron-down"
+                size={16}
+                color={currentPalette.tertiary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setActiveFilterModal("priority")}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                Priority: {getFilterDisplayName("priority", filters.priority)}
+              </Text>
+              <Ionicons
+                name="chevron-down"
+                size={16}
+                color={currentPalette.tertiary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setActiveFilterModal("time")}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                Time: {getFilterDisplayName("time", filters.time)}
+              </Text>
+              <Ionicons
+                name="chevron-down"
+                size={16}
+                color={currentPalette.tertiary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setActiveFilterModal("goal")}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                Goal: {getFilterDisplayName("goal", filters.goal)}
+              </Text>
+              <Ionicons
+                name="chevron-down"
+                size={16}
+                color={currentPalette.tertiary}
+              />
+            </TouchableOpacity>
+          </ScrollView>
+
+          {hasActiveFilters() && (
+            <TouchableOpacity
+              style={[
+                styles.clearFiltersButton,
+                { backgroundColor: currentPalette.accent },
+              ]}
+              onPress={clearAllFilters}
+            >
+              <Ionicons name="close" size={16} color="white" />
+              <Text style={styles.clearFiltersText}>Clear</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         <TouchableOpacity
           style={[
             styles.createTaskButton,
@@ -384,7 +715,7 @@ export const TodoScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        {sortedTasks.length === 0 ? (
+        {filteredAndSortedTasks.length === 0 ? (
           <View style={styles.emptyState}>
             <Text
               style={[styles.emptyText, { color: currentPalette.tertiary }]}
@@ -399,7 +730,7 @@ export const TodoScreen = () => {
           </View>
         ) : (
           <FlatList
-            data={sortedTasks}
+            data={filteredAndSortedTasks}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderTask}
             ItemSeparatorComponent={() => <View style={styles.divider} />}
@@ -420,6 +751,8 @@ export const TodoScreen = () => {
           task={selectedTask}
           onTaskUpdated={handleTaskUpdated}
         />
+
+        {renderFilterModal()}
 
         <View style={styles.spacer} />
       </View>
@@ -621,5 +954,72 @@ const styles = StyleSheet.create({
   },
   hamburgerButton: {
     padding: 4,
+  },
+  // Filter styles
+  filterBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 8,
+  },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+    minWidth: 80,
+  },
+  filterButtonText: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  clearFiltersButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+  },
+  clearFiltersText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  filterModalContainer: {
+    width: "80%",
+    maxHeight: "60%",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  filterModalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  filterOptionsContainer: {
+    maxHeight: 300,
+  },
+  filterOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 4,
+  },
+  filterOptionText: {
+    fontSize: 16,
+    fontWeight: "500",
   },
 });
