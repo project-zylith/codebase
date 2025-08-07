@@ -23,7 +23,7 @@ Your task is to analyze the notes and create logical groupings. For each group, 
 1. A clear, descriptive name for the galaxy (e.g., "Programming Projects", "Personal Goals", "Learning Notes")
 2. The notes that belong in that group
 
-Return your response as a nested array in this EXACT format (valid JSON only):
+Return your response as a nested array in this EXACT format (valid JSON only, It is crucial that it is able to be parsed):
 [[galaxyName, [[title, content], [title, content], ...]], [galaxyName, [[title, content], ...]], ...]
 
 CRITICAL: Your response must be ONLY valid JSON. Do not include any explanations, markdown, or other text. Just the JSON array.
@@ -147,7 +147,10 @@ export const generateGalaxiesWithAI = async (
         responseToParse = response.replace(/```\s*/, "").replace(/\s*```/, "");
       }
 
-      console.log("🔧 Attempting to parse:", responseToParse.substring(0, 200) + "...");
+      console.log(
+        "🔧 Attempting to parse:",
+        responseToParse.substring(0, 200) + "..."
+      );
       const parsedResponse = JSON.parse(responseToParse);
 
       if (Array.isArray(parsedResponse)) {
