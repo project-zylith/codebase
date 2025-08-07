@@ -17,6 +17,12 @@ const cors = require("cors");
 // Load environment variables from .env file
 require("dotenv").config();
 
+// Debug environment variables
+console.log("🔍 Environment Debug:");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("PG_CONNECTION_STRING:", process.env.PG_CONNECTION_STRING ? "SET" : "NOT SET");
+console.log("PORT:", process.env.PORT);
+
 const app = express();
 const port = process.env.PORT || 3000;
 
