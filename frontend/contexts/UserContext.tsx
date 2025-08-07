@@ -87,37 +87,46 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   const checkStoredSession = async () => {
     try {
+      console.log("🔍 Checking stored session...");
       // First check if we have a stored user
       const storedUser = await AsyncStorage.getItem("user");
 
       if (storedUser) {
+        console.log("📱 Found stored user, verifying with backend...");
         // Verify the session with the backend
         const response = await getCurrentUser();
+        console.log("🌐 Backend response:", response?.status);
 
         if (response && response.ok) {
           const currentUser = await response.json();
+          console.log("✅ Session valid, user authenticated");
           // Update stored user with latest data from backend
           await AsyncStorage.setItem("user", JSON.stringify(currentUser));
           dispatch({ type: "SET_USER", payload: currentUser });
         } else {
+          console.log("❌ Session invalid, clearing stored data. Status:", response?.status);
           // Session is invalid, clear stored data
           await AsyncStorage.removeItem("user");
           dispatch({ type: "SET_LOADING", payload: false });
         }
       } else {
+        console.log("📱 No stored user, checking for valid session...");
         // No stored user, check if there's a valid session anyway
         const response = await getCurrentUser();
+        console.log("🌐 Backend response:", response?.status);
 
         if (response && response.ok) {
           const currentUser = await response.json();
+          console.log("✅ Found valid session, storing user");
           await AsyncStorage.setItem("user", JSON.stringify(currentUser));
           dispatch({ type: "SET_USER", payload: currentUser });
         } else {
+          console.log("❌ No valid session, showing login. Status:", response?.status);
           dispatch({ type: "SET_LOADING", payload: false });
         }
       }
     } catch (error) {
-      console.error("Error checking stored session:", error);
+      console.error("💥 Error checking stored session:", error);
       await AsyncStorage.removeItem("user");
       dispatch({ type: "SET_LOADING", payload: false });
     }

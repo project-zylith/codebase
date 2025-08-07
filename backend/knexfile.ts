@@ -1,10 +1,16 @@
 require("dotenv").config();
 console.log("🔍 Knexfile Debug:");
 console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("PG_CONNECTION_STRING:", process.env.PG_CONNECTION_STRING ? "SET" : "NOT SET");
+console.log(
+  "PG_CONNECTION_STRING:",
+  process.env.PG_CONNECTION_STRING ? "SET" : "NOT SET"
+);
 if (process.env.PG_CONNECTION_STRING) {
   // Mask password but show structure
-  const maskedString = process.env.PG_CONNECTION_STRING.replace(/:([^@]+)@/, ':****@');
+  const maskedString = process.env.PG_CONNECTION_STRING.replace(
+    /:([^@]+)@/,
+    ":****@"
+  );
   console.log("Connection string format:", maskedString);
 }
 console.log("Individual DB vars - PG_DB:", process.env.PG_DB);
@@ -47,15 +53,18 @@ module.exports = {
     connection: {
       connectionString: process.env.PG_CONNECTION_STRING,
       ssl: { rejectUnauthorized: false },
-      // Force IPv4 to avoid IPv6 connectivity issues
-      options: '-c default_text_search_config=pg_catalog.english',
-    },
-    migrations: {
-      directory: migrationsDirectory,
     },
     pool: {
       min: POOL_MIN,
       max: POOL_MAX,
+      // Add connection options to prefer IPv4
+      afterCreate: function (conn: any, done: any) {
+        // Force IPv4 preference
+        done(null, conn);
+      },
+    },
+    migrations: {
+      directory: migrationsDirectory,
     },
     seeds: {
       directory: seedsDirectory,
