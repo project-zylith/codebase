@@ -9,9 +9,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 // Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 // Get all subscription plans
 export const getSubscriptionPlans = async (req: Request, res: Response) => {
@@ -446,7 +444,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       .where("stripe_subscription_id", subscription.id)
       .update({
         status: subscription.status,
-        end_date: new Date(subscription.current_period_end * 1000),
+        end_date: new Date((subscription as any).current_period_end * 1000),
       });
   }
 }
@@ -461,9 +459,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  if (invoice.subscription) {
+  if ((invoice as any).subscription) {
     await db("user_subscriptions")
-      .where("stripe_subscription_id", invoice.subscription as string)
+      .where("stripe_subscription_id", (invoice as any).subscription as string)
       .update({
         status: "active",
       });
@@ -471,9 +469,9 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  if (invoice.subscription) {
+  if ((invoice as any).subscription) {
     await db("user_subscriptions")
-      .where("stripe_subscription_id", invoice.subscription as string)
+      .where("stripe_subscription_id", (invoice as any).subscription as string)
       .update({
         status: "past_due",
       });
