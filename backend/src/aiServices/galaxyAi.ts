@@ -23,8 +23,10 @@ Your task is to analyze the notes and create logical groupings. For each group, 
 1. A clear, descriptive name for the galaxy (e.g., "Programming Projects", "Personal Goals", "Learning Notes")
 2. The notes that belong in that group
 
-Return your response as a nested array in this exact format:
+Return your response as a nested array in this EXACT format (valid JSON only):
 [[galaxyName, [[title, content], [title, content], ...]], [galaxyName, [[title, content], ...]], ...]
+
+CRITICAL: Your response must be ONLY valid JSON. Do not include any explanations, markdown, or other text. Just the JSON array.
 
 Guidelines for creating galaxies:
 - Group notes that are conceptually related or work toward similar goals
@@ -38,7 +40,8 @@ Guidelines for creating galaxies:
   * Travel plans + Budget notes → "Travel Planning"
   * Work goals + Career notes → "Career Development"
 
-Make sure your response is valid JSON that can be parsed directly.`;
+RESPONSE FORMAT EXAMPLE:
+[["Work Projects", [["Meeting Notes", "Discussed quarterly goals"], ["Project Plan", "Timeline for Q1 launch"]]], ["Personal", [["Workout Plan", "Monday: Chest and triceps"], ["Recipe Ideas", "Healthy meal prep options"]]]]`;
 const galaxyReSortPrompt = `You are Zylith, an AI assistant inside of a note taking/todo app. Your job is to re-sort existing galaxies based on the current notes.
 
 You will be provided all of the notes with their title and content inside of a nested array: [[title, content], [title, content], [title, content], ...]
@@ -126,6 +129,8 @@ export const generateGalaxiesWithAI = async (
     const response = await result.response.text();
 
     console.log("🤖 AI Response:", response);
+    console.log("🤖 AI Response length:", response.length);
+    console.log("🤖 AI Response type:", typeof response);
 
     // Parse the AI response
     try {
@@ -133,13 +138,16 @@ export const generateGalaxiesWithAI = async (
 
       // Handle markdown-wrapped JSON responses
       if (response.includes("```json")) {
+        console.log("📝 Found JSON markdown wrapper, removing...");
         responseToParse = response
           .replace(/```json\s*/, "")
           .replace(/\s*```/, "");
       } else if (response.includes("```")) {
+        console.log("📝 Found generic markdown wrapper, removing...");
         responseToParse = response.replace(/```\s*/, "").replace(/\s*```/, "");
       }
 
+      console.log("🔧 Attempting to parse:", responseToParse.substring(0, 200) + "...");
       const parsedResponse = JSON.parse(responseToParse);
 
       if (Array.isArray(parsedResponse)) {
