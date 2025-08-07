@@ -3,29 +3,15 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const dbConfig = {
-  client: "postgresql",
-  connection: {
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "5432"),
-    user: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD || "123",
-    database: process.env.DB_NAME || "renaissance",
-  },
-  pool: {
-    min: 2,
-    max: 10,
-  },
-  migrations: {
-    tableName: "knex_migrations",
-    directory: "./src/migrations",
-  },
-  seeds: {
-    directory: "./src/seeds",
-  },
-};
+// Import the knex configuration
+const knexConfig = require("../knexfile.ts");
+const environment = process.env.NODE_ENV || "development";
 
-export const db = knex(dbConfig);
+console.log("🔍 Database.ts Debug:");
+console.log("Environment:", environment);
+console.log("Using config:", environment);
+
+export const db = knex(knexConfig[environment]);
 
 // Test the connection
 export const testConnection = async (): Promise<void> => {

@@ -1,7 +1,9 @@
 require("dotenv").config();
-console.log("Database:", process.env.PG_DB);
-console.log("User:", process.env.PG_USER);
-console.log("Password:", process.env.PG_PASS);
+console.log("🔍 Knexfile Debug:");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("PG_CONNECTION_STRING:", process.env.PG_CONNECTION_STRING ? "SET" : "NOT SET");
+console.log("Individual DB vars - PG_DB:", process.env.PG_DB);
+console.log("Individual DB vars - PG_USER:", process.env.PG_USER);
 const path = require("path");
 
 const migrationsDirectory = path.join(__dirname, "database/migrations");
