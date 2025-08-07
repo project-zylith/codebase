@@ -10,8 +10,8 @@ export const API_BASE_URL_WORKING = "http://192.168.56.1:3000";
 export const API_URL_TEMP = "http://192.168.86.44:3000";
 export const API_BASE_URL_SPOTIFY = "http://10.21.127.117:3000";
 
-// Use production URL for TestFlight builds
-export const API_BASE_URL = API_BASE_URL_PRODUCTION;
+// Temporarily use localhost for development debugging
+export const API_BASE_URL = "http://localhost:3000";
 
 // API Endpoints
 export const API_ENDPOINTS = {

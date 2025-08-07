@@ -15,8 +15,9 @@ export const registerUser = async (userData: CreateUserRequest) => {
       body: JSON.stringify(userData),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Network error in registerUser:", error);
     console.warn(error);
+    return null;
   }
 };
 
@@ -30,8 +31,9 @@ export const loginUser = async (userData: LoginRequest) => {
       credentials: "include", // Important for session cookies
     });
   } catch (error) {
-    console.error(error);
+    console.error("Network error in loginUser:", error);
     console.warn(error);
+    return null;
   }
 };
 
@@ -44,8 +46,10 @@ export const getCurrentUser = async () => {
       credentials: "include", // Important for session cookies
     });
   } catch (error) {
-    console.error(error);
+    console.error("Network error in getCurrentUser:", error);
     console.warn(error);
+    // Return null to indicate network error
+    return null;
   }
 };
 
@@ -58,7 +62,8 @@ export const logoutUser = async () => {
       credentials: "include", // Important for session cookies
     });
   } catch (error) {
-    console.error(error);
+    console.error("Network error in logoutUser:", error);
     console.warn(error);
+    return null;
   }
 };
