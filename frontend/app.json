@@ -1,45 +1,36 @@
 {
   "expo": {
     "name": "Zylith",
-    "slug": "renaissance-app",
+    "slug": "renaissance",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "extra": {
+      "eas": {
+        "projectId": "edaab702-85e1-4899-9245-d4bab7ef1645"
+      }
+    },
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "com.apiary.zylith",
-      "buildNumber": "1",
+      "buildNumber": "3",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "This app may access your camera to allow you to take photos for notes or attachments within the rich text editor."
-      },
-      "podfileProperties": {
-        "use_frameworks": "static"
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.apiary.renaissance"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "28fdead2-9998-4b6c-a417-7b9ff58b3cdc"
-      }
-    },
-    "owner": "iaso"
+    }
   }
 }
