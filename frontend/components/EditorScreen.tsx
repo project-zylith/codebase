@@ -5,7 +5,7 @@ import {
   useNavigation,
   usePreventRemove,
 } from "@react-navigation/native";
-import { TenTapEditorNew, TenTapEditorRef } from "./TenTapEditorNew";
+import { QuillEditor, QuillEditorRef } from "./QuillEditor";
 import { NoteInsightModal } from "./NoteInsightModal";
 import colorPalette from "../assets/colorPalette";
 import {
@@ -32,7 +32,7 @@ export const EditorScreen = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isSavingRef = useRef(false);
   const lastSavedContentRef = useRef("");
-  const editorRef = useRef<TenTapEditorRef>(null);
+  const editorRef = useRef<QuillEditorRef>(null);
   const [showInsightModal, setShowInsightModal] = useState(false);
   const [galaxy, setGalaxy] = useState<any>(null);
   const [relatedNotes, setRelatedNotes] = useState<any[]>([]);
@@ -240,7 +240,7 @@ export const EditorScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TenTapEditorNew
+      <QuillEditor
         ref={editorRef}
         initialContent={initialContent}
         onContentChange={handleContentChange}

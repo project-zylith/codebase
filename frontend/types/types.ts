@@ -1,7 +1,6 @@
 export type RootTabParamList = {
   Home: undefined;
   Todo: undefined;
-  EditorTest: undefined;
   Account: undefined;
 };
 
