@@ -85,10 +85,7 @@ export const generateGalaxies = async (
   }
 
   try {
-    console.log(
-      "🚀 Starting AI galaxy generation for user:",
-      userId
-    );
+    console.log("🚀 Starting AI galaxy generation for user:", userId);
 
     const { notes } = req.body;
 
@@ -105,9 +102,7 @@ export const generateGalaxies = async (
     console.log("🧹 Clearing existing galaxies and note assignments...");
 
     // Reset all notes to have no galaxy assignment
-    await knex("notes")
-      .where({ user_id: userId })
-      .update({ galaxy_id: null });
+    await knex("notes").where({ user_id: userId }).update({ galaxy_id: null });
 
     // Delete all existing galaxies for this user
     const deletedGalaxies = await knex("galaxies")
@@ -261,9 +256,7 @@ export const createGalaxy = async (
     }
 
     // Check subscription limits before creating galaxy
-    const limitCheck = await SubscriptionLimitService.canCreateGalaxy(
-      userId
-    );
+    const limitCheck = await SubscriptionLimitService.canCreateGalaxy(userId);
 
     if (!limitCheck.allowed) {
       const limitText =

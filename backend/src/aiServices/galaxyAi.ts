@@ -15,33 +15,25 @@ if (!API_KEY) {
   console.error("❌ No API_KEY found in environment variables!");
 }
 
-const generateGalaxyPrompt = `You are Zylith, an AI assistant inside of a note taking/todo app. Your job is to create "galaxies", which are collections of related notes that help users organize their thoughts.
+const generateGalaxyPrompt = `Create note "galaxies" (groups) from the provided notes. Analyze titles and content to group related notes.
 
-You will be provided all of the notes with their title and content inside of a nested array: [[title, content], [title, content], [title, content], ...]
+Input format: [[title, content], [title, content], ...]
+Output format: [[galaxyName, [[title, content], [title, content]]], [galaxyName, [[title, content]]]]
 
-Your task is to analyze the notes and create logical groupings. For each group, provide:
-1. A clear, descriptive name for the galaxy (e.g., "Programming Projects", "Personal Goals", "Learning Notes")
-2. The notes that belong in that group
+Rules:
+- Group conceptually related notes
+- Use clear, descriptive galaxy names
+- 2-5 galaxies total
+- Min 2 notes per galaxy (unless very few notes)
+- Return ONLY valid JSON, no explanations
 
-Return your response as a nested array in this EXACT format (valid JSON only, It is crucial that it is able to be parsed):
-[[galaxyName, [[title, content], [title, content], ...]], [galaxyName, [[title, content], ...]], ...]
+Examples:
+- Travel notes → "Travel Planning" 
+- Work/career notes → "Career Development"
+- Health/fitness notes → "Health & Fitness"
+- Programming/tech notes → "Software Development"
 
-CRITICAL: Your response must be ONLY valid JSON. Do not include any explanations, markdown, or other text. Just the JSON array.
-
-Guidelines for creating galaxies:
-- Group notes that are conceptually related or work toward similar goals
-- Use descriptive, user-friendly names that clearly indicate the theme
-- Aim for 2-5 galaxies total (unless you have very few notes)
-- Each galaxy should have at least 2 notes (unless you have very few notes total)
-- Consider both the title and content when determining relationships
-- Examples of good groupings:
-  * Programming notes + App development notes → "Software Development"
-  * Gym notes + Nutrition notes → "Health & Fitness"
-  * Travel plans + Budget notes → "Travel Planning"
-  * Work goals + Career notes → "Career Development"
-
-RESPONSE FORMAT EXAMPLE:
-[["Work Projects", [["Meeting Notes", "Discussed quarterly goals"], ["Project Plan", "Timeline for Q1 launch"]]], ["Personal", [["Workout Plan", "Monday: Chest and triceps"], ["Recipe Ideas", "Healthy meal prep options"]]]]`;
+RETURN ONLY JSON:`;
 const galaxyReSortPrompt = `You are Zylith, an AI assistant inside of a note taking/todo app. Your job is to re-sort existing galaxies based on the current notes.
 
 You will be provided all of the notes with their title and content inside of a nested array: [[title, content], [title, content], [title, content], ...]
@@ -115,9 +107,19 @@ export const generateGalaxiesWithAI = async (
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+    // Truncate note content to prevent response truncation while keeping context
+    const truncatedNotes = notes.map(([title, content]) => [
+      title,
+      content.length > 500 ? content.substring(0, 500) + "..." : content
+    ]);
+
+    console.log(
+      `📝 Processing ${notes.length} notes, truncated content for AI efficiency`
+    );
+
     // Combine the prompt with the notes data
     const fullPrompt = `${generateGalaxyPrompt}\n\nHere are the notes to organize:\n${JSON.stringify(
-      notes
+      truncatedNotes
     )}`;
 
     console.log(
