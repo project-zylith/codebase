@@ -1,12 +1,33 @@
 import { Request, Response } from "express";
 import { UserService } from "../src/services/userService";
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 interface AuthenticatedRequest extends Request {
   session?: {
     userId?: number;
   };
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+  };
 }
+
+// JWT utility functions
+const generateToken = (userId: number) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET || "your-secret-key", {
+    expiresIn: "24h",
+  });
+};
+
+const verifyToken = (token: string) => {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+  } catch (error) {
+    return null;
+  }
+};
 
 export const registerUser = async (
   req: AuthenticatedRequest,
@@ -42,10 +63,15 @@ export const registerUser = async (
   }
 
   console.log("✅ User created successfully:", result.user);
-  req.session!.userId = result.user.id;
+
+  // Generate JWT token
+  const token = generateToken(result.user.id);
+
   res.status(201).send({
     id: result.user.id,
     username: result.user.username,
+    email: result.user.email,
+    token: token,
   });
 };
 
@@ -81,15 +107,15 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).send({ message: "Invalid credentials." });
     }
 
-    // Add the user id to the session and send the user data back
-    req.session!.userId = user.id;
-    console.log("🔐 Session after setting userId:", req.session);
+    // Generate JWT token
+    const token = generateToken(user.id);
     console.log("✅ User logged in successfully with ID:", user.id);
 
     res.send({
       id: user.id,
       username: user.username,
       email: user.email,
+      token: token,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -99,19 +125,32 @@ export const loginUser = async (req: AuthenticatedRequest, res: Response) => {
 
 export const showMe = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 showMe controller hit!");
-  console.log("🔍 Session data:", req.session);
-  console.log("👤 User ID from session:", req.session?.userId);
 
-  // no session with an id => Not authenticated.
-  if (!req.session?.userId) {
-    console.log("❌ No userId in session, user not authenticated");
+  // Extract token from Authorization header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+
+  console.log("🔍 Authorization header:", authHeader);
+  console.log("🔑 Token:", token ? "Present" : "Missing");
+
+  if (!token) {
+    console.log("❌ No token provided, user not authenticated");
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
-  // session with an id => here's your user info!
-  const user = await UserService.getUserById(req.session.userId);
+  // Verify JWT token
+  const decoded = verifyToken(token);
+  if (!decoded || !decoded.userId) {
+    console.log("❌ Invalid token, user not authenticated");
+    return res.status(401).send({ message: "Invalid token." });
+  }
+
+  console.log("👤 User ID from token:", decoded.userId);
+
+  // Get user info
+  const user = await UserService.getUserById(decoded.userId);
   if (!user) {
-    console.log("❌ User not found in database for ID:", req.session.userId);
+    console.log("❌ User not found in database for ID:", decoded.userId);
     return res.status(404).send({ message: "User not found." });
   }
 
@@ -127,6 +166,8 @@ export const showMe = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 export const logoutUser = (req: AuthenticatedRequest, res: Response) => {
-  req.session = undefined; // "erase" the session
-  res.status(204).send({ message: "User logged out." });
+  // For JWT, logout is handled client-side by removing the token
+  // Server just confirms the logout
+  console.log("🎯 logoutUser controller hit!");
+  res.status(200).send({ message: "User logged out successfully." });
 };
