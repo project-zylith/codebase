@@ -11,6 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "extra": {
       "eas": {
         "projectId": "edaab702-85e1-4899-9245-d4bab7ef1645"

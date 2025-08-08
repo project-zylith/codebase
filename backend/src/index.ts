@@ -20,7 +20,10 @@ require("dotenv").config();
 // Debug environment variables
 console.log("🔍 Environment Debug:");
 console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("PG_CONNECTION_STRING:", process.env.PG_CONNECTION_STRING ? "SET" : "NOT SET");
+console.log(
+  "PG_CONNECTION_STRING:",
+  process.env.PG_CONNECTION_STRING ? "SET" : "NOT SET"
+);
 console.log("PORT:", process.env.PORT);
 
 const app = express();
@@ -36,7 +39,16 @@ app.use((req: Request, res: Response, next) => {
 // CORS configuration to allow credentials
 app.use(
   cors({
-    origin: true, // Allow all origins in development
+    origin:
+      process.env.NODE_ENV === "production"
+        ? [
+            "https://codebase-production-e8f2.up.railway.app",
+            "capacitor://localhost",
+            "ionic://localhost",
+            "http://localhost",
+            "https://localhost",
+          ]
+        : true, // Allow all origins in development
     credentials: true, // Allow cookies to be sent
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
@@ -51,9 +63,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: process.env.NODE_ENV === "production", // true in production with HTTPS
       httpOnly: true, // Prevent XSS attacks
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Allow cross-origin in production
     },
   })
 );

@@ -24,12 +24,19 @@ export const registerUser = async (userData: CreateUserRequest) => {
 export const loginUser = async (userData: LoginRequest) => {
   try {
     console.log("frontend adapter (login) hit");
-    return await fetch(`${API_ENDPOINTS.AUTH.LOGIN}`, {
+    console.log("Attempting login to:", API_ENDPOINTS.AUTH.LOGIN);
+    
+    const response = await fetch(`${API_ENDPOINTS.AUTH.LOGIN}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
       credentials: "include", // Important for session cookies
     });
+    
+    console.log("Login response status:", response.status);
+    console.log("Login response headers:", response.headers);
+    
+    return response;
   } catch (error) {
     console.error("Network error in loginUser:", error);
     console.warn(error);
@@ -40,11 +47,18 @@ export const loginUser = async (userData: LoginRequest) => {
 export const getCurrentUser = async () => {
   try {
     console.log("frontend adapter (getCurrentUser) hit");
-    return await fetch(`${API_ENDPOINTS.AUTH.ME}`, {
+    console.log("Attempting getCurrentUser from:", API_ENDPOINTS.AUTH.ME);
+    
+    const response = await fetch(`${API_ENDPOINTS.AUTH.ME}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       credentials: "include", // Important for session cookies
     });
+    
+    console.log("getCurrentUser response status:", response.status);
+    console.log("getCurrentUser response headers:", response.headers);
+    
+    return response;
   } catch (error) {
     console.error("Network error in getCurrentUser:", error);
     console.warn(error);
