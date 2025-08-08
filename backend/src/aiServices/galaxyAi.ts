@@ -167,8 +167,12 @@ export const generateGalaxiesWithAI = async (
     } catch (parseError) {
       console.error("❌ Failed to parse Zylith response as JSON:", parseError);
       console.log("Raw Zylith response:", response);
-      console.error("❌ DEBUGGING: This is likely why you're seeing 'General Notes' instead of specific galaxies!");
-      console.error("❌ The AI response could not be parsed. Check the raw response above.");
+      console.error(
+        "❌ DEBUGGING: This is likely why you're seeing 'General Notes' instead of specific galaxies!"
+      );
+      console.error(
+        "❌ The AI response could not be parsed. Check the raw response above."
+      );
 
       // Fallback: create a single galaxy with all notes
       console.log("🔄 Creating fallback galaxy with all notes");
