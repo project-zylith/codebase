@@ -6,22 +6,43 @@ interface AuthenticatedRequest extends Request {
   session?: {
     userId?: number;
   };
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+  };
 }
+
+// Helper function to get user ID from JWT or session
+const getUserId = (req: AuthenticatedRequest): number | null => {
+  // Try JWT first (from middleware)
+  if (req.user?.id) {
+    return req.user.id;
+  }
+  // Fallback to session
+  if (req.session?.userId) {
+    return userId;
+  }
+  return null;
+};
 
 export const getTasks = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 getTasks controller hit!");
   console.log("🔍 Session data:", req.session);
-  console.log("👤 User ID from session:", req.session?.userId);
+  console.log("🔑 JWT user data:", req.user);
+  
+  const userId = getUserId(req);
+  console.log("👤 User ID (JWT or session):", userId);
 
-  if (!req.session?.userId) {
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
   try {
-    const tasks = await TaskService.getTasksByUserId(req.session.userId);
+    const tasks = await TaskService.getTasksByUserId(userId);
     console.log(
       "📋 Tasks found for user",
-      req.session.userId,
+      userId,
       ":",
       tasks.length
     );
@@ -44,7 +65,8 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 createTask controller hit!");
   console.log("📨 Request body:", req.body);
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -58,7 +80,7 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Check subscription limits before creating task
     const limitCheck = await SubscriptionLimitService.canCreateTask(
-      req.session.userId
+      userId
     );
 
     if (!limitCheck.allowed) {
@@ -73,7 +95,7 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const task = await TaskService.createTask({
-      user_id: req.session.userId,
+      user_id: userId,
       content,
       goal,
       is_completed: is_completed || false,
@@ -92,7 +114,8 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
 export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 updateTask controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -107,7 +130,7 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Verify task belongs to user
     const existingTask = await TaskService.getTaskById(taskId);
-    if (!existingTask || existingTask.user_id !== req.session.userId) {
+    if (!existingTask || existingTask.user_id !== userId) {
       return res.status(404).send({ message: "Task not found." });
     }
 
@@ -134,7 +157,8 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
 export const deleteTask = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 deleteTask controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -147,7 +171,7 @@ export const deleteTask = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Verify task belongs to user
     const existingTask = await TaskService.getTaskById(taskId);
-    if (!existingTask || existingTask.user_id !== req.session.userId) {
+    if (!existingTask || existingTask.user_id !== userId) {
       return res.status(404).send({ message: "Task not found." });
     }
 
@@ -171,7 +195,8 @@ export const toggleTaskCompletion = async (
 ) => {
   console.log("🎯 toggleTaskCompletion controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -184,7 +209,7 @@ export const toggleTaskCompletion = async (
   try {
     // Verify task belongs to user
     const existingTask = await TaskService.getTaskById(taskId);
-    if (!existingTask || existingTask.user_id !== req.session.userId) {
+    if (!existingTask || existingTask.user_id !== userId) {
       return res.status(404).send({ message: "Task not found." });
     }
 
@@ -208,7 +233,8 @@ export const toggleTaskFavorite = async (
 ) => {
   console.log("🎯 toggleTaskFavorite controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -221,7 +247,7 @@ export const toggleTaskFavorite = async (
   try {
     // Verify task belongs to user
     const existingTask = await TaskService.getTaskById(taskId);
-    if (!existingTask || existingTask.user_id !== req.session.userId) {
+    if (!existingTask || existingTask.user_id !== userId) {
       return res.status(404).send({ message: "Task not found." });
     }
 
@@ -245,23 +271,24 @@ export const cleanupCompletedTasks = async (
 ) => {
   console.log("🎯 cleanupCompletedTasks controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
   try {
     const { SchedulerService } = await import("../src/scheduler");
     const deletedCount = await SchedulerService.cleanupUserTasks(
-      req.session.userId
+      userId
     );
 
     console.log(
-      `✅ Manual cleanup completed for user ${req.session.userId}: ${deletedCount} tasks deleted`
+      `✅ Manual cleanup completed for user ${userId}: ${deletedCount} tasks deleted`
     );
     res.send({
       message: "Cleanup completed successfully",
       deletedCount,
-      userId: req.session.userId,
+      userId: userId,
     });
   } catch (error) {
     console.error("Manual cleanup error:", error);

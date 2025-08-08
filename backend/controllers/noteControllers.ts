@@ -3,20 +3,34 @@ import { AuthenticatedRequest } from "../middleware/checkAuthentication";
 import { NoteService } from "../src/services/noteService";
 import { SubscriptionLimitService } from "../src/services/subscriptionLimitService";
 
+// Helper function to get user ID from JWT or session
+const getUserId = (req: AuthenticatedRequest): number | null => {
+  // Try JWT first (from middleware)
+  if (req.user?.id) {
+    return req.user.id;
+  }
+  // Fallback to session
+  if (req.session?.userId) {
+    return userId;
+  }
+  return null;
+};
+
 export const getNotes = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 getNotes controller hit!");
   console.log("🔍 Session data:", req.session);
   console.log("👤 User ID from session:", req.session?.userId);
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
   try {
-    const notes = await NoteService.getNotesByUserId(req.session.userId);
+    const notes = await NoteService.getNotesByUserId(userId);
     console.log(
       "📝 Notes found for user",
-      req.session.userId,
+      userId,
       ":",
       notes.length
     );
@@ -40,7 +54,8 @@ export const createNote = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 createNote controller hit!");
   console.log("📨 Request body:", req.body);
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -53,7 +68,7 @@ export const createNote = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Check subscription limits before creating note
     const limitCheck = await SubscriptionLimitService.canCreateNote(
-      req.session.userId
+      userId
     );
 
     if (!limitCheck.allowed) {
@@ -68,7 +83,7 @@ export const createNote = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const note = await NoteService.createNote({
-      user_id: req.session.userId,
+      user_id: userId,
       title,
       content: content || null,
       galaxy_id: galaxy_id || null,
@@ -85,7 +100,8 @@ export const createNote = async (req: AuthenticatedRequest, res: Response) => {
 export const updateNote = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 updateNote controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -99,7 +115,7 @@ export const updateNote = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Verify note belongs to user
     const existingNote = await NoteService.getNoteById(noteId);
-    if (!existingNote || existingNote.user_id !== req.session.userId) {
+    if (!existingNote || existingNote.user_id !== userId) {
       return res.status(404).send({ message: "Note not found." });
     }
 
@@ -124,7 +140,8 @@ export const updateNote = async (req: AuthenticatedRequest, res: Response) => {
 export const deleteNote = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 deleteNote controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -137,7 +154,7 @@ export const deleteNote = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Verify note belongs to user
     const existingNote = await NoteService.getNoteById(noteId);
-    if (!existingNote || existingNote.user_id !== req.session.userId) {
+    if (!existingNote || existingNote.user_id !== userId) {
       return res.status(404).send({ message: "Note not found." });
     }
 
@@ -158,7 +175,8 @@ export const deleteNote = async (req: AuthenticatedRequest, res: Response) => {
 export const getNoteById = async (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 getNoteById controller hit!");
 
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.status(401).send({ message: "User must be authenticated." });
   }
 
@@ -171,7 +189,7 @@ export const getNoteById = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const note = await NoteService.getNoteById(noteId);
 
-    if (!note || note.user_id !== req.session.userId) {
+    if (!note || note.user_id !== userId) {
       return res.status(404).send({ message: "Note not found." });
     }
 

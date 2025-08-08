@@ -4,12 +4,26 @@ const knex = require("../database/database");
 import * as galaxyAi from "../src/aiServices/galaxyAi";
 import { SubscriptionLimitService } from "../src/services/subscriptionLimitService";
 
+// Helper function to get user ID from JWT or session
+const getUserId = (req: AuthenticatedRequest): number | null => {
+  // Try JWT first (from middleware)
+  if (req.user?.id) {
+    return req.user.id;
+  }
+  // Fallback to session
+  if (req.session?.userId) {
+    return userId;
+  }
+  return null;
+};
+
 // Get all galaxies for authenticated user
 export const getGalaxies = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -17,7 +31,7 @@ export const getGalaxies = async (
   try {
     const galaxies = await knex("galaxies")
       .select("*")
-      .where({ user_id: req.session.userId })
+      .where({ user_id: userId })
       .orderBy("created_at", "desc");
 
     console.log("📡 Fetched galaxies:", galaxies);
@@ -33,7 +47,8 @@ export const getGalaxyById = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -42,7 +57,7 @@ export const getGalaxyById = async (
     const { id } = req.params;
     const galaxy = await knex("galaxies")
       .select("*")
-      .where({ id: parseInt(id), user_id: req.session.userId })
+      .where({ id: parseInt(id), user_id: userId })
       .first();
 
     if (!galaxy) {
@@ -63,7 +78,8 @@ export const generateGalaxies = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -71,7 +87,7 @@ export const generateGalaxies = async (
   try {
     console.log(
       "🚀 Starting AI galaxy generation for user:",
-      req.session.userId
+      userId
     );
 
     const { notes } = req.body;
@@ -90,12 +106,12 @@ export const generateGalaxies = async (
 
     // Reset all notes to have no galaxy assignment
     await knex("notes")
-      .where({ user_id: req.session.userId })
+      .where({ user_id: userId })
       .update({ galaxy_id: null });
 
     // Delete all existing galaxies for this user
     const deletedGalaxies = await knex("galaxies")
-      .where({ user_id: req.session.userId })
+      .where({ user_id: userId })
       .del();
 
     console.log(`🗑️ Deleted ${deletedGalaxies} existing galaxies`);
@@ -135,7 +151,7 @@ export const generateGalaxies = async (
         // Create the galaxy in database
         const [newGalaxy] = await knex("galaxies")
           .insert({
-            user_id: req.session.userId,
+            user_id: userId,
             name: galaxyName,
             created_at: new Date(),
           })
@@ -156,7 +172,7 @@ export const generateGalaxies = async (
           // Find the note by title only (content might have formatting differences)
           const [updatedNote] = await knex("notes")
             .where({
-              user_id: req.session.userId,
+              user_id: userId,
               title: noteTitle,
             })
             .update({ galaxy_id: newGalaxy.id })
@@ -174,7 +190,7 @@ export const generateGalaxies = async (
             // Let's see what notes exist for this user
             const existingNotes = await knex("notes")
               .select("title")
-              .where({ user_id: req.session.userId });
+              .where({ user_id: userId });
             console.log(
               `📋 Available notes for user:`,
               existingNotes.map((n: any) => n.title)
@@ -203,7 +219,7 @@ export const generateGalaxies = async (
 
     // Get summary of what was cleaned up
     const notesWithoutGalaxy = await knex("notes")
-      .where({ user_id: req.session.userId, galaxy_id: null })
+      .where({ user_id: userId, galaxy_id: null })
       .count("* as count")
       .first();
 
@@ -230,7 +246,8 @@ export const createGalaxy = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -245,7 +262,7 @@ export const createGalaxy = async (
 
     // Check subscription limits before creating galaxy
     const limitCheck = await SubscriptionLimitService.canCreateGalaxy(
-      req.session.userId
+      userId
     );
 
     if (!limitCheck.allowed) {
@@ -262,7 +279,7 @@ export const createGalaxy = async (
 
     const [newGalaxy] = await knex("galaxies")
       .insert({
-        user_id: req.session.userId,
+        user_id: userId,
         name,
         created_at: new Date(),
       })
@@ -281,7 +298,8 @@ export const updateGalaxy = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -296,7 +314,7 @@ export const updateGalaxy = async (
     }
 
     const [updatedGalaxy] = await knex("galaxies")
-      .where({ id: parseInt(id), user_id: req.session.userId })
+      .where({ id: parseInt(id), user_id: userId })
       .update({ name })
       .returning("*");
 
@@ -318,7 +336,8 @@ export const deleteGalaxy = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -328,11 +347,11 @@ export const deleteGalaxy = async (
 
     // First, update all notes in this galaxy to have null galaxy_id
     await knex("notes")
-      .where({ galaxy_id: parseInt(id), user_id: req.session.userId })
+      .where({ galaxy_id: parseInt(id), user_id: userId })
       .update({ galaxy_id: null });
 
     const deletedCount = await knex("galaxies")
-      .where({ id: parseInt(id), user_id: req.session.userId })
+      .where({ id: parseInt(id), user_id: userId })
       .del();
 
     if (deletedCount === 0) {
@@ -353,7 +372,8 @@ export const getGalaxyNotes = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -364,7 +384,7 @@ export const getGalaxyNotes = async (
     // First verify the galaxy belongs to the user
     const galaxy = await knex("galaxies")
       .select("*")
-      .where({ id: parseInt(id), user_id: req.session.userId })
+      .where({ id: parseInt(id), user_id: userId })
       .first();
 
     if (!galaxy) {
@@ -375,7 +395,7 @@ export const getGalaxyNotes = async (
     // Get notes in this galaxy
     const notes = await knex("notes")
       .select("*")
-      .where({ galaxy_id: parseInt(id), user_id: req.session.userId })
+      .where({ galaxy_id: parseInt(id), user_id: userId })
       .orderBy("created_at", "desc");
 
     console.log(`📚 Fetched ${notes.length} notes for galaxy:`, galaxy.name);
@@ -391,7 +411,8 @@ export const assignNoteToGalaxy = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  if (!req.session?.userId) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "User must be authenticated" });
     return;
   }
@@ -402,7 +423,7 @@ export const assignNoteToGalaxy = async (
     // Verify galaxy belongs to user
     const galaxy = await knex("galaxies")
       .select("*")
-      .where({ id: galaxyId, user_id: req.session.userId })
+      .where({ id: galaxyId, user_id: userId })
       .first();
 
     if (!galaxy) {
@@ -412,7 +433,7 @@ export const assignNoteToGalaxy = async (
 
     // Update note to assign it to the galaxy
     const [updatedNote] = await knex("notes")
-      .where({ id: noteId, user_id: req.session.userId })
+      .where({ id: noteId, user_id: userId })
       .update({ galaxy_id: galaxyId })
       .returning("*");
 

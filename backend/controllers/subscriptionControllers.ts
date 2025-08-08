@@ -6,7 +6,25 @@ interface AuthenticatedRequest extends Request {
   session?: {
     userId?: number;
   };
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+  };
 }
+
+// Helper function to get user ID from JWT or session
+const getUserId = (req: AuthenticatedRequest): number | null => {
+  // Try JWT first (from middleware)
+  if (req.user?.id) {
+    return req.user.id;
+  }
+  // Fallback to session
+  if (req.session?.userId) {
+    return userId;
+  }
+  return null;
+};
 
 // Initialize Stripe with secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -28,11 +46,12 @@ export const getUserSubscription = async (
   res: Response
 ) => {
   try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: "User must be authenticated" });
-    }
+      const userId = getUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: "User must be authenticated" });
+  }
 
-    const userId = req.session.userId;
+    const userId = userId;
 
     const subscription = await db("user_subscriptions")
       .join(
@@ -66,11 +85,12 @@ export const createSubscription = async (
   res: Response
 ) => {
   try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: "User must be authenticated" });
-    }
+      const userId = getUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: "User must be authenticated" });
+  }
 
-    const userId = req.session.userId;
+    const userId = userId;
     const { planId, paymentMethodId } = req.body;
 
     if (!planId || !paymentMethodId) {
@@ -162,11 +182,12 @@ export const cancelSubscription = async (
   res: Response
 ) => {
   try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: "User must be authenticated" });
-    }
+      const userId = getUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: "User must be authenticated" });
+  }
 
-    const userId = req.session.userId;
+    const userId = userId;
 
     // Get user's subscription
     const userSubscription = await db("user_subscriptions")
@@ -230,11 +251,12 @@ export const cancelSubscription = async (
 // Resubscribe to canceled subscription
 export const resubscribe = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: "User must be authenticated" });
-    }
+      const userId = getUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: "User must be authenticated" });
+  }
 
-    const userId = req.session.userId;
+    const userId = userId;
 
     // Get user's canceled subscription
     const userSubscription = await db("user_subscriptions")
@@ -282,11 +304,12 @@ export const resubscribe = async (req: AuthenticatedRequest, res: Response) => {
 // Switch subscription plan
 export const switchPlan = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: "User must be authenticated" });
-    }
+      const userId = getUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: "User must be authenticated" });
+  }
 
-    const userId = req.session.userId;
+    const userId = userId;
     const { planId } = req.body;
 
     if (!planId) {
