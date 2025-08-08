@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Zylith",
+    "name": "Renaissance",
     "slug": "renaissance",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,7 +18,7 @@
       }
     },
     "ios": {
-      "bundleIdentifier": "com.apiary.zylith",
+      "bundleIdentifier": "com.apiary.renaissance",
       "buildNumber": "3",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
