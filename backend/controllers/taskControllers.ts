@@ -21,7 +21,7 @@ const getUserId = (req: AuthenticatedRequest): number | null => {
   }
   // Fallback to session
   if (req.session?.userId) {
-    return userId;
+    return req.session.userId;
   }
   return null;
 };

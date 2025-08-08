@@ -21,7 +21,7 @@ const getUserId = (req: AuthenticatedRequest): number | null => {
   }
   // Fallback to session
   if (req.session?.userId) {
-    return userId;
+    return req.session.userId;
   }
   return null;
 };
@@ -51,7 +51,7 @@ export const getUserSubscription = async (
     return res.status(401).json({ error: "User must be authenticated" });
   }
 
-    const userId = userId;
+
 
     const subscription = await db("user_subscriptions")
       .join(
@@ -90,7 +90,7 @@ export const createSubscription = async (
     return res.status(401).json({ error: "User must be authenticated" });
   }
 
-    const userId = userId;
+
     const { planId, paymentMethodId } = req.body;
 
     if (!planId || !paymentMethodId) {
@@ -187,7 +187,7 @@ export const cancelSubscription = async (
     return res.status(401).json({ error: "User must be authenticated" });
   }
 
-    const userId = userId;
+
 
     // Get user's subscription
     const userSubscription = await db("user_subscriptions")
@@ -256,7 +256,7 @@ export const resubscribe = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(401).json({ error: "User must be authenticated" });
   }
 
-    const userId = userId;
+
 
     // Get user's canceled subscription
     const userSubscription = await db("user_subscriptions")
@@ -309,7 +309,7 @@ export const switchPlan = async (req: AuthenticatedRequest, res: Response) => {
     return res.status(401).json({ error: "User must be authenticated" });
   }
 
-    const userId = userId;
+
     const { planId } = req.body;
 
     if (!planId) {
