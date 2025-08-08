@@ -156,6 +156,12 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
       }
     };
 
+    const handleInsight = () => {
+      if (onInsight) {
+        onInsight();
+      }
+    };
+
     const dismissKeyboard = () => {
       Keyboard.dismiss();
     };
@@ -278,13 +284,6 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={handleSaveAndExit}
-            style={styles.headerButton}
-          >
-            <Ionicons name="arrow-back" size={24} color="#007AFF" />
-          </TouchableOpacity>
-
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>{note?.title || "New Note"}</Text>
             {galaxy && (
@@ -293,6 +292,10 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           </View>
 
           <View style={styles.headerRight}>
+            <TouchableOpacity onPress={handleInsight} style={styles.headerButton}>
+              <Ionicons name="bulb-outline" size={24} color="#007AFF" />
+            </TouchableOpacity>
+            
             <TouchableOpacity onPress={handleSave} style={styles.headerButton}>
               <Ionicons name="checkmark" size={24} color="#007AFF" />
             </TouchableOpacity>
@@ -319,16 +322,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
             >
               <View style={styles.modalOverlay}>
                 <View style={styles.dropdown}>
-                  <TouchableOpacity
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setShowToolsDropdown(false);
-                      onInsight?.();
-                    }}
-                  >
-                    <Ionicons name="bulb-outline" size={20} color="#007AFF" />
-                    <Text style={styles.dropdownText}>Get Insight</Text>
-                  </TouchableOpacity>
+
                 </View>
               </View>
             </TouchableWithoutFeedback>
