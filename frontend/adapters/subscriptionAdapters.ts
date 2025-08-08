@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
+import { getToken } from "./userAdapters";
 
 export interface SubscriptionPlan {
   id: number;
@@ -23,14 +24,23 @@ export interface UserSubscription {
   description: string;
 }
 
+// Get authorization headers with JWT token
+const getAuthHeaders = async () => {
+  const token = await getToken();
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
 // Get all available subscription plans
 export const getSubscriptionPlans = async (): Promise<SubscriptionPlan[]> => {
   try {
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.PLANS, {
       method: "GET",
-      credentials: "include",
+      headers: await getAuthHeaders(),
       headers: {
-        "Content-Type": "application/json",
+        ...(await getAuthHeaders()),
       },
     });
 
@@ -52,9 +62,9 @@ export const getUserSubscription = async (): Promise<{
   try {
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.USER, {
       method: "GET",
-      credentials: "include",
+      headers: await getAuthHeaders(),
       headers: {
-        "Content-Type": "application/json",
+        ...(await getAuthHeaders()),
       },
     });
 
@@ -85,9 +95,9 @@ export const createSubscription = async (
   try {
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.CREATE, {
       method: "POST",
-      credentials: "include",
+      headers: await getAuthHeaders(),
       headers: {
-        "Content-Type": "application/json",
+        ...(await getAuthHeaders()),
       },
       body: JSON.stringify({
         planId,
@@ -120,9 +130,9 @@ export const cancelSubscription = async (): Promise<{ message: string }> => {
   try {
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.CANCEL, {
       method: "POST",
-      credentials: "include",
+      headers: await getAuthHeaders(),
       headers: {
-        "Content-Type": "application/json",
+        ...(await getAuthHeaders()),
       },
     });
 
@@ -151,9 +161,9 @@ export const resubscribe = async (): Promise<{ message: string }> => {
   try {
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.RESUBSCRIBE, {
       method: "POST",
-      credentials: "include",
+      headers: await getAuthHeaders(),
       headers: {
-        "Content-Type": "application/json",
+        ...(await getAuthHeaders()),
       },
     });
 
@@ -187,9 +197,9 @@ export const switchPlan = async (
   try {
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.SWITCH_PLAN, {
       method: "POST",
-      credentials: "include",
+      headers: await getAuthHeaders(),
       headers: {
-        "Content-Type": "application/json",
+        ...(await getAuthHeaders()),
       },
       body: JSON.stringify({ planId }),
     });
@@ -221,9 +231,9 @@ export const createPaymentIntent = async (
   try {
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.PAYMENT_INTENT, {
       method: "POST",
-      credentials: "include",
+      headers: await getAuthHeaders(),
       headers: {
-        "Content-Type": "application/json",
+        ...(await getAuthHeaders()),
       },
       body: JSON.stringify({
         amount,

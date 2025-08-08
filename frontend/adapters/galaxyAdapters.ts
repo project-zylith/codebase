@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
+import { getToken } from "./userAdapters";
 
 export interface Galaxy {
   id: number;
@@ -17,11 +18,20 @@ export interface Note {
   updated_at: string;
 }
 
+// Get authorization headers with JWT token
+const getAuthHeaders = async () => {
+  const token = await getToken();
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
 // Get all galaxies for authenticated user
 export const getGalaxies = async () => {
   return await fetch(API_ENDPOINTS.GALAXIES.LIST, {
     method: "GET",
-    credentials: "include",
+    headers: await getAuthHeaders(),
   });
 };
 
@@ -29,7 +39,7 @@ export const getGalaxies = async () => {
 export const getGalaxyById = async (id: number) => {
   return await fetch(API_ENDPOINTS.GALAXIES.GET_BY_ID(id), {
     method: "GET",
-    credentials: "include",
+    headers: await getAuthHeaders(),
   });
 };
 
@@ -38,7 +48,7 @@ export const createGalaxy = async (data: { name: string }) => {
   return await fetch(API_ENDPOINTS.GALAXIES.CREATE, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: await getAuthHeaders(),
     body: JSON.stringify(data),
   });
 };
@@ -48,7 +58,7 @@ export const updateGalaxy = async (id: number, data: { name: string }) => {
   return await fetch(API_ENDPOINTS.GALAXIES.UPDATE(id), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: await getAuthHeaders(),
     body: JSON.stringify(data),
   });
 };
@@ -57,7 +67,7 @@ export const updateGalaxy = async (id: number, data: { name: string }) => {
 export const deleteGalaxy = async (id: number) => {
   return await fetch(API_ENDPOINTS.GALAXIES.DELETE(id), {
     method: "DELETE",
-    credentials: "include",
+    headers: await getAuthHeaders(),
   });
 };
 
@@ -65,7 +75,7 @@ export const deleteGalaxy = async (id: number) => {
 export const getGalaxyNotes = async (id: number) => {
   return await fetch(API_ENDPOINTS.GALAXIES.GET_NOTES(id), {
     method: "GET",
-    credentials: "include",
+    headers: await getAuthHeaders(),
   });
 };
 
@@ -77,7 +87,7 @@ export const assignNoteToGalaxy = async (data: {
   return await fetch(API_ENDPOINTS.GALAXIES.ASSIGN_NOTE, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: await getAuthHeaders(),
     body: JSON.stringify(data),
   });
 };
@@ -89,10 +99,8 @@ export const generateGalaxies = async (notes: Note[]): Promise<any> => {
 
     const response = await fetch(API_ENDPOINTS.GALAXIES.GENERATE_GALAXIES, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
+          headers: await getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify({
         notes: notes.map((note) => [note.title, note.content]),
       }),
@@ -120,7 +128,7 @@ export const reSortGalaxy = async (notes: Array<[string, string]>) => {
   return await fetch(API_ENDPOINTS.GALAXIES.RESORT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: await getAuthHeaders(),
     body: JSON.stringify({ notes }),
   });
 };
@@ -130,7 +138,7 @@ export const generateGalaxyInsight = async (notes: Array<[string, string]>) => {
   return await fetch(API_ENDPOINTS.GALAXIES.GENERATE_INSIGHT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: await getAuthHeaders(),
     body: JSON.stringify({ notes }),
   });
 };

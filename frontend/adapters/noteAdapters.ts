@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
+import { getToken } from "./userAdapters";
 
 // Note interface matching the backend
 export interface Note {
@@ -23,12 +24,21 @@ export interface UpdateNoteRequest {
   galaxy_id?: number | null;
 }
 
+// Get authorization headers with JWT token
+const getAuthHeaders = async () => {
+  const token = await getToken();
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
 export const getNotes = async () => {
   try {
+    const headers = await getAuthHeaders();
     return await fetch(`${API_ENDPOINTS.NOTES.LIST}`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Include session cookies
+      headers: headers,
     });
   } catch (error) {
     console.error("Get notes error:", error);
@@ -38,10 +48,10 @@ export const getNotes = async () => {
 
 export const createNote = async (noteData: CreateNoteRequest) => {
   try {
+    const headers = await getAuthHeaders();
     return await fetch(`${API_ENDPOINTS.NOTES.CREATE}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Include session cookies
+      headers: headers,
       body: JSON.stringify(noteData),
     });
   } catch (error) {
@@ -52,10 +62,10 @@ export const createNote = async (noteData: CreateNoteRequest) => {
 
 export const getNoteById = async (id: number) => {
   try {
+    const headers = await getAuthHeaders();
     return await fetch(`${API_ENDPOINTS.NOTES.GET_BY_ID(id)}`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Include session cookies
+      headers: headers,
     });
   } catch (error) {
     console.error("Get note by ID error:", error);
@@ -65,10 +75,10 @@ export const getNoteById = async (id: number) => {
 
 export const updateNote = async (id: number, noteData: UpdateNoteRequest) => {
   try {
+    const headers = await getAuthHeaders();
     return await fetch(`${API_ENDPOINTS.NOTES.UPDATE(id)}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Include session cookies
+      headers: headers,
       body: JSON.stringify(noteData),
     });
   } catch (error) {
@@ -79,10 +89,10 @@ export const updateNote = async (id: number, noteData: UpdateNoteRequest) => {
 
 export const deleteNote = async (id: number) => {
   try {
+    const headers = await getAuthHeaders();
     return await fetch(`${API_ENDPOINTS.NOTES.DELETE(id)}`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Include session cookies
+      headers: headers,
     });
   } catch (error) {
     console.error("Delete note error:", error);
