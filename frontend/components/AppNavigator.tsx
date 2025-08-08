@@ -6,6 +6,7 @@ import { HomeScreen } from "./HomeScreen";
 import { TodoScreen } from "./TodoScreen";
 import { EditorScreen } from "./EditorScreen";
 import { AccountScreen } from "./AccountScreen";
+import { EditorComparisonScreen } from "./EditorComparisonScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { RootTabParamList, RootStackParamList } from "../types/types";
 import { useUser } from "../contexts/UserContext";
@@ -104,6 +105,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Todo" component={TodoScreen} />
+      <Tab.Screen name="EditorTest" component={EditorComparisonScreen} />
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
   );

@@ -52,17 +52,25 @@ export const registerUser = async (userData: CreateUserRequest) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
     });
-
+    
+    // Clone the response to avoid "Already read" error
+    const responseClone = response.clone();
+    
     // If registration successful, store the token
     if (response.ok) {
-      const data = await response.json();
-      if (data.token) {
-        await storeToken(data.token);
-        console.log("✅ Token stored after registration");
+      try {
+        const data = await response.json();
+        if (data.token) {
+          await storeToken(data.token);
+          console.log("✅ Token stored after registration");
+        }
+      } catch (jsonError) {
+        console.error("Error parsing registration response JSON:", jsonError);
       }
     }
-
-    return response;
+    
+    // Return the cloned response so it can be read again
+    return responseClone;
   } catch (error) {
     console.error("Network error in registerUser:", error);
     console.warn(error);
@@ -74,26 +82,34 @@ export const loginUser = async (userData: LoginRequest) => {
   try {
     console.log("frontend adapter (login) hit");
     console.log("Attempting login to:", API_ENDPOINTS.AUTH.LOGIN);
-
+    
     const response = await fetch(`${API_ENDPOINTS.AUTH.LOGIN}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
       // Removed credentials: "include" - no longer needed for JWT
     });
-
+    
     console.log("Login response status:", response.status);
-
+    
+    // Clone the response to avoid "Already read" error
+    const responseClone = response.clone();
+    
     // If login successful, store the token
     if (response.ok) {
-      const data = await response.json();
-      if (data.token) {
-        await storeToken(data.token);
-        console.log("✅ Token stored after login");
+      try {
+        const data = await response.json();
+        if (data.token) {
+          await storeToken(data.token);
+          console.log("✅ Token stored after login");
+        }
+      } catch (jsonError) {
+        console.error("Error parsing login response JSON:", jsonError);
       }
     }
-
-    return response;
+    
+    // Return the cloned response so it can be read again
+    return responseClone;
   } catch (error) {
     console.error("Network error in loginUser:", error);
     console.warn(error);
