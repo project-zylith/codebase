@@ -41,10 +41,10 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? function (origin, callback) {
+        ? function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
             // Allow requests with no origin (mobile apps, Postman, etc.)
             if (!origin) return callback(null, true);
-            
+
             // Allow specific origins
             const allowedOrigins = [
               "capacitor://localhost",
@@ -53,11 +53,11 @@ app.use(
               "https://localhost",
               // Add any other origins you need
             ];
-            
+
             if (allowedOrigins.includes(origin)) {
               return callback(null, true);
             }
-            
+
             // For production, allow all origins for mobile apps
             // Mobile apps don't always send proper Origin headers
             return callback(null, true);
