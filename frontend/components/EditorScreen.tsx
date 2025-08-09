@@ -13,6 +13,7 @@ import {
   getNoteById,
   updateNote,
   getNotes,
+  deleteNote,
 } from "../adapters/noteAdapters";
 import { getGalaxyById, getGalaxyNotes } from "../adapters/galaxyAdapters";
 
@@ -205,6 +206,37 @@ export const EditorScreen = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!currentNote) return;
+
+    Alert.alert(
+      "Delete Note",
+      `Are you sure you want to delete "${currentNote.title}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const response = await deleteNote(currentNote.id);
+              if (response.ok) {
+                // Navigate back to home screen
+                navigation.goBack();
+                Alert.alert("Success", "Note deleted successfully");
+              } else {
+                Alert.alert("Error", "Failed to delete note");
+              }
+            } catch (error) {
+              console.error("Error deleting note:", error);
+              Alert.alert("Error", "Failed to delete note");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const loadGalaxyData = async (note: Note) => {
     if (note.galaxy_id) {
       try {
@@ -262,6 +294,7 @@ export const EditorScreen = () => {
         galaxy={galaxy}
         relatedNotes={relatedNotes}
         onInsight={handleInsight}
+        onDelete={handleDelete}
       />
       <NoteInsightModal
         visible={showInsightModal}

@@ -44,6 +44,7 @@ interface QuillEditorProps {
     content: string;
   }> | null;
   onInsight?: () => void;
+  onDelete?: () => void;
 }
 
 export interface QuillEditorRef {
@@ -63,6 +64,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
       galaxy,
       relatedNotes,
       onInsight,
+      onDelete,
     },
     ref
   ) => {
@@ -160,6 +162,13 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
       if (onInsight) {
         onInsight();
       }
+    };
+
+    const handleDelete = () => {
+      if (onDelete) {
+        onDelete();
+      }
+      setShowToolsDropdown(false);
     };
 
     const dismissKeyboard = () => {
@@ -322,7 +331,26 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
             >
               <View style={styles.modalOverlay}>
                 <View style={styles.dropdown}>
-
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setShowToolsDropdown(false);
+                      handleSave();
+                    }}
+                  >
+                    <Ionicons name="save-outline" size={20} color="#007AFF" />
+                    <Text style={styles.dropdownText}>Save Note</Text>
+                  </TouchableOpacity>
+                  
+                  {note?.id && (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={handleDelete}
+                    >
+                      <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                      <Text style={[styles.dropdownText, { color: "#FF3B30" }]}>Delete Note</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             </TouchableWithoutFeedback>

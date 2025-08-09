@@ -110,7 +110,7 @@ export const generateGalaxiesWithAI = async (
     // Truncate note content to prevent response truncation while keeping context
     const truncatedNotes = notes.map(([title, content]) => [
       title,
-      content.length > 500 ? content.substring(0, 500) + "..." : content
+      content.length > 500 ? content.substring(0, 500) + "..." : content,
     ]);
 
     console.log(
