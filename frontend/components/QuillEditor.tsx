@@ -304,10 +304,6 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
             <TouchableOpacity onPress={handleInsight} style={styles.headerButton}>
               <Ionicons name="bulb-outline" size={24} color="#007AFF" />
             </TouchableOpacity>
-            
-            <TouchableOpacity onPress={handleSave} style={styles.headerButton}>
-              <Ionicons name="checkmark" size={24} color="#007AFF" />
-            </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setShowToolsDropdown(!showToolsDropdown)}
