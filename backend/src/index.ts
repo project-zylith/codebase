@@ -36,19 +36,22 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
-// CORS configuration to allow credentials
+// CORS configuration for JWT authentication
 app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+        ? function (
+            origin: string | undefined,
+            callback: (err: Error | null, allow?: boolean) => void
+          ) {
             // Allow requests with no origin (mobile apps, Postman, etc.)
             if (!origin) return callback(null, true);
 
             // Allow specific origins
             const allowedOrigins = [
               "capacitor://localhost",
-              "ionic://localhost",
+              "ionic://localhost", 
               "http://localhost",
               "https://localhost",
               // Add any other origins you need
@@ -63,9 +66,9 @@ app.use(
             return callback(null, true);
           }
         : true, // Allow all origins in development
-    credentials: true, // Allow cookies to be sent
+    credentials: false, // JWT doesn't need credentials/cookies
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    allowedHeaders: ["Content-Type", "Authorization"], // Removed Cookie header
   })
 );
 

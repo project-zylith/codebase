@@ -119,24 +119,35 @@ export const loginUser = async (userData: LoginRequest) => {
 
 export const getCurrentUser = async () => {
   try {
-    console.log("frontend adapter (getCurrentUser) hit");
-    console.log("Attempting getCurrentUser from:", API_ENDPOINTS.AUTH.ME);
+    console.log("🔍 frontend adapter (getCurrentUser) hit");
+    console.log("🔍 Attempting getCurrentUser from:", API_ENDPOINTS.AUTH.ME);
 
     const headers = await getAuthHeaders();
-    console.log("Using headers:", headers);
+    console.log("🔍 Using headers:", headers);
+
+    // Add timeout to prevent infinite hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.log("⏰ getCurrentUser request timeout after 10 seconds");
+      controller.abort();
+    }, 10000); // 10 second timeout
 
     const response = await fetch(`${API_ENDPOINTS.AUTH.ME}`, {
       method: "GET",
       headers: headers,
+      signal: controller.signal,
       // Removed credentials: "include" - using JWT in Authorization header
     });
 
-    console.log("getCurrentUser response status:", response.status);
+    clearTimeout(timeoutId);
+    console.log("✅ getCurrentUser response status:", response.status);
 
     return response;
   } catch (error) {
-    console.error("Network error in getCurrentUser:", error);
-    console.warn(error);
+    console.error("❌ Network error in getCurrentUser:", error);
+    console.error("❌ Error type:", error.name);
+    console.error("❌ Error message:", error.message);
+    
     // Return null to indicate network error
     return null;
   }

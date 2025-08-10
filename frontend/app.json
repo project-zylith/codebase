@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Renaissance",
+    "name": "Zylith",
     "slug": "renaissance",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,17 +11,26 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "extra": {
       "eas": {
         "projectId": "edaab702-85e1-4899-9245-d4bab7ef1645"
       }
     },
     "ios": {
-      "bundleIdentifier": "com.apiary.renaissance",
-      "buildNumber": "3",
+      "bundleIdentifier": "com.apiary.zylith",
+      "buildNumber": "4",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSExceptionDomains": {
+            "codebase-production-e8f2.up.railway.app": {
+              "NSExceptionAllowsInsecureHTTPLoads": false,
+              "NSExceptionMinimumTLSVersion": "TLSv1.2",
+              "NSExceptionRequiresForwardSecrecy": false
+            }
+          }
+        }
       }
     },
     "android": {

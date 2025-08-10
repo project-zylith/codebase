@@ -88,6 +88,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   const checkStoredSession = async () => {
     try {
       console.log("🔍 Checking stored session...");
+      
+      // Add overall timeout for the entire session check
+      const sessionCheckTimeout = setTimeout(() => {
+        console.log("⏰ Session check timeout - forcing login screen");
+        dispatch({ type: "SET_LOADING", payload: false });
+      }, 15000); // 15 second overall timeout
+
       // First check if we have a stored user
       const storedUser = await AsyncStorage.getItem("user");
 
@@ -102,11 +109,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
           console.log("✅ Session valid, user authenticated");
           // Update stored user with latest data from backend
           await AsyncStorage.setItem("user", JSON.stringify(currentUser));
+          clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_USER", payload: currentUser });
         } else {
           console.log("❌ Session invalid, clearing stored data. Status:", response?.status);
           // Session is invalid, clear stored data
           await AsyncStorage.removeItem("user");
+          clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_LOADING", payload: false });
         }
       } else {
@@ -119,9 +128,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
           const currentUser = await response.json();
           console.log("✅ Found valid session, storing user");
           await AsyncStorage.setItem("user", JSON.stringify(currentUser));
+          clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_USER", payload: currentUser });
         } else {
           console.log("❌ No valid session, showing login. Status:", response?.status);
+          clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_LOADING", payload: false });
         }
       }
