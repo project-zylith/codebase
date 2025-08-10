@@ -45,7 +45,9 @@ const AuthLogin: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Username</Text>
+      <Text style={[styles.label, { color: currentPalette.tertiary }]}>
+        Username
+      </Text>
       <TextInput
         style={[
           styles.input,
