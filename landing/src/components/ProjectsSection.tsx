@@ -91,64 +91,140 @@ export const ProjectsSection = () => {
                     rel="noopener noreferrer"
                     className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer`}
                   >
+                    {project.link && (
+                      <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
+                        <span className="text-sm">View Project →</span>
+                      </div>
+                    )}
+
+                    <div
+                      className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
+                    >
+                      {project.title === "Renaissance" ? (
+                        <img
+                          src={renaissanceLogo}
+                          alt="Renaissance Logo"
+                          className="w-10 h-10 object-contain"
+                        />
+                      ) : (
+                        <span className="text-2xl">{project.icon}</span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xl font-semibold text-cosmic-off-white">
+                        {project.title}
+                      </h3>
+                      <span className="px-3 py-1 bg-cosmic-main-purple/30 rounded-full text-cosmic-electric-cyan text-xs">
+                        {project.status}
+                      </span>
+                    </div>
+
+                    <p className="text-cosmic-light-green mb-4 leading-relaxed">
+                      {project.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </a>
                 ) : project.link ? (
                   <Link
                     to={project.link}
                     className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer`}
                   >
+                    {project.link && (
+                      <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
+                        <span className="text-sm">View Project →</span>
+                      </div>
+                    )}
+
+                    <div
+                      className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
+                    >
+                      {project.title === "Renaissance" ? (
+                        <img
+                          src={renaissanceLogo}
+                          alt="Renaissance Logo"
+                          className="w-10 h-10 object-contain"
+                        />
+                      ) : (
+                        <span className="text-2xl">{project.icon}</span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xl font-semibold text-cosmic-off-white">
+                        {project.title}
+                      </h3>
+                      <span className="px-3 py-1 bg-cosmic-main-purple/30 rounded-full text-cosmic-electric-cyan text-xs">
+                        {project.status}
+                      </span>
+                    </div>
+
+                    <p className="text-cosmic-light-green mb-4 leading-relaxed">
+                      {project.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
                 ) : (
                   <div
                     className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative`}
                   >
-                )}
-                  {project.link && (
-                    <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
-                      <span className="text-sm">View Project →</span>
+                    <div
+                      className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
+                    >
+                      {project.title === "Renaissance" ? (
+                        <img
+                          src={renaissanceLogo}
+                          alt="Renaissance Logo"
+                          className="w-10 h-10 object-contain"
+                        />
+                      ) : (
+                        <span className="text-2xl">{project.icon}</span>
+                      )}
                     </div>
-                  )}
 
-                  <div
-                    className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
-                  >
-                    {project.title === "Renaissance" ? (
-                      <img
-                        src={renaissanceLogo}
-                        alt="Renaissance Logo"
-                        className="w-10 h-10 object-contain"
-                      />
-                    ) : (
-                      <span className="text-2xl">{project.icon}</span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-cosmic-off-white">
-                      {project.title}
-                    </h3>
-                    <span className="px-3 py-1 bg-cosmic-main-purple/30 rounded-full text-cosmic-electric-cyan text-xs">
-                      {project.status}
-                    </span>
-                  </div>
-
-                  <p className="text-cosmic-light-green mb-4 leading-relaxed">
-                    {project.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2">
-                    {project.tech.map((tech) => (
-                      <span
-                        key={tech}
-                        className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
-                      >
-                        {tech}
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xl font-semibold text-cosmic-off-white">
+                        {project.title}
+                      </h3>
+                      <span className="px-3 py-1 bg-cosmic-main-purple/30 rounded-full text-cosmic-electric-cyan text-xs">
+                        {project.status}
                       </span>
-                    ))}
-                  </div>
-                {project.external ? (
-                  </a>
-                ) : project.link ? (
-                  </Link>
-                ) : (
+                    </div>
+
+                    <p className="text-cosmic-light-green mb-4 leading-relaxed">
+                      {project.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </motion.div>
