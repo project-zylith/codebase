@@ -2,7 +2,7 @@
   "expo": {
     "name": "Zylith",
     "slug": "renaissance",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,9 +18,10 @@
     },
     "ios": {
       "bundleIdentifier": "com.apiary.zylith",
-      "buildNumber": "4",
+      "buildNumber": "6",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "This app uses the camera to allow users to capture images for their notes and tasks within the Renaissance productivity app.",
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
           "NSExceptionDomains": {
