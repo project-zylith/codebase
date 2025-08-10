@@ -1,0 +1,38 @@
+{
+  "name": "react-native-app-template",
+  "version": "1.0.0",
+  "description": "Complete React Native + Express.js app template with authentication, rich text editing, AI integration, and more",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node setup-new-project.js",
+    "backend:install": "cd backend && npm install",
+    "frontend:install": "cd frontend && npm install", 
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm start",
+    "backend:migrate": "cd backend && npm run migrate",
+    "backend:seed": "cd backend && npm run seed",
+    "build:ios": "cd frontend && eas build --platform ios",
+    "build:android": "cd frontend && eas build --platform android",
+    "submit:ios": "cd frontend && eas submit --platform ios",
+    "submit:android": "cd frontend && eas submit --platform android"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "express",
+    "typescript", 
+    "jwt-auth",
+    "postgresql",
+    "ai-integration",
+    "stripe",
+    "template"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {},
+  "template": {
+    "name": "react-native-full-stack-template",
+    "description": "A complete full-stack React Native template with backend, authentication, AI, and more"
+  }
+}

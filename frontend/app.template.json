@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Zylith",
-    "slug": "renaissance",
+    "name": "YOUR_APP_NAME",
+    "slug": "your-app-slug",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,19 +13,19 @@
     },
     "extra": {
       "eas": {
-        "projectId": "edaab702-85e1-4899-9245-d4bab7ef1645"
+        "projectId": "YOUR_EAS_PROJECT_ID"
       }
     },
     "ios": {
-      "bundleIdentifier": "com.apiary.zylith",
-      "buildNumber": "5",
+      "bundleIdentifier": "com.yourcompany.yourapp",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "This app uses the camera to capture images for notes and documents.",
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
           "NSExceptionDomains": {
-            "codebase-production-e8f2.up.railway.app": {
+            "your-backend-domain.com": {
               "NSExceptionAllowsInsecureHTTPLoads": false,
               "NSExceptionMinimumTLSVersion": "TLSv1.2",
               "NSExceptionRequiresForwardSecrecy": false
