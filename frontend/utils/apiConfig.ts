@@ -1,16 +1,14 @@
-// API Configuration
-// Production backend URL
-export const API_BASE_URL_PRODUCTION =
-  "https://codebase-production-e8f2.up.railway.app";
+// API Configuration Template
+// Replace these URLs with your actual backend URLs
+
+// Production backend URL (e.g., Railway, Heroku, etc.)
+export const API_BASE_URL_PRODUCTION = "https://your-backend-domain.com";
 
 // Development URLs (for local testing)
-export const API_BASE_URL_HOME = "http://192.168.1.189:3000";
-export const API_BASE_URL_MARCY = "http://10.0.13.161:3000";
-export const API_BASE_URL_WORKING = "http://192.168.56.1:3000";
-export const API_URL_TEMP = "http://192.168.86.44:3000";
-export const API_BASE_URL_SPOTIFY = "http://10.21.127.117:3000";
+export const API_BASE_URL_LOCAL = "http://localhost:3000";
+export const API_BASE_URL_DEV = "http://192.168.1.100:3000"; // Replace with your local IP
 
-// Temporarily use localhost for development debugging
+// Use production URL for builds, local for development
 export const API_BASE_URL = API_BASE_URL_PRODUCTION;
 
 // API Endpoints

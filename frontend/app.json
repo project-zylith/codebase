@@ -25,7 +25,7 @@
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
           "NSExceptionDomains": {
-            "codebase-production-e8f2.up.railway.app": {
+            "your-backend-domain.com": {
               "NSExceptionAllowsInsecureHTTPLoads": false,
               "NSExceptionMinimumTLSVersion": "TLSv1.2",
               "NSExceptionRequiresForwardSecrecy": false

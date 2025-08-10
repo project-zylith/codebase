@@ -1,5 +1,6 @@
 // @ts-nocheck
 /**
+ * Template seed file for conversations
  * @param {import('knex').Knex} knex
  */
 exports.seed = function (knex) {
@@ -7,20 +8,18 @@ exports.seed = function (knex) {
   return knex("conversations")
     .del()
     .then(function () {
-      // Inserts seed entries
+      // Inserts template seed entries
       return knex("conversations").insert([
         {
-          created_at: new Date("2024-01-16T08:00:00Z"),
+          title: "Project Discussion",
+          created_at: new Date("2024-01-15T14:00:00Z"),
+          updated_at: new Date("2024-01-15T14:00:00Z"),
         },
         {
-          created_at: new Date("2024-01-22T14:30:00Z"),
-        },
-        {
-          created_at: new Date("2024-02-01T10:15:00Z"),
-        },
-        {
-          created_at: new Date("2024-02-05T16:45:00Z"),
-        },
+          title: "Feature Planning",
+          created_at: new Date("2024-01-16T09:00:00Z"),
+          updated_at: new Date("2024-01-16T09:00:00Z"),
+        }
       ]);
     });
 };
