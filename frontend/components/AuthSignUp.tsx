@@ -67,6 +67,9 @@ const AuthSignUp: React.FC = () => {
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
+        autoComplete="off"
+        autoCorrect={false}
+        textContentType="none"
       />
       <Text style={[styles.label, { color: currentPalette.tertiary }]}>
         Email
@@ -85,6 +88,9 @@ const AuthSignUp: React.FC = () => {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        autoComplete="off"
+        autoCorrect={false}
+        textContentType="none"
       />
       <Text style={[styles.label, { color: currentPalette.tertiary }]}>
         Password
@@ -102,6 +108,9 @@ const AuthSignUp: React.FC = () => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        autoComplete="off"
+        autoCorrect={false}
+        textContentType="none"
       />
       <Text style={[styles.label, { color: currentPalette.tertiary }]}>
         Password Confirmation
@@ -119,6 +128,9 @@ const AuthSignUp: React.FC = () => {
         value={passwordConfirmation}
         onChangeText={setPasswordConfirmation}
         secureTextEntry
+        autoComplete="off"
+        autoCorrect={false}
+        textContentType="none"
       />
       <TouchableOpacity
         style={[styles.button, { backgroundColor: currentPalette.quaternary }]}

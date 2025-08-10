@@ -25,10 +25,10 @@ const subscriptionPlans = [
     duration_days: 30,
     description:
       "Monthly subscription with basic features and limited AI insights",
-    note_limit: 100,
-    task_limit: 50,
+    note_limit: 20,
+    task_limit: 30,
     galaxy_limit: 10,
-    ai_insights_per_day: 20,
+    ai_insights_per_day: 10,
     interval: "month",
   },
   {
@@ -37,10 +37,10 @@ const subscriptionPlans = [
     duration_days: 365,
     description:
       "Annual subscription with basic features and limited AI insights (save 17%)",
-    note_limit: 100,
-    task_limit: 50,
+    note_limit: 20,
+    task_limit: 30,
     galaxy_limit: 10,
-    ai_insights_per_day: 20,
+    ai_insights_per_day: 10,
     interval: "year",
   },
   {
@@ -84,7 +84,7 @@ const subscriptionPlans = [
     price: 0.0,
     duration_days: null,
     description: "Permanent free tier with limited features and AI insights",
-    note_limit: 20,
+    note_limit: 5,
     task_limit: 10,
     galaxy_limit: 3,
     ai_insights_per_day: 5,

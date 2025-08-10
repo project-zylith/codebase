@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { PortfolioHero } from "../components/PortfolioHero";
 import { SkillsSection } from "../components/SkillsSection";
 import { ProjectsSection } from "../components/ProjectsSection";

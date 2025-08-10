@@ -1,13 +1,12 @@
-import { motion } from "framer-motion";
-import { IasoHero } from "../components/IasoHero";
+import { ZylithHero } from "../components/ZylithHero";
 import { FeaturesSection } from "../components/FeaturesSection";
 import { DownloadSection } from "../components/DownloadSection";
 import { Footer } from "../components/Footer";
 
-export const IasoPage = () => {
+export const ZylithPage = () => {
   return (
     <div className="min-h-screen">
-      <IasoHero />
+      <ZylithHero />
       <FeaturesSection />
       <DownloadSection />
       <Footer />

@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { RenaissanceHero } from "../components/RenaissanceHero";
 import { FeaturesSection } from "../components/FeaturesSection";
 import { DownloadSection } from "../components/DownloadSection";

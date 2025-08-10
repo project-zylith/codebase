@@ -97,31 +97,31 @@ const colorPalette5 = {
 };
 
 const colorPalette6 = {
-  primary: "#1F2937", // Deep slate gray
-  secondary: "#374151", // Medium slate for cards/containers
-  tertiary: "#F9FAFB", // Off-white for text
-  quaternary: "#F59E0B", // Warm amber for buttons/accents
-  quinary: "#9CA3AF", // Light gray for subtle text
-  accent: "#FBBF24", // Bright amber accent
-  background: "#111827", // Very dark slate background
-  card: "#4B5563", // Medium gray card background
-  border: "#F59E0B", // Amber border accent
-  button: "#F59E0B", // Amber button background
-  buttonText: "#1F2937", // Dark text on amber buttons
+  primary: "#0C1821", // Deep ocean blue
+  secondary: "#1B3A4B", // Medium ocean blue for cards/containers
+  tertiary: "#F0F9FF", // Ice white for text
+  quaternary: "#0EA5E9", // Bright sky blue for buttons/accents
+  quinary: "#7DD3FC", // Light sky blue for subtle text
+  accent: "#38BDF8", // Electric blue accent
+  background: "#020617", // Very dark ocean background
+  card: "#1E3A8A", // Deep blue card background
+  border: "#0EA5E9", // Sky blue border accent
+  button: "#0EA5E9", // Sky blue button background
+  buttonText: "#F0F9FF", // Light text on blue buttons
 };
 
 const colorPalette7 = {
-  primary: "#2D1B69", // Deep royal purple
-  secondary: "#4C1D95", // Medium purple for cards/containers
-  tertiary: "#F3E8FF", // Light lavender for text
-  quaternary: "#EC4899", // Hot pink for buttons/accents
-  quinary: "#C084FC", // Light purple for subtle text
-  accent: "#F472B6", // Bright pink accent
-  background: "#1E1B4B", // Very dark purple background
-  card: "#5B21B6", // Medium purple card background
-  border: "#EC4899", // Pink border accent
-  button: "#EC4899", // Pink button background
-  buttonText: "#F3E8FF", // Light text on pink buttons
+  primary: "#1A1A2E", // Deep midnight blue
+  secondary: "#16213E", // Medium midnight for cards/containers
+  tertiary: "#FFEAA7", // Warm gold for text
+  quaternary: "#FDCB6E", // Sunset orange for buttons/accents
+  quinary: "#FD79A8", // Soft coral for subtle text
+  accent: "#FF7675", // Bright coral accent
+  background: "#0D1421", // Very dark midnight background
+  card: "#2C3E50", // Dark blue-gray card background
+  border: "#FDCB6E", // Orange border accent
+  button: "#FDCB6E", // Orange button background
+  buttonText: "#1A1A2E", // Dark text on orange buttons
 };
 
 const colorPalette8 = {
@@ -139,31 +139,31 @@ const colorPalette8 = {
 };
 
 const colorPalette9 = {
-  primary: "#451A03", // Deep terracotta
-  secondary: "#7C2D12", // Medium terracotta for cards/containers
-  tertiary: "#FEF3C7", // Light cream for text
-  quaternary: "#DC2626", // Red for buttons/accents
-  quinary: "#FCA5A5", // Light red for subtle text
-  accent: "#EF4444", // Bright red accent
-  background: "#2D0A02", // Very dark terracotta background
-  card: "#991B1B", // Medium red card background
-  border: "#DC2626", // Red border accent
-  button: "#DC2626", // Red button background
-  buttonText: "#FEF3C7", // Light text on red buttons
+  primary: "#2A1810", // Deep coffee brown
+  secondary: "#4A2C2A", // Medium espresso for cards/containers
+  tertiary: "#FFF8E1", // Cream white for text
+  quaternary: "#FF8A65", // Warm peach for buttons/accents
+  quinary: "#FFCC80", // Light peach for subtle text
+  accent: "#FFB74D", // Golden peach accent
+  background: "#1A0E0A", // Very dark coffee background
+  card: "#3E2723", // Dark brown card background
+  border: "#FF8A65", // Peach border accent
+  button: "#FF8A65", // Peach button background
+  buttonText: "#FFF8E1", // Light text on peach buttons
 };
 
 const colorPalette10 = {
-  primary: "#064E3B", // Deep emerald
-  secondary: "#065F46", // Medium emerald for cards/containers
-  tertiary: "#ECFDF5", // Light green-white for text
-  quaternary: "#059669", // Emerald green for buttons/accents
-  quinary: "#6EE7B7", // Light emerald for subtle text
-  accent: "#10B981", // Bright emerald accent
-  background: "#022C22", // Very dark emerald background
-  card: "#047857", // Medium emerald card background
-  border: "#059669", // Emerald border accent
-  button: "#059669", // Emerald button background
-  buttonText: "#ECFDF5", // Light text on emerald buttons
+  primary: "#2D1B4E", // Deep cosmic purple
+  secondary: "#3B2F5F", // Medium cosmic for cards/containers
+  tertiary: "#E0E7FF", // Starlight white for text
+  quaternary: "#8B5CF6", // Violet for buttons/accents
+  quinary: "#C4B5FD", // Light violet for subtle text
+  accent: "#A78BFA", // Bright violet accent
+  background: "#1E1B4B", // Very dark cosmic background
+  card: "#4C1D95", // Deep violet card background
+  border: "#8B5CF6", // Violet border accent
+  button: "#8B5CF6", // Violet button background
+  buttonText: "#E0E7FF", // Light text on violet buttons
 };
 
 const nebula = {

@@ -75,21 +75,6 @@ export const ProjectsSection = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
           {projects.map((project, index) => {
-            const ProjectWrapper = project.external
-              ? "a"
-              : project.link
-              ? Link
-              : "div";
-            const wrapperProps = project.external
-              ? {
-                  href: project.link,
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                }
-              : project.link
-              ? { to: project.link }
-              : {};
-
             return (
               <motion.div
                 key={project.title}
@@ -99,12 +84,23 @@ export const ProjectsSection = () => {
                 viewport={{ once: true }}
                 className="relative"
               >
-                <ProjectWrapper
-                  {...wrapperProps}
-                  className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative ${
-                    project.link ? "cursor-pointer" : ""
-                  }`}
-                >
+                {project.external ? (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer`}
+                  >
+                ) : project.link ? (
+                  <Link
+                    to={project.link}
+                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer`}
+                  >
+                ) : (
+                  <div
+                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative`}
+                  >
+                )}
                   {project.link && (
                     <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
                       <span className="text-sm">View Project →</span>
@@ -148,7 +144,13 @@ export const ProjectsSection = () => {
                       </span>
                     ))}
                   </div>
-                </ProjectWrapper>
+                {project.external ? (
+                  </a>
+                ) : project.link ? (
+                  </Link>
+                ) : (
+                  </div>
+                )}
               </motion.div>
             );
           })}

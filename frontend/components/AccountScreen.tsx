@@ -99,9 +99,11 @@ export const AccountScreen = () => {
   };
 
   const handleUpgradeSubscription = (planId: string) => {
+    // Refresh subscription data after successful upgrade
+    fetchSubscription();
     Alert.alert(
-      "Subscription Upgrade",
-      `You've selected the ${planId} plan. This feature will be fully implemented with Stripe integration.`,
+      "Success! 🎉",
+      `Your subscription has been updated! You now have access to all the features of your new plan.`,
       [{ text: "OK" }]
     );
   };
@@ -254,7 +256,7 @@ export const AccountScreen = () => {
                   { color: currentPalette.quaternary },
                 ]}
               >
-                Free Plan
+                Free Demo
               </Text>
               <Text
                 style={[

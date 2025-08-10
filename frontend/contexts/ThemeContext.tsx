@@ -42,10 +42,10 @@ const paletteOptions: PaletteOption[] = [
   { id: "palette4", name: "Watercolor", palette: colorPalette2 },
   { id: "palette5", name: "Mint Green", palette: colorPalette4 },
   { id: "palette6", name: "Monochrome", palette: colorPalette5 },
-  { id: "palette7", name: "Amber & Slate", palette: colorPalette6 },
-  { id: "palette8", name: "Royal Purple & Pink", palette: colorPalette7 },
-  { id: "palette9", name: "Terracotta & Red", palette: colorPalette9 },
-  { id: "palette10", name: "Emerald & Green", palette: colorPalette10 },
+  { id: "palette7", name: "Ocean Depths", palette: colorPalette6 },
+  { id: "palette8", name: "Sunset Gradient", palette: colorPalette7 },
+  { id: "palette9", name: "Coffee & Cream", palette: colorPalette9 },
+  { id: "palette10", name: "Cosmic Violet", palette: colorPalette10 },
 ];
 
 interface ThemeContextType {

@@ -46,11 +46,11 @@ interface SubscriptionModalProps {
 const localSubscriptionPlans: LocalSubscriptionPlan[] = [
   {
     id: "free",
-    name: "Free",
+    name: "Free Demo",
     price: 0,
     period: "forever",
     features: [
-      "20 notes",
+      "5 notes",
       "10 tasks",
       "3 galaxies",
       "5 AI insights per day",
@@ -63,10 +63,10 @@ const localSubscriptionPlans: LocalSubscriptionPlan[] = [
     price: 9.99,
     period: "month",
     features: [
-      "100 notes",
-      "50 tasks",
+      "20 notes",
+      "30 tasks",
       "10 galaxies",
-      "20 AI insights per day",
+      "10 AI insights per day",
       "Priority support",
     ],
   },
@@ -76,10 +76,10 @@ const localSubscriptionPlans: LocalSubscriptionPlan[] = [
     price: 99.99,
     period: "year",
     features: [
-      "100 notes",
-      "50 tasks",
+      "20 notes",
+      "30 tasks",
       "10 galaxies",
-      "20 AI insights per day",
+      "10 AI insights per day",
       "Priority support",
       "Save 17%",
     ],
@@ -136,6 +136,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   currentSubscription,
 }) => {
   const { currentPalette } = useTheme();
+  const { createPaymentMethod } = useStripe();
+  const { confirmPayment } = useConfirmPayment();
   const [selectedPlan, setSelectedPlan] = useState<string>("free");
   const [loading, setLoading] = useState(false);
   const [serverPlans, setServerPlans] = useState<SubscriptionPlan[]>([]);
@@ -160,6 +162,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     };
     fetchPlans();
   }, []);
+
+  // Helper function to check if plan requires payment
+  const requiresPayment = (planId: string) => {
+    return planId !== "free" && !planId.includes("free");
+  };
 
   const handleUpgrade = async () => {
     if (selectedPlan === "free") {
@@ -205,7 +212,23 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       }
     }
 
-    setShowPaymentForm(true);
+    // Only show payment form for paid plans
+    if (requiresPayment(selectedPlan)) {
+      setShowPaymentForm(true);
+    } else {
+      // Handle free plan upgrade directly
+      try {
+        setLoading(true);
+        // For free plans, we can upgrade without payment
+        onUpgrade(selectedPlan);
+        Alert.alert("Success", "Switched to free plan successfully!");
+        onClose();
+      } catch (error) {
+        Alert.alert("Error", "Failed to switch to free plan");
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const handleCancelSubscription = async () => {
@@ -296,6 +319,12 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       return;
     }
 
+    // Validate card is complete
+    if (!cardValidationStatus.complete) {
+      Alert.alert("Error", "Please enter complete card information");
+      return;
+    }
+
     setLoading(true);
     try {
       // Map local plan IDs to server plan names
@@ -322,19 +351,59 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         throw new Error("Selected plan not found on server");
       }
 
-      // For now, let's use a test payment method ID since we need to implement
-      // proper payment method creation. This will work for testing.
-      const testPaymentMethodId = "pm_card_visa"; // Stripe test payment method
+      // Create payment method from card details
+      const { paymentMethod, error: paymentMethodError } =
+        await createPaymentMethod({
+          paymentMethodType: "Card",
+        });
 
-      // Create subscription with Stripe using the test payment method
-      const result = await createSubscription(
-        serverPlan.id,
-        testPaymentMethodId
+      if (paymentMethodError) {
+        throw new Error(
+          paymentMethodError.message || "Failed to create payment method"
+        );
+      }
+
+      if (!paymentMethod?.id) {
+        throw new Error("Failed to create payment method");
+      }
+
+      // Create subscription with the real payment method
+      const result = await createSubscription(serverPlan.id, paymentMethod.id);
+
+      // Handle payment confirmation if needed (for 3D Secure, etc.)
+      if (result.clientSecret) {
+        const { error: confirmError } = await confirmPayment(
+          result.clientSecret,
+          {
+            paymentMethodType: "Card",
+          }
+        );
+
+        if (confirmError) {
+          // Handle specific error types
+          if (confirmError.code === "Canceled") {
+            Alert.alert("Payment Cancelled", "Payment was cancelled by user");
+            return;
+          }
+          throw new Error(
+            confirmError.message || "Payment confirmation failed"
+          );
+        }
+      }
+
+      Alert.alert(
+        "Success! 🎉",
+        `Welcome to ${targetPlanName}! Your subscription is now active and you have access to all premium features.`,
+        [
+          {
+            text: "Continue",
+            onPress: () => {
+              onUpgrade(selectedPlan);
+              onClose();
+            },
+          },
+        ]
       );
-
-      Alert.alert("Success", "Subscription created successfully!");
-      onUpgrade(selectedPlan);
-      onClose();
     } catch (error) {
       console.error("Payment error:", error);
       const errorMessage =
@@ -702,20 +771,29 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   style={[
                     styles.payButton,
                     {
-                      backgroundColor: currentPalette.quinary,
+                      backgroundColor:
+                        cardValidationStatus.complete && !loading
+                          ? currentPalette.quaternary
+                          : currentPalette.quinary,
                     },
-                    styles.disabledButton,
+                    (!cardValidationStatus.complete || loading) &&
+                      styles.disabledButton,
                   ]}
-                  disabled={true}
+                  disabled={!cardValidationStatus.complete || loading}
+                  onPress={handlePayment}
                 >
-                  <Text
-                    style={[
-                      styles.payButtonText,
-                      { color: currentPalette.tertiary },
-                    ]}
-                  >
-                    Pay Now
-                  </Text>
+                  {loading ? (
+                    <ActivityIndicator color={currentPalette.tertiary} />
+                  ) : (
+                    <Text
+                      style={[
+                        styles.payButtonText,
+                        { color: currentPalette.tertiary },
+                      ]}
+                    >
+                      Pay Now
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -723,24 +801,32 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <TouchableOpacity
               style={[
                 styles.upgradeButton,
-                { backgroundColor: currentPalette.quinary },
-                styles.disabledButton,
+                { backgroundColor: currentPalette.quaternary },
               ]}
-              disabled={true}
+              disabled={loading}
+              onPress={handleUpgrade}
             >
-              <Ionicons
-                name="diamond"
-                size={20}
-                color={currentPalette.tertiary}
-              />
-              <Text
-                style={[
-                  styles.upgradeButtonText,
-                  { color: currentPalette.tertiary },
-                ]}
-              >
-                {selectedPlan === "free" ? "Stay on Free Plan" : "Upgrade Now"}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color={currentPalette.tertiary} />
+              ) : (
+                <>
+                  <Ionicons
+                    name="diamond"
+                    size={20}
+                    color={currentPalette.tertiary}
+                  />
+                  <Text
+                    style={[
+                      styles.upgradeButtonText,
+                      { color: currentPalette.tertiary },
+                    ]}
+                  >
+                    {selectedPlan === "free"
+                      ? "Stay on Free Plan"
+                      : "Upgrade Now"}
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
           )}
 

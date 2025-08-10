@@ -27,10 +27,10 @@ exports.seed = function (knex) {
           duration_days: 30,
           description:
             "Monthly subscription with basic features and limited AI insights",
-          note_limit: 100,
-          task_limit: 50,
+          note_limit: 20,
+          task_limit: 30,
           galaxy_limit: 10,
-          ai_insights_per_day: 20,
+          ai_insights_per_day: 10,
           stripe_product_id: "prod_SjX6wB5k4x3Km2", // Will be updated after Stripe setup
           stripe_price_id: "price_1Ro42e2RsS2XTpnuCKjBHHgJ", // Will be updated after Stripe setup
         },
@@ -40,10 +40,10 @@ exports.seed = function (knex) {
           duration_days: 365,
           description:
             "Annual subscription with basic features and limited AI insights (save 17%)",
-          note_limit: 100,
-          task_limit: 50,
+          note_limit: 20,
+          task_limit: 30,
           galaxy_limit: 10,
-          ai_insights_per_day: 20,
+          ai_insights_per_day: 10,
           stripe_product_id: "prod_SjX6wB5k4x3Km2", // Will be updated after Stripe setup
           stripe_price_id: "price_1Ro42e2RsS2XTpnuX8obkrRg", // Will be updated after Stripe setup
         },
@@ -92,7 +92,7 @@ exports.seed = function (knex) {
           duration_days: 0, // 0 for permanent free tier
           description:
             "Permanent free tier with limited features and AI insights",
-          note_limit: 20,
+          note_limit: 5,
           task_limit: 10,
           galaxy_limit: 3,
           ai_insights_per_day: 5,

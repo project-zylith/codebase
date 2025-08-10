@@ -61,6 +61,9 @@ const AuthLogin: React.FC = () => {
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
+        autoComplete="off"
+        autoCorrect={false}
+        textContentType="none"
       />
       <Text style={[styles.label, { color: currentPalette.tertiary }]}>
         Password
@@ -78,6 +81,9 @@ const AuthLogin: React.FC = () => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        autoComplete="off"
+        autoCorrect={false}
+        textContentType="none"
       />
       <TouchableOpacity
         style={[styles.button, { backgroundColor: currentPalette.quaternary }]}
