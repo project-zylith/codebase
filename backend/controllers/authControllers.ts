@@ -171,3 +171,124 @@ export const logoutUser = (req: AuthenticatedRequest, res: Response) => {
   console.log("🎯 logoutUser controller hit!");
   res.status(200).send({ message: "User logged out successfully." });
 };
+
+// Update user email
+export const updateUserEmail = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  console.log("🎯 updateUserEmail controller hit!");
+
+  // Extract token from Authorization header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).send({ message: "User must be authenticated." });
+  }
+
+  // Verify JWT token
+  const decoded = verifyToken(token);
+  if (!decoded || !decoded.userId) {
+    return res.status(401).send({ message: "Invalid token." });
+  }
+
+  const { email } = req.body;
+  if (!email || !email.includes("@")) {
+    return res.status(400).send({ message: "Valid email is required." });
+  }
+
+  try {
+    // Check if email is already taken by another user
+    const existingUser = await UserService.getUserByEmail(email);
+    if (existingUser && existingUser.id !== decoded.userId) {
+      return res.status(400).send({ message: "Email already in use." });
+    }
+
+    // Update user email
+    const updatedUser = await UserService.updateUser(decoded.userId, { email });
+    if (!updatedUser) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    res.send({
+      message: "Email updated successfully",
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+      },
+    });
+  } catch (error) {
+    console.error("Update email error:", error);
+    res.status(500).send({ message: "Internal server error." });
+  }
+};
+
+// Update user password
+export const updateUserPassword = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  console.log("🎯 updateUserPassword controller hit!");
+
+  // Extract token from Authorization header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).send({ message: "User must be authenticated." });
+  }
+
+  // Verify JWT token
+  const decoded = verifyToken(token);
+  if (!decoded || !decoded.userId) {
+    return res.status(401).send({ message: "Invalid token." });
+  }
+
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res
+      .status(400)
+      .send({ message: "Current and new password are required." });
+  }
+
+  if (newPassword.length < 6) {
+    return res
+      .status(400)
+      .send({ message: "New password must be at least 6 characters long." });
+  }
+
+  try {
+    // Get user to verify current password
+    const user = await UserService.getUserById(decoded.userId);
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await UserService.verifyPassword(
+      user,
+      currentPassword
+    );
+    if (!isCurrentPasswordValid) {
+      return res
+        .status(401)
+        .send({ message: "Current password is incorrect." });
+    }
+
+    // Update password
+    const success = await UserService.updatePassword(
+      decoded.userId,
+      newPassword
+    );
+    if (!success) {
+      return res.status(500).send({ message: "Failed to update password." });
+    }
+
+    res.send({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Update password error:", error);
+    res.status(500).send({ message: "Internal server error." });
+  }
+};

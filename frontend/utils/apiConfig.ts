@@ -20,6 +20,8 @@ export const API_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/api/auth/login`,
     LOGOUT: `${API_BASE_URL}/api/auth/logout`,
     ME: `${API_BASE_URL}/api/auth/me`,
+    UPDATE_EMAIL: `${API_BASE_URL}/api/auth/email`,
+    UPDATE_PASSWORD: `${API_BASE_URL}/api/auth/password`,
   },
   TASKS: {
     LIST: `${API_BASE_URL}/api/tasks`,

@@ -220,6 +220,8 @@ app.post("/api/auth/register", auth.registerUser);
 app.post("/api/auth/login", auth.loginUser);
 app.get("/api/auth/me", checkAuthentication, auth.showMe);
 app.delete("/api/auth/logout", auth.logoutUser);
+app.put("/api/auth/email", checkAuthentication, auth.updateUserEmail);
+app.put("/api/auth/password", checkAuthentication, auth.updateUserPassword);
 
 /////////////////////////////////
 // Subscription Routes

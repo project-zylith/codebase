@@ -52,10 +52,10 @@ export const registerUser = async (userData: CreateUserRequest) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
     });
-    
+
     // Clone the response to avoid "Already read" error
     const responseClone = response.clone();
-    
+
     // If registration successful, store the token
     if (response.ok) {
       try {
@@ -68,7 +68,7 @@ export const registerUser = async (userData: CreateUserRequest) => {
         console.error("Error parsing registration response JSON:", jsonError);
       }
     }
-    
+
     // Return the cloned response so it can be read again
     return responseClone;
   } catch (error) {
@@ -82,19 +82,19 @@ export const loginUser = async (userData: LoginRequest) => {
   try {
     console.log("frontend adapter (login) hit");
     console.log("Attempting login to:", API_ENDPOINTS.AUTH.LOGIN);
-    
+
     const response = await fetch(`${API_ENDPOINTS.AUTH.LOGIN}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
       // Removed credentials: "include" - no longer needed for JWT
     });
-    
+
     console.log("Login response status:", response.status);
-    
+
     // Clone the response to avoid "Already read" error
     const responseClone = response.clone();
-    
+
     // If login successful, store the token
     if (response.ok) {
       try {
@@ -107,7 +107,7 @@ export const loginUser = async (userData: LoginRequest) => {
         console.error("Error parsing login response JSON:", jsonError);
       }
     }
-    
+
     // Return the cloned response so it can be read again
     return responseClone;
   } catch (error) {
@@ -147,7 +147,7 @@ export const getCurrentUser = async () => {
     console.error("❌ Network error in getCurrentUser:", error);
     console.error("❌ Error type:", error.name);
     console.error("❌ Error message:", error.message);
-    
+
     // Return null to indicate network error
     return null;
   }
@@ -173,6 +173,47 @@ export const logoutUser = async () => {
   } catch (error) {
     console.error("Network error in logoutUser:", error);
     console.warn(error);
+    return null;
+  }
+};
+
+// Update user email
+export const updateUserEmail = async (email: string) => {
+  try {
+    console.log("frontend adapter (updateUserEmail) hit");
+
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_ENDPOINTS.AUTH.UPDATE_EMAIL}`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify({ email }),
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Network error in updateUserEmail:", error);
+    return null;
+  }
+};
+
+// Update user password
+export const updateUserPassword = async (
+  currentPassword: string,
+  newPassword: string
+) => {
+  try {
+    console.log("frontend adapter (updateUserPassword) hit");
+
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_ENDPOINTS.AUTH.UPDATE_PASSWORD}`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Network error in updateUserPassword:", error);
     return null;
   }
 };

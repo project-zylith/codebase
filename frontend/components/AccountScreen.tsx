@@ -16,6 +16,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
 import { SubscriptionModal } from "./SubscriptionModal";
+import UserProfileUpdateModal from "./UserProfileUpdateModal";
 import {
   getUserSubscription,
   resubscribe,
@@ -30,6 +31,7 @@ export const AccountScreen = () => {
     useTheme();
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showProfileUpdateModal, setShowProfileUpdateModal] = useState(false);
   const [selectedPaletteId, setSelectedPaletteId] = useState(currentPaletteId);
   const [scaleAnim] = useState(new Animated.Value(1));
   const [subscription, setSubscription] = useState<any>(null);
@@ -483,6 +485,28 @@ export const AccountScreen = () => {
               styles.actionButton,
               { backgroundColor: currentPalette.button },
             ]}
+            onPress={() => setShowProfileUpdateModal(true)}
+          >
+            <Ionicons
+              name="person"
+              size={20}
+              color={currentPalette.buttonText}
+            />
+            <Text
+              style={[
+                styles.actionButtonText,
+                { color: currentPalette.buttonText },
+              ]}
+            >
+              Update Profile
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: currentPalette.button },
+            ]}
             onPress={handleLogout}
           >
             <Ionicons
@@ -565,6 +589,14 @@ export const AccountScreen = () => {
         onClose={() => setShowSubscriptionModal(false)}
         onUpgrade={handleUpgradeSubscription}
         currentSubscription={subscription}
+      />
+      <UserProfileUpdateModal
+        visible={showProfileUpdateModal}
+        onClose={() => setShowProfileUpdateModal(false)}
+        onUpdate={() => {
+          // Refresh user data if needed
+          console.log("Profile updated, refreshing data...");
+        }}
       />
     </SafeAreaView>
   );

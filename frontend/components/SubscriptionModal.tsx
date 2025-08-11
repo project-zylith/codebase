@@ -854,28 +854,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             })}
           </View>
 
-          {/* Feature in Development Message */}
-          <View
-            style={[
-              styles.developmentMessage,
-              { backgroundColor: currentPalette.card },
-            ]}
-          >
-            <Ionicons
-              name="construct"
-              size={20}
-              color={currentPalette.quaternary}
-            />
-            <Text
-              style={[
-                styles.developmentText,
-                { color: currentPalette.quaternary },
-              ]}
-            >
-              Feature in Development
-            </Text>
-          </View>
-
           {/* Upgrade Button */}
           {!showPaymentForm && (
             <TouchableOpacity
@@ -1125,22 +1103,7 @@ const styles = StyleSheet.create({
   validationText: {
     fontSize: 14,
   },
-  developmentMessage: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-  developmentText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
+
   keyboardAvoidingView: {
     flex: 1,
   },

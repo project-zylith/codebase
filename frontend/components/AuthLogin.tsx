@@ -80,7 +80,7 @@ const AuthLogin: React.FC = () => {
         placeholderTextColor={currentPalette.quinary}
         value={password}
         onChangeText={setPassword}
-        secureTextEntry={false}
+        secureTextEntry
         autoComplete="off"
         autoCorrect={false}
         textContentType="none"
