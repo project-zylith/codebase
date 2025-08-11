@@ -107,10 +107,13 @@ const AuthSignUp: React.FC = () => {
         placeholderTextColor={currentPalette.quinary}
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
+        secureTextEntry={false}
         autoComplete="off"
         autoCorrect={false}
         textContentType="none"
+        autoCapitalize="none"
+        spellCheck={false}
+        importantForAutofill="no"
       />
       <Text style={[styles.label, { color: currentPalette.tertiary }]}>
         Password Confirmation
@@ -124,13 +127,16 @@ const AuthSignUp: React.FC = () => {
           },
         ]}
         placeholder="Enter password confirmation"
-        placeholderTextColor={currentPalette.quinary}
+        placeholderTextColor={currentPalette.tertiary}
         value={passwordConfirmation}
         onChangeText={setPasswordConfirmation}
-        secureTextEntry
+        secureTextEntry={false}
         autoComplete="off"
         autoCorrect={false}
         textContentType="none"
+        autoCapitalize="none"
+        spellCheck={false}
+        importantForAutofill="no"
       />
       <TouchableOpacity
         style={[styles.button, { backgroundColor: currentPalette.quaternary }]}

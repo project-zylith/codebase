@@ -80,10 +80,13 @@ const AuthLogin: React.FC = () => {
         placeholderTextColor={currentPalette.quinary}
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
+        secureTextEntry={false}
         autoComplete="off"
         autoCorrect={false}
         textContentType="none"
+        autoCapitalize="none"
+        spellCheck={false}
+        importantForAutofill="no"
       />
       <TouchableOpacity
         style={[styles.button, { backgroundColor: currentPalette.quaternary }]}

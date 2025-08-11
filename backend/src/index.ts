@@ -51,7 +51,7 @@ app.use(
             // Allow specific origins
             const allowedOrigins = [
               "capacitor://localhost",
-              "ionic://localhost", 
+              "ionic://localhost",
               "http://localhost",
               "https://localhost",
               // Add any other origins you need
@@ -70,6 +70,14 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"], // Removed Cookie header
   })
+);
+
+// Webhook routes must come BEFORE express.json() middleware
+// to preserve raw body for Stripe signature verification
+app.post(
+  "/api/subscriptions/webhook",
+  express.raw({ type: "application/json" }),
+  subscriptionControllers.handleWebhook
 );
 
 // Middleware
@@ -221,11 +229,6 @@ app.delete("/api/auth/logout", auth.logoutUser);
 app.get(
   "/api/subscriptions/plans",
   subscriptionControllers.getSubscriptionPlans
-);
-app.post(
-  "/api/subscriptions/webhook",
-  express.raw({ type: "application/json" }),
-  subscriptionControllers.handleWebhook
 );
 
 // Authenticated routes

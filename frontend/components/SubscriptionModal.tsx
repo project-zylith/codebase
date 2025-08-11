@@ -9,6 +9,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
@@ -128,6 +130,236 @@ const localSubscriptionPlans: LocalSubscriptionPlan[] = [
     ],
   },
 ];
+
+// Card Details Modal Component
+interface CardDetailsModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onPayment: () => void;
+  cardDetails: any;
+  setCardDetails: (details: any) => void;
+  cardValidationStatus: any;
+  setCardValidationStatus: (status: any) => void;
+  loading: boolean;
+  currentPalette: any;
+}
+
+const CardDetailsModal: React.FC<CardDetailsModalProps> = ({
+  visible,
+  onClose,
+  onPayment,
+  cardDetails,
+  setCardDetails,
+  cardValidationStatus,
+  setCardValidationStatus,
+  loading,
+  currentPalette,
+}) => {
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <SafeAreaView
+          style={[
+            styles.cardModalContainer,
+            { backgroundColor: currentPalette.primary },
+          ]}
+        >
+          {/* Header */}
+          <View style={styles.cardModalHeader}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons
+                name="close"
+                size={24}
+                color={currentPalette.tertiary}
+              />
+            </TouchableOpacity>
+            <Text
+              style={[
+                styles.cardModalTitle,
+                { color: currentPalette.tertiary },
+              ]}
+            >
+              Payment Details
+            </Text>
+            <View style={styles.placeholder} />
+          </View>
+
+          {/* Content */}
+          <ScrollView
+            style={styles.cardModalContent}
+            contentContainerStyle={styles.cardModalContentContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text
+              style={[
+                styles.cardModalSubtitle,
+                { color: currentPalette.quinary },
+              ]}
+            >
+              Enter your card information to complete the upgrade
+            </Text>
+
+            {/* Card Input Field */}
+            <View style={styles.cardInputContainer}>
+              <CardField
+                postalCodeEnabled={false}
+                placeholders={{
+                  number: "4242 4242 4242 4242",
+                }}
+                cardStyle={{
+                  backgroundColor: currentPalette.card,
+                  textColor: currentPalette.tertiary,
+                  borderRadius: 8,
+                }}
+                style={styles.cardField}
+                onCardChange={(cardDetails) => {
+                  setCardDetails(cardDetails);
+                  setCardValidationStatus({
+                    number: cardDetails?.validNumber === "Valid",
+                    expiry: cardDetails?.validExpiryDate === "Valid",
+                    cvc: cardDetails?.validCVC === "Valid",
+                    complete: cardDetails?.complete || false,
+                  });
+                }}
+              />
+            </View>
+
+            {/* Card Validation Status */}
+            <View style={styles.validationStatus}>
+              <View style={styles.validationItem}>
+                <Ionicons
+                  name={
+                    cardValidationStatus.number
+                      ? "checkmark-circle"
+                      : "ellipse-outline"
+                  }
+                  size={16}
+                  color={
+                    cardValidationStatus.number
+                      ? currentPalette.quaternary
+                      : currentPalette.quinary
+                  }
+                />
+                <Text
+                  style={[
+                    styles.validationText,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Card Number
+                </Text>
+              </View>
+              <View style={styles.validationItem}>
+                <Ionicons
+                  name={
+                    cardValidationStatus.expiry
+                      ? "checkmark-circle"
+                      : "ellipse-outline"
+                  }
+                  size={16}
+                  color={
+                    cardValidationStatus.expiry
+                      ? currentPalette.quaternary
+                      : currentPalette.quinary
+                  }
+                />
+                <Text
+                  style={[
+                    styles.validationText,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Expiry Date
+                </Text>
+              </View>
+              <View style={styles.validationItem}>
+                <Ionicons
+                  name={
+                    cardValidationStatus.cvc
+                      ? "checkmark-circle"
+                      : "ellipse-outline"
+                  }
+                  size={16}
+                  color={
+                    cardValidationStatus.cvc
+                      ? currentPalette.quaternary
+                      : currentPalette.quinary
+                  }
+                />
+                <Text
+                  style={[
+                    styles.validationText,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  CVC
+                </Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.cardModalButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.cancelButton,
+                  { borderColor: currentPalette.quinary },
+                ]}
+                onPress={onClose}
+              >
+                <Text
+                  style={[
+                    styles.cancelButtonText,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.payButton,
+                  {
+                    backgroundColor:
+                      cardValidationStatus.complete && !loading
+                        ? currentPalette.quaternary
+                        : currentPalette.quinary,
+                  },
+                  (!cardValidationStatus.complete || loading) &&
+                    styles.disabledButton,
+                ]}
+                disabled={!cardValidationStatus.complete || loading}
+                onPress={onPayment}
+              >
+                {loading ? (
+                  <ActivityIndicator color={currentPalette.tertiary} />
+                ) : (
+                  <Text
+                    style={[
+                      styles.payButtonText,
+                      { color: currentPalette.tertiary },
+                    ]}
+                  >
+                    Pay Now
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+};
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   visible,
@@ -645,159 +877,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </View>
 
           {/* Upgrade Button */}
-          {showPaymentForm ? (
-            <View style={styles.paymentForm}>
-              <Text
-                style={[
-                  styles.paymentTitle,
-                  { color: currentPalette.tertiary },
-                ]}
-              >
-                Enter Payment Details
-              </Text>
-              <CardField
-                postalCodeEnabled={false}
-                placeholders={{
-                  number: "4242 4242 4242 4242",
-                }}
-                cardStyle={{
-                  backgroundColor: currentPalette.card,
-                  textColor: currentPalette.tertiary,
-                  borderRadius: 8,
-                }}
-                style={styles.cardField}
-                onCardChange={(cardDetails) => {
-                  setCardDetails(cardDetails);
-                  setCardValidationStatus({
-                    number: cardDetails?.validNumber === "Valid",
-                    expiry: cardDetails?.validExpiryDate === "Valid",
-                    cvc: cardDetails?.validCVC === "Valid",
-                    complete: cardDetails?.complete || false,
-                  });
-                }}
-              />
-
-              {/* Card Validation Status */}
-              <View style={styles.validationStatus}>
-                <View style={styles.validationItem}>
-                  <Ionicons
-                    name={
-                      cardValidationStatus.number
-                        ? "checkmark-circle"
-                        : "ellipse-outline"
-                    }
-                    size={16}
-                    color={
-                      cardValidationStatus.number
-                        ? currentPalette.quaternary
-                        : currentPalette.quinary
-                    }
-                  />
-                  <Text
-                    style={[
-                      styles.validationText,
-                      { color: currentPalette.quinary },
-                    ]}
-                  >
-                    Card Number
-                  </Text>
-                </View>
-                <View style={styles.validationItem}>
-                  <Ionicons
-                    name={
-                      cardValidationStatus.expiry
-                        ? "checkmark-circle"
-                        : "ellipse-outline"
-                    }
-                    size={16}
-                    color={
-                      cardValidationStatus.expiry
-                        ? currentPalette.quaternary
-                        : currentPalette.quinary
-                    }
-                  />
-                  <Text
-                    style={[
-                      styles.validationText,
-                      { color: currentPalette.quinary },
-                    ]}
-                  >
-                    Expiry Date
-                  </Text>
-                </View>
-                <View style={styles.validationItem}>
-                  <Ionicons
-                    name={
-                      cardValidationStatus.cvc
-                        ? "checkmark-circle"
-                        : "ellipse-outline"
-                    }
-                    size={16}
-                    color={
-                      cardValidationStatus.cvc
-                        ? currentPalette.quaternary
-                        : currentPalette.quinary
-                    }
-                  />
-                  <Text
-                    style={[
-                      styles.validationText,
-                      { color: currentPalette.quinary },
-                    ]}
-                  >
-                    CVC
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.paymentButtons}>
-                <TouchableOpacity
-                  style={[
-                    styles.cancelButton,
-                    { borderColor: currentPalette.quinary },
-                  ]}
-                  onPress={() => setShowPaymentForm(false)}
-                >
-                  <Text
-                    style={[
-                      styles.cancelButtonText,
-                      { color: currentPalette.quinary },
-                    ]}
-                  >
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.payButton,
-                    {
-                      backgroundColor:
-                        cardValidationStatus.complete && !loading
-                          ? currentPalette.quaternary
-                          : currentPalette.quinary,
-                    },
-                    (!cardValidationStatus.complete || loading) &&
-                      styles.disabledButton,
-                  ]}
-                  disabled={!cardValidationStatus.complete || loading}
-                  onPress={handlePayment}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={currentPalette.tertiary} />
-                  ) : (
-                    <Text
-                      style={[
-                        styles.payButtonText,
-                        { color: currentPalette.tertiary },
-                      ]}
-                    >
-                      Pay Now
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
+          {!showPaymentForm && (
             <TouchableOpacity
               style={[
                 styles.upgradeButton,
@@ -836,6 +916,19 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </Text>
         </ScrollView>
       </SafeAreaView>
+
+      {/* Card Details Modal */}
+      <CardDetailsModal
+        visible={showPaymentForm}
+        onClose={() => setShowPaymentForm(false)}
+        onPayment={handlePayment}
+        cardDetails={cardDetails}
+        setCardDetails={setCardDetails}
+        cardValidationStatus={cardValidationStatus}
+        setCardValidationStatus={setCardValidationStatus}
+        loading={loading}
+        currentPalette={currentPalette}
+      />
     </Modal>
   );
 };
@@ -993,22 +1086,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 16,
   },
-  paymentForm: {
-    marginTop: 20,
-  },
-  paymentTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-    textAlign: "center",
-  },
   cardField: {
     height: 50,
     marginBottom: 20,
-  },
-  paymentButtons: {
-    flexDirection: "row",
-    gap: 12,
   },
   cancelButton: {
     flex: 1,
@@ -1060,5 +1140,45 @@ const styles = StyleSheet.create({
   developmentText: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  cardModalContainer: {
+    flex: 1,
+  },
+  cardModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+  },
+  cardModalTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    flex: 1,
+    textAlign: "center",
+  },
+  cardModalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  cardModalContentContainer: {
+    flexGrow: 1,
+  },
+  cardModalSubtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  cardInputContainer: {
+    marginBottom: 20,
+  },
+  cardModalButtons: {
+    flexDirection: "row",
+    gap: 12,
   },
 });
