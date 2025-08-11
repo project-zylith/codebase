@@ -46,12 +46,10 @@ export const getUserSubscription = async (
   res: Response
 ) => {
   try {
-      const userId = getUserId(req);
-  if (!userId) {
-    return res.status(401).json({ error: "User must be authenticated" });
-  }
-
-
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
 
     const subscription = await db("user_subscriptions")
       .join(
@@ -85,11 +83,16 @@ export const createSubscription = async (
   res: Response
 ) => {
   try {
-      const userId = getUserId(req);
-  if (!userId) {
-    return res.status(401).json({ error: "User must be authenticated" });
-  }
+    console.log("📦 Request body:", req.body);
+    console.log("🔐 Request session:", req.session);
+    console.log("👤 Request user:", req.user);
 
+    const userId = getUserId(req);
+    console.log("🆔 Extracted user ID:", userId);
+
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
 
     const { planId, paymentMethodId } = req.body;
 
@@ -106,9 +109,21 @@ export const createSubscription = async (
     }
 
     // Get user details
+    console.log("🔍 Looking for user with ID:", userId);
     const user = await db("users").where("id", userId).first();
+    console.log("🔍 Found user:", user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    // Validate user email
+    if (!user.email || !user.email.includes("@")) {
+      console.error("❌ Invalid user email:", user.email);
+      return res.status(400).json({
+        error:
+          "User has invalid email address. Please update your profile first.",
+        userEmail: user.email,
+      });
     }
 
     // Check if user already has a subscription
@@ -182,12 +197,10 @@ export const cancelSubscription = async (
   res: Response
 ) => {
   try {
-      const userId = getUserId(req);
-  if (!userId) {
-    return res.status(401).json({ error: "User must be authenticated" });
-  }
-
-
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
 
     // Get user's subscription
     const userSubscription = await db("user_subscriptions")
@@ -251,12 +264,10 @@ export const cancelSubscription = async (
 // Resubscribe to canceled subscription
 export const resubscribe = async (req: AuthenticatedRequest, res: Response) => {
   try {
-      const userId = getUserId(req);
-  if (!userId) {
-    return res.status(401).json({ error: "User must be authenticated" });
-  }
-
-
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
 
     // Get user's canceled subscription
     const userSubscription = await db("user_subscriptions")
@@ -304,11 +315,10 @@ export const resubscribe = async (req: AuthenticatedRequest, res: Response) => {
 // Switch subscription plan
 export const switchPlan = async (req: AuthenticatedRequest, res: Response) => {
   try {
-      const userId = getUserId(req);
-  if (!userId) {
-    return res.status(401).json({ error: "User must be authenticated" });
-  }
-
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
 
     const { planId } = req.body;
 

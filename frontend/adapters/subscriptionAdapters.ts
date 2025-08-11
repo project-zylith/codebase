@@ -96,9 +96,6 @@ export const createSubscription = async (
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.CREATE, {
       method: "POST",
       headers: await getAuthHeaders(),
-      headers: {
-        ...(await getAuthHeaders()),
-      },
       body: JSON.stringify({
         planId,
         paymentMethodId,
@@ -232,9 +229,6 @@ export const createPaymentIntent = async (
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.PAYMENT_INTENT, {
       method: "POST",
       headers: await getAuthHeaders(),
-      headers: {
-        ...(await getAuthHeaders()),
-      },
       body: JSON.stringify({
         amount,
         currency,
