@@ -155,7 +155,7 @@ export const createSubscription = async (
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [{ price: plan.stripe_price_id }],
-      payment_behavior: "default_incomplete",
+      // Remove payment_behavior to charge immediately
       payment_settings: { save_default_payment_method: "on_subscription" },
       expand: ["latest_invoice.payment_intent"],
     });
@@ -438,6 +438,11 @@ export const handleWebhook = async (req: Request, res: Response) => {
     console.log(`📦 Processing webhook event: ${event.type}`);
 
     switch (event.type) {
+      case "customer.subscription.created":
+        await handleSubscriptionCreated(
+          event.data.object as Stripe.Subscription
+        );
+        break;
       case "customer.subscription.updated":
         await handleSubscriptionUpdated(
           event.data.object as Stripe.Subscription
@@ -467,6 +472,32 @@ export const handleWebhook = async (req: Request, res: Response) => {
 };
 
 // Webhook handlers
+async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+  console.log("🎉 New subscription created:", subscription.id);
+
+  // Find the user subscription by Stripe ID
+  const userSubscription = await db("user_subscriptions")
+    .where("stripe_subscription_id", subscription.id)
+    .first();
+
+  if (userSubscription) {
+    // Update the subscription status
+    await db("user_subscriptions")
+      .where("stripe_subscription_id", subscription.id)
+      .update({
+        status: subscription.status,
+        end_date: new Date((subscription as any).current_period_end * 1000),
+      });
+
+    console.log("✅ Updated user subscription in database");
+  } else {
+    console.log(
+      "⚠️ No user subscription found for Stripe ID:",
+      subscription.id
+    );
+  }
+}
+
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const userSubscription = await db("user_subscriptions")
     .where("stripe_subscription_id", subscription.id)
