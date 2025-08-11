@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import renaissanceLogo from "../assets/icon.png";
 
-export const ZylithHero = () => {
+export const RENAIHero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
       {/* Background glow effects */}
@@ -52,7 +52,7 @@ export const ZylithHero = () => {
             <div className="flex items-center space-x-2 text-cosmic-electric-cyan">
               <img
                 src={renaissanceLogo}
-                alt="Renaissance"
+                alt="REN|AI"
                 className="w-5 h-5 object-contain"
               />
               <span>Galaxy Organization</span>

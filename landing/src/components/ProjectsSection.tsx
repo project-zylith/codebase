@@ -5,7 +5,7 @@ import renaissanceLogo from "../assets/icon.png";
 export const ProjectsSection = () => {
   const projects = [
     {
-      title: "Renaissance",
+      title: "REN|AI",
       description:
         "AI-powered note-taking and task management app with cosmic-themed UI and intelligent organization features.",
       tech: [
@@ -18,7 +18,7 @@ export const ProjectsSection = () => {
       status: "Live on iOS App Store",
       icon: "🌌",
       color: "cosmic-vibrant-blue",
-      link: "/renaissance",
+      link: "/renai",
     },
     {
       title: "Buldak Anime Discovery",
@@ -36,7 +36,7 @@ export const ProjectsSection = () => {
       description:
         "Intelligent AI system that automatically groups related notes into themed collections using advanced NLP.",
       tech: ["Google Generative AI", "Node.js", "TypeScript", "Express"],
-      status: "Featured in Renaissance",
+      status: "Featured in REN|AI",
       icon: "🌟",
       color: "cosmic-main-teal",
     },
@@ -100,10 +100,10 @@ export const ProjectsSection = () => {
                     <div
                       className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
                     >
-                      {project.title === "Renaissance" ? (
+                      {project.title === "REN|AI" ? (
                         <img
                           src={renaissanceLogo}
-                          alt="Renaissance Logo"
+                          alt="REN|AI Logo"
                           className="w-10 h-10 object-contain"
                         />
                       ) : (
@@ -149,10 +149,10 @@ export const ProjectsSection = () => {
                     <div
                       className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
                     >
-                      {project.title === "Renaissance" ? (
+                      {project.title === "REN|AI" ? (
                         <img
                           src={renaissanceLogo}
-                          alt="Renaissance Logo"
+                          alt="REN|AI Logo"
                           className="w-10 h-10 object-contain"
                         />
                       ) : (
@@ -191,10 +191,10 @@ export const ProjectsSection = () => {
                     <div
                       className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
                     >
-                      {project.title === "Renaissance" ? (
+                      {project.title === "REN|AI" ? (
                         <img
                           src={renaissanceLogo}
-                          alt="Renaissance Logo"
+                          alt="REN|AI Logo"
                           className="w-10 h-10 object-contain"
                         />
                       ) : (
@@ -246,7 +246,7 @@ export const ProjectsSection = () => {
           <p className="text-xl text-cosmic-light-green max-w-4xl mx-auto leading-relaxed">
             I believe in creating software that doesn't just function—it
             inspires. Every line of code should contribute to an experience that
-            feels magical, intuitive, and empowering. Through Renaissance, I'm
+            feels magical, intuitive, and empowering. Through REN|AI, I'm
             exploring how AI can enhance human creativity rather than replace
             it.
           </p>

@@ -29,9 +29,9 @@ export const PortfolioHero = () => {
 
           <p className="text-lg text-cosmic-light-green mb-8 leading-relaxed">
             I'm passionate about creating beautiful, intelligent applications
-            that solve real problems. Renaissance represents my vision of
-            combining AI with exceptional user experience to transform how we
-            capture and organize our thoughts.
+            that solve real problems. REN|AI represents my vision of combining
+            AI with exceptional user experience to transform how we capture and
+            organize our thoughts.
           </p>
 
           <div className="flex flex-wrap gap-4 mb-8">

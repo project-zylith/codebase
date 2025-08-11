@@ -1,12 +1,12 @@
-import { ZylithHero } from "../components/ZylithHero";
+import { RENAIHero } from "../components/RENAIHero";
 import { FeaturesSection } from "../components/FeaturesSection";
 import { DownloadSection } from "../components/DownloadSection";
 import { Footer } from "../components/Footer";
 
-export const ZylithPage = () => {
+export const RENAIPage = () => {
   return (
     <div className="min-h-screen">
-      <ZylithHero />
+      <RENAIHero />
       <FeaturesSection />
       <DownloadSection />
       <Footer />

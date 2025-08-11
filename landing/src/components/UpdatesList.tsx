@@ -6,11 +6,11 @@ export const UpdatesList = () => {
   const updates = [
     {
       id: 1,
-      title: "Renaissance v1.2.0 - Galaxy Organization System",
+      title: "REN|AI v1.2.0 - Galaxy Organization System",
       date: "December 2024",
       type: "Major Update",
       description:
-        'Introducing the revolutionary Galaxy Organization System! Renaissance now uses AI to automatically group your related notes into themed "galaxies" for better organization and discovery.',
+        'Introducing the revolutionary Galaxy Organization System! REN|AI now uses AI to automatically group your related notes into themed "galaxies" for better organization and discovery.',
       features: [
         "AI-powered note grouping",
         "Visual galaxy interface",
@@ -26,7 +26,7 @@ export const UpdatesList = () => {
       date: "November 2024",
       type: "Feature Update",
       description:
-        "Improved AI capabilities for generating better task suggestions and note insights. Renaissance now provides more contextual and actionable recommendations.",
+        "Improved AI capabilities for generating better task suggestions and note insights. REN|AI now provides more contextual and actionable recommendations.",
       features: [
         "Smarter task generation",
         "Better context understanding",
@@ -54,11 +54,11 @@ export const UpdatesList = () => {
     },
     {
       id: 4,
-      title: "Renaissance v1.0.0 Launch",
+      title: "REN|AI v1.0.0 Launch",
       date: "September 2024",
       type: "Launch",
       description:
-        "The official launch of Renaissance! After months of development, our AI-powered note-taking and task management app is now available on the App Store.",
+        "The official launch of REN|AI! After months of development, our AI-powered note-taking and task management app is now available on the App Store.",
       features: [
         "Full note-taking system",
         "AI task generation",
@@ -184,12 +184,12 @@ export const UpdatesList = () => {
               Get in Touch
             </motion.a>
             <motion.a
-              href="/renaissance#download"
+              href="/renai#download"
               className="border-2 border-cosmic-main-teal hover:bg-cosmic-main-teal px-6 py-3 rounded-xl font-semibold text-cosmic-light-green hover:text-cosmic-off-white transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Download Renaissance
+              Download REN|AI
             </motion.a>
           </div>
         </motion.div>

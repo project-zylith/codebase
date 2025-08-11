@@ -40,7 +40,7 @@ const IntroScreen1 = ({
       ]}
     >
       <Text style={[styles.screenTitle, { color: currentPalette.quaternary }]}>
-        Welcome to Renaissance
+        Welcome to REN|AI
       </Text>
     </Animated.View>
   </TouchableOpacity>
@@ -67,7 +67,7 @@ const IntroScreen2 = ({
         Your Digital Mind Map
       </Text>
       <Text style={[styles.screenSubtitle, { color: currentPalette.tertiary }]}>
-        Capture ideas, organize thoughts, and let Zylith help you achieve your
+        Capture ideas, organize thoughts, and let REN|AI help you achieve your
         goals
       </Text>
     </Animated.View>

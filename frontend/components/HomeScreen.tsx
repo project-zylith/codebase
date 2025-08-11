@@ -407,9 +407,9 @@ export const HomeScreen = () => {
   };
 
   const getCurrentGalaxyName = () => {
-    if (currentGalaxyIndex === -1) return "Renaissance";
-    if (galaxies.length === 0) return "Renaissance";
-    return galaxies[currentGalaxyIndex]?.name || "Renaissance";
+    if (currentGalaxyIndex === -1) return "REN|AI";
+    if (galaxies.length === 0) return "REN|AI";
+    return galaxies[currentGalaxyIndex]?.name || "REN|AI";
   };
 
   // Start twinkling and drifting animation for stars

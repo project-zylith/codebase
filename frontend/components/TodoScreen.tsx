@@ -474,7 +474,7 @@ export const TodoScreen = () => {
               { color: currentPalette.tertiary },
             ]}
           >
-            ZYLITH GENERATED
+            REN|AI GENERATED
           </Text>
         </View>
       )}

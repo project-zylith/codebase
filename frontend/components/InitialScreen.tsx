@@ -42,7 +42,7 @@ export const InitialScreen = () => {
 
   return (
     <SafeAreaView>
-      <Text>Renaissance</Text>
+      <Text>REN|AI</Text>
     </SafeAreaView>
   );
 };

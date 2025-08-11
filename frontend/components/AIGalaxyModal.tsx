@@ -18,7 +18,7 @@ import { generateGalaxies } from "../adapters/galaxyAdapters";
 import { getNotes, Note } from "../adapters/noteAdapters";
 import { useTheme } from "../contexts/ThemeContext";
 
-interface ZylithGalaxyModalProps {
+interface RENAIGalaxyModalProps {
   visible: boolean;
   onClose: () => void;
   onGalaxiesGenerated: () => void;
@@ -29,7 +29,7 @@ interface GalaxyPreview {
   notes: string[];
 }
 
-const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
+const RENAIGalaxyModal: React.FC<RENAIGalaxyModalProps> = ({
   visible,
   onClose,
   onGalaxiesGenerated,
@@ -114,14 +114,14 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
         return;
       }
 
-      setLoadingStep("Analyzing notes with Zylith...");
+      setLoadingStep("Analyzing notes with REN|AI...");
 
       // Step 2: Generate galaxies using AI (this now handles everything)
       // Cast notes to the expected type for generateGalaxies
       const result = await generateGalaxies(notes as any);
 
       if (!result.success) {
-        throw new Error("Zylith failed to generate galaxies");
+        throw new Error("REN|AI failed to generate galaxies");
       }
 
       console.log("✅ Galaxy generation successful:", result);
@@ -241,7 +241,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
               />
             </TouchableOpacity>
             <Text style={[styles.title, { color: currentPalette.tertiary }]}>
-              Zylith Galaxy Generator
+              REN|AI Galaxy Generator
             </Text>
             <View style={styles.placeholder} />
           </View>
@@ -264,7 +264,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
                 <Text
                   style={[styles.introText, { color: currentPalette.tertiary }]}
                 >
-                  Let Zylith organize your notes into themed galaxies!
+                  Let REN|AI organize your notes into themed galaxies!
                 </Text>
                 <Text
                   style={[
@@ -272,7 +272,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
                     { color: currentPalette.quinary },
                   ]}
                 >
-                  Zylith will analyze your notes and group them into meaningful
+                  REN|AI will analyze your notes and group them into meaningful
                   collections based on their content and themes.
                 </Text>
 
@@ -297,7 +297,7 @@ const ZylithGalaxyModal: React.FC<ZylithGalaxyModalProps> = ({
                         { color: currentPalette.quinary },
                       ]}
                     >
-                      Zylith is analyzing your notes and creating themed
+                      REN|AI is analyzing your notes and creating themed
                       collections
                     </Text>
                   </View>
@@ -612,4 +612,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ZylithGalaxyModal;
+export default RENAIGalaxyModal;

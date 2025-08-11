@@ -18,7 +18,7 @@ export const UpdatesHero = () => {
 
           <p className="text-xl md:text-2xl text-cosmic-light-green mb-8 max-w-3xl mx-auto leading-relaxed">
             Stay up to date with the latest features, improvements, and insights
-            from the Renaissance development journey.
+            from the REN|AI development journey.
           </p>
 
           <div className="flex flex-wrap justify-center gap-6">

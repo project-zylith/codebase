@@ -338,7 +338,7 @@ export const AccountScreen = () => {
       </View>
 
       <Text style={[styles.sectionSubtitle, { color: currentPalette.quinary }]}>
-        Personalize your Renaissance experience
+        Personalize your REN|AI experience
       </Text>
 
       <ScrollView

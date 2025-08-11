@@ -689,7 +689,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           <Text style={[styles.subtitle, { color: currentPalette.quinary }]}>
-            Unlock the full potential of Renaissance
+            Unlock the full potential of REN|AI
           </Text>
 
           {/* Current Subscription Status */}

@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { Navigation } from "./components/Navigation";
 import { DeveloperPage } from "./pages/DeveloperPage";
-import { RenaissancePage } from "./pages/RenaissancePage";
+import { RENAIPage } from "./pages/RENAIPage";
 import { UpdatesPage } from "./pages/UpdatesPage";
 
 function App() {
@@ -16,7 +16,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<DeveloperPage />} />
-            <Route path="/renaissance" element={<RenaissancePage />} />
+            <Route path="/renai" element={<RENAIPage />} />
             <Route path="/updates" element={<UpdatesPage />} />
           </Routes>
         </main>

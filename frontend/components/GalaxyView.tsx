@@ -252,7 +252,7 @@ const GalaxyView: React.FC<GalaxyViewProps> = ({
             <Text
               style={[styles.emptySubtext, { color: currentPalette.quinary }]}
             >
-              Use the Zylith generator to create your first galaxy
+              Use the REN|AI generator to create your first galaxy
             </Text>
           </View>
         ) : (

@@ -18,14 +18,14 @@ export const DownloadSection = () => {
           </h2>
 
           <p className="text-xl text-cosmic-light-green mb-12 max-w-2xl mx-auto">
-            Download Renaissance today and experience the future of note-taking
-            and productivity. Available on iOS.
+            Download REN|AI today and experience the future of note-taking and
+            productivity. Available on iOS.
           </p>
 
           {/* Download button */}
           <div className="flex justify-center items-center mb-12">
             <motion.a
-              href="https://apps.apple.com/app/renaissance" // Replace with your actual App Store link
+              href="https://apps.apple.com/app/renai" // Replace with your actual App Store link
               target="_blank"
               rel="noopener noreferrer"
               className="cosmic-card hover:scale-105 transition-all duration-300 p-6 rounded-2xl cosmic-glow-hover group"

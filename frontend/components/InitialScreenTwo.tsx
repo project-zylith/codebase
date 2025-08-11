@@ -5,11 +5,11 @@ export const InitialScreenTwo = () => {
   return (
     <SafeAreaView>
       <Text>
-        Renaissance is a personal AI assistant that helps you turn notes into
-        goals and goals into product.
+        REN|AI is a personal AI assistant that helps you turn notes into goals
+        and goals into product.
       </Text>
       <Text>
-        Zylith, is your personal AI assistant. You can ask her to help generate
+        REN|AI, is your personal AI assistant. You can ask her to help generate
         task, provide insights on your notes, and group these notes together.
       </Text>
     </SafeAreaView>
