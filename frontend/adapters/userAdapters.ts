@@ -145,8 +145,8 @@ export const getCurrentUser = async () => {
     return response;
   } catch (error) {
     console.error("❌ Network error in getCurrentUser:", error);
-    console.error("❌ Error type:", error.name);
-    console.error("❌ Error message:", error.message);
+    console.error("❌ Error type:", (error as any).name);
+    console.error("❌ Error message:", (error as any).message);
 
     // Return null to indicate network error
     return null;
@@ -215,5 +215,37 @@ export const updateUserPassword = async (
   } catch (error) {
     console.error("Network error in updateUserPassword:", error);
     return null;
+  }
+};
+
+// Delete user account
+export const deleteUserAccount = async () => {
+  try {
+    console.log("frontend adapter (deleteUserAccount) hit");
+
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_ENDPOINTS.AUTH.DELETE_ACCOUNT}`, {
+      method: "DELETE",
+      headers: headers,
+    });
+
+    // Check if response is ok before trying to parse JSON
+    if (!response.ok) {
+      // Try to get error message, but handle non-JSON responses
+      let errorMessage = "Failed to delete account";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (parseError) {
+        // If response is not JSON (like HTML error page), use status text
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Network error in deleteUserAccount:", error);
+    throw error;
   }
 };

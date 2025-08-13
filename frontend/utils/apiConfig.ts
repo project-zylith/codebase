@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
     ME: `${API_BASE_URL}/api/auth/me`,
     UPDATE_EMAIL: `${API_BASE_URL}/api/auth/email`,
     UPDATE_PASSWORD: `${API_BASE_URL}/api/auth/password`,
+    DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/account`,
   },
   TASKS: {
     LIST: `${API_BASE_URL}/api/tasks`,

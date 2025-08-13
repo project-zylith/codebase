@@ -13,7 +13,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
-import { updateUserEmail, updateUserPassword } from "../adapters/userAdapters";
+import {
+  updateUserEmail,
+  updateUserPassword,
+  deleteUserAccount,
+} from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
 
 interface UserProfileUpdateModalProps {
@@ -30,7 +34,9 @@ export const UserProfileUpdateModal: React.FC<UserProfileUpdateModalProps> = ({
   const { currentPalette } = useTheme();
   const { state: userState } = useUser();
 
-  const [activeTab, setActiveTab] = useState<"email" | "password">("email");
+  const [activeTab, setActiveTab] = useState<"email" | "password" | "account">(
+    "email"
+  );
   const [loading, setLoading] = useState(false);
 
   // Email update state
@@ -72,6 +78,46 @@ export const UserProfileUpdateModal: React.FC<UserProfileUpdateModalProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      "Delete Account",
+      "This will permanently delete your account, all your data (notes, tasks, galaxies), and end your subscription. This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete Account",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteUserAccount();
+              Alert.alert(
+                "Account Deleted",
+                "Your account has been permanently deleted. You will be logged out.",
+                [
+                  {
+                    text: "OK",
+                    onPress: async () => {
+                      // Close modal and trigger logout
+                      onClose();
+                      // Note: The logout will be handled by the parent component
+                      // when it detects the user is no longer authenticated
+                    },
+                  },
+                ]
+              );
+            } catch (error: any) {
+              console.error("Delete account error:", error);
+              Alert.alert(
+                "Error",
+                error.message || "Failed to delete account. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handlePasswordUpdate = async () => {
@@ -278,6 +324,48 @@ export const UserProfileUpdateModal: React.FC<UserProfileUpdateModalProps> = ({
     </View>
   );
 
+  const renderAccountTab = () => (
+    <View style={styles.tabContent}>
+      <Text style={[styles.tabSubtitle, { color: currentPalette.quinary }]}>
+        Manage your account settings
+      </Text>
+
+      <View style={styles.inputContainer}>
+        <Text style={[styles.label, { color: currentPalette.quinary }]}>
+          Current Username
+        </Text>
+        <Text style={[styles.currentValue, { color: currentPalette.quinary }]}>
+          {userState.user?.username}
+        </Text>
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={[styles.label, { color: currentPalette.quinary }]}>
+          Current Email
+        </Text>
+        <Text style={[styles.currentValue, { color: currentPalette.quinary }]}>
+          {userState.user?.email}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={[
+          styles.updateButton,
+          {
+            backgroundColor: "transparent",
+            borderWidth: 1,
+            borderColor: "#dc2626",
+          },
+        ]}
+        onPress={handleDeleteAccount}
+      >
+        <Text style={[styles.updateButtonText, { color: "#dc2626" }]}>
+          Delete Account
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <Modal
       visible={visible}
@@ -346,11 +434,37 @@ export const UserProfileUpdateModal: React.FC<UserProfileUpdateModalProps> = ({
               Password
             </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              activeTab === "account" && {
+                borderBottomColor: currentPalette.quaternary,
+              },
+            ]}
+            onPress={() => setActiveTab("account")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                { color: currentPalette.tertiary },
+                activeTab === "account" && {
+                  color: currentPalette.quaternary,
+                },
+              ]}
+            >
+              Account
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Tab Content */}
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {activeTab === "email" ? renderEmailTab() : renderPasswordTab()}
+          {activeTab === "email"
+            ? renderEmailTab()
+            : activeTab === "password"
+            ? renderPasswordTab()
+            : renderAccountTab()}
         </ScrollView>
       </SafeAreaView>
     </Modal>

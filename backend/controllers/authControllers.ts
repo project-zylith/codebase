@@ -292,3 +292,42 @@ export const updateUserPassword = async (
     res.status(500).send({ message: "Internal server error." });
   }
 };
+
+// Delete user account
+export const deleteUserAccount = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  console.log("🎯 deleteUserAccount controller hit!");
+
+  // Extract token from Authorization header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).send({ message: "User must be authenticated." });
+  }
+
+  // Verify JWT token
+  const decoded = verifyToken(token);
+  if (!decoded || !decoded.userId) {
+    return res.status(401).send({ message: "Invalid token." });
+  }
+
+  try {
+    // Delete user account and all associated data
+    const result = await UserService.deleteUserAccount(decoded.userId);
+
+    if (!result.success) {
+      return res.status(500).send({ message: result.message });
+    }
+
+    res.send({
+      message: result.message,
+      success: true,
+    });
+  } catch (error) {
+    console.error("Delete account error:", error);
+    res.status(500).send({ message: "Internal server error." });
+  }
+};

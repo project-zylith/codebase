@@ -125,4 +125,46 @@ export class UserService {
       return false;
     }
   }
+
+  static async deleteUserAccount(
+    userId: number
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Start a transaction to ensure data consistency
+      await db.transaction(async (trx) => {
+        // 1. Cancel Stripe subscription if exists
+        const subscription = await trx("user_subscriptions")
+          .where({ user_id: userId })
+          .first();
+
+        if (subscription?.stripe_subscription_id) {
+          // Note: In production, you'd want to call Stripe API here
+          // For now, we'll just mark it as canceled
+          await trx("user_subscriptions").where({ user_id: userId }).update({
+            status: "canceled",
+            canceled_at: trx.fn.now(),
+          });
+        }
+
+        // 2. Delete user (this will cascade to all related data due to foreign key constraints)
+        const deletedRows = await trx("users").where({ id: userId }).del();
+
+        if (deletedRows === 0) {
+          throw new Error("User not found");
+        }
+      });
+
+      return {
+        success: true,
+        message:
+          "Account and all associated data have been permanently deleted",
+      };
+    } catch (error: any) {
+      console.error("Error deleting user account:", error);
+      return {
+        success: false,
+        message: error.message || "Failed to delete account",
+      };
+    }
+  }
 }
