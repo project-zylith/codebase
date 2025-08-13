@@ -11,7 +11,7 @@ import {
 
 // Apple IAP Product IDs - these must match what you configure in App Store Connect
 export const PRODUCT_IDS = {
-  BASIC_MONTHLY: "com.renai.basic_monthly",
+  BASIC_MONTHLY: "com.renai.basic_monthly2",
   BASIC_ANNUAL: "com.renai.basic_annual",
   PRO_MONTHLY: "com.renai.pro_monthly",
   PRO_ANNUAL: "com.renai.pro_annual",
