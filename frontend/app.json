@@ -18,7 +18,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.apiary.zylith",
-      "buildNumber": "12",
+      "buildNumber": "13",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "This app uses the camera to allow users to capture images for their notes and tasks within the Renaissance productivity app.",

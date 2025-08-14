@@ -46,6 +46,12 @@ export const Footer = () => {
                   Portfolio
                 </Link>
                 <Link
+                  to="/resume"
+                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                >
+                  Resume
+                </Link>
+                <Link
                   to="/renai"
                   className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
                 >

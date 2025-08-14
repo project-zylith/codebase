@@ -8,6 +8,7 @@ export const Navigation = () => {
 
   const navItems = [
     { path: "/", label: "Portfolio" },
+    { path: "/resume", label: "Resume" },
     { path: "/renai", label: "REN|AI" },
     { path: "/updates", label: "Updates" },
   ];

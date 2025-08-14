@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { Navigation } from "./components/Navigation";
 import { DeveloperPage } from "./pages/DeveloperPage";
+import { ResumePage } from "./pages/ResumePage";
 import { RENAIPage } from "./pages/RENAIPage";
 import { UpdatesPage } from "./pages/UpdatesPage";
 
@@ -16,6 +17,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<DeveloperPage />} />
+            <Route path="/resume" element={<ResumePage />} />
             <Route path="/renai" element={<RENAIPage />} />
             <Route path="/updates" element={<UpdatesPage />} />
           </Routes>
