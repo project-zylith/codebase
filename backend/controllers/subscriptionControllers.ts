@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { db } from "../src/database";
+import {
+  AppleReceiptValidator,
+  ReceiptValidationResult,
+} from "../src/services/appleReceiptValidation";
 
 interface AuthenticatedRequest extends Request {
   session?: {
@@ -561,5 +565,296 @@ export const createPaymentIntent = async (
   } catch (error) {
     console.error("Error creating payment intent:", error);
     res.status(500).json({ error: "Failed to create payment intent" });
+  }
+};
+
+// Apple Receipt Validation Endpoints
+
+/**
+ * Validates an Apple receipt and creates/updates a subscription
+ * @route POST /api/subscriptions/validate-apple-receipt
+ */
+export const validateAppleReceipt = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
+
+    const { receiptData, productId } = req.body;
+
+    if (!receiptData || !productId) {
+      return res.status(400).json({
+        error: "Receipt data and product ID are required",
+      });
+    }
+
+    console.log("🍎 Validating Apple receipt for user:", userId);
+    console.log("📱 Product ID:", productId);
+
+    // Validate the receipt with Apple
+    const validator = new AppleReceiptValidator();
+    const validationResult = await validator.validateReceipt(receiptData);
+
+    if (!validationResult.isValid) {
+      console.log("❌ Receipt validation failed:", validationResult.error);
+      return res.status(400).json({
+        error: "Invalid receipt",
+        details: validationResult.error,
+      });
+    }
+
+    console.log("✅ Receipt validated successfully");
+    console.log("🌍 Environment:", validationResult.environment);
+    console.log("🆔 Transaction ID:", validationResult.transactionId);
+
+    // Check if this transaction has already been processed
+    const existingSubscription = await db("user_subscriptions")
+      .where("apple_transaction_id", validationResult.transactionId)
+      .first();
+
+    if (existingSubscription) {
+      console.log(
+        "⚠️ Transaction already processed:",
+        validationResult.transactionId
+      );
+      return res.status(409).json({
+        error: "Transaction already processed",
+        subscription: existingSubscription,
+      });
+    }
+
+    // Find the subscription plan that matches the Apple product ID
+    const subscriptionPlan = await db("subscription_plans")
+      .where("apple_product_id", productId)
+      .first();
+
+    if (!subscriptionPlan) {
+      console.log(
+        "❌ No subscription plan found for Apple product ID:",
+        productId
+      );
+      return res.status(400).json({
+        error: "Invalid product ID",
+        details: "No subscription plan found for this Apple product",
+      });
+    }
+
+    // Create or update the user subscription
+    const subscriptionData = {
+      user_id: userId,
+      plan_id: subscriptionPlan.id,
+      status: "active",
+      start_date: validationResult.purchaseDate || new Date(),
+      end_date: validationResult.expirationDate || null,
+      apple_receipt_data: receiptData,
+      apple_transaction_id: validationResult.transactionId,
+      apple_original_transaction_id: validationResult.originalTransactionId,
+      apple_product_id: validationResult.productId,
+      apple_purchase_date: validationResult.purchaseDate,
+      apple_expiration_date: validationResult.expirationDate,
+      apple_is_trial_period: validationResult.isTrialPeriod || false,
+      apple_is_intro_offer_period: validationResult.isIntroOfferPeriod || false,
+      apple_validation_environment: validationResult.environment,
+      apple_last_validated: new Date(),
+      apple_validation_status: "validated",
+    };
+
+    // Check if user already has an active subscription for this plan
+    const existingUserSubscription = await db("user_subscriptions")
+      .where({
+        user_id: userId,
+        plan_id: subscriptionPlan.id,
+      })
+      .first();
+
+    let subscription;
+    if (existingUserSubscription) {
+      // Update existing subscription
+      subscription = await db("user_subscriptions")
+        .where("id", existingUserSubscription.id)
+        .update(subscriptionData)
+        .returning("*")
+        .first();
+
+      console.log("🔄 Updated existing subscription:", subscription.id);
+    } else {
+      // Create new subscription
+      subscription = await db("user_subscriptions")
+        .insert(subscriptionData)
+        .returning("*")
+        .first();
+
+      console.log("🆕 Created new subscription:", subscription.id);
+    }
+
+    res.json({
+      success: true,
+      subscription,
+      validation: {
+        environment: validationResult.environment,
+        transactionId: validationResult.transactionId,
+        productId: validationResult.productId,
+        purchaseDate: validationResult.purchaseDate,
+        expirationDate: validationResult.expirationDate,
+        isTrialPeriod: validationResult.isTrialPeriod,
+        isIntroOfferPeriod: validationResult.isIntroOfferPeriod,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error validating Apple receipt:", error);
+    res.status(500).json({
+      error: "Failed to validate receipt",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+/**
+ * Refreshes Apple receipt validation for an existing subscription
+ * @route POST /api/subscriptions/refresh-apple-receipt
+ */
+export const refreshAppleReceipt = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
+
+    const { subscriptionId } = req.params;
+
+    // Get the user's subscription
+    const subscription = await db("user_subscriptions")
+      .where({
+        id: subscriptionId,
+        user_id: userId,
+      })
+      .first();
+
+    if (!subscription) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
+
+    if (!subscription.apple_receipt_data) {
+      return res.status(400).json({ error: "No Apple receipt data found" });
+    }
+
+    console.log(
+      "🔄 Refreshing Apple receipt validation for subscription:",
+      subscriptionId
+    );
+
+    // Re-validate the receipt
+    const validator = new AppleReceiptValidator();
+    const validationResult = await validator.validateReceipt(
+      subscription.apple_receipt_data
+    );
+
+    if (!validationResult.isValid) {
+      // Update validation status to failed
+      await db("user_subscriptions").where("id", subscriptionId).update({
+        apple_validation_status: "failed",
+        apple_last_validated: new Date(),
+      });
+
+      return res.status(400).json({
+        error: "Receipt validation failed",
+        details: validationResult.error,
+      });
+    }
+
+    // Update the subscription with new validation data
+    const updatedSubscription = await db("user_subscriptions")
+      .where("id", subscriptionId)
+      .update({
+        status: "active",
+        end_date: validationResult.expirationDate || null,
+        apple_expiration_date: validationResult.expirationDate,
+        apple_last_validated: new Date(),
+        apple_validation_status: "validated",
+        apple_validation_environment: validationResult.environment,
+      })
+      .returning("*")
+      .first();
+
+    console.log("✅ Receipt validation refreshed successfully");
+
+    res.json({
+      success: true,
+      subscription: updatedSubscription,
+      validation: {
+        environment: validationResult.environment,
+        transactionId: validationResult.transactionId,
+        productId: validationResult.productId,
+        purchaseDate: validationResult.purchaseDate,
+        expirationDate: validationResult.expirationDate,
+        isTrialPeriod: validationResult.isTrialPeriod,
+        isIntroOfferPeriod: validationResult.isIntroOfferPeriod,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error refreshing Apple receipt:", error);
+    res.status(500).json({
+      error: "Failed to refresh receipt validation",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+/**
+ * Gets Apple receipt validation status for a user's subscription
+ * @route GET /api/subscriptions/:subscriptionId/apple-receipt-status
+ */
+export const getAppleReceiptStatus = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
+
+    const { subscriptionId } = req.params;
+
+    const subscription = await db("user_subscriptions")
+      .where({
+        id: subscriptionId,
+        user_id: userId,
+      })
+      .select([
+        "id",
+        "apple_transaction_id",
+        "apple_product_id",
+        "apple_purchase_date",
+        "apple_expiration_date",
+        "apple_is_trial_period",
+        "apple_is_intro_offer_period",
+        "apple_validation_environment",
+        "apple_last_validated",
+        "apple_validation_status",
+      ])
+      .first();
+
+    if (!subscription) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
+
+    res.json({
+      success: true,
+      receiptStatus: subscription,
+    });
+  } catch (error) {
+    console.error("❌ Error getting Apple receipt status:", error);
+    res.status(500).json({
+      error: "Failed to get receipt status",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
