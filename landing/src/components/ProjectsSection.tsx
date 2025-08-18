@@ -15,7 +15,7 @@ export const ProjectsSection = () => {
         "Google AI",
         "PostgreSQL",
       ],
-      status: "Live on iOS App Store",
+      status: "Beta Testing",
       icon: "🌌",
       color: "cosmic-vibrant-blue",
       link: "/renai",

@@ -54,11 +54,11 @@ export const UpdatesList = () => {
     },
     {
       id: 4,
-      title: "REN|AI v1.0.0 Launch",
+      title: "REN|AI Beta Launch",
       date: "September 2024",
       type: "Launch",
       description:
-        "The official launch of REN|AI! After months of development, our AI-powered note-taking and task management app is now available on the App Store.",
+        "The beta launch of REN|AI! After months of development, our AI-powered note-taking and task management app is now available for beta testing.",
       features: [
         "Full note-taking system",
         "AI task generation",
