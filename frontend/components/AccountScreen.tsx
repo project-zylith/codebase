@@ -17,6 +17,7 @@ import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
 import { AppleIAPSubscriptionModal } from "./AppleIAPSubscriptionModal";
 import UserProfileUpdateModal from "./UserProfileUpdateModal";
+import { getToken } from "../adapters/userAdapters";
 
 const { width } = Dimensions.get("window");
 
@@ -29,6 +30,7 @@ export const AccountScreen = () => {
   const [showProfileUpdateModal, setShowProfileUpdateModal] = useState(false);
   const [selectedPaletteId, setSelectedPaletteId] = useState(currentPaletteId);
   const [scaleAnim] = useState(new Animated.Value(1));
+  const [userToken, setUserToken] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     console.log("AccountScreen: userState changed", userState);
@@ -82,6 +84,19 @@ export const AccountScreen = () => {
     );
   };
 
+  const handleOpenSubscriptionModal = async () => {
+    if (userState.user) {
+      const token = await getToken();
+      setUserToken(token || undefined);
+      setShowSubscriptionModal(true);
+    } else {
+      Alert.alert(
+        "Authentication Required",
+        "Please log in to view subscription options."
+      );
+    }
+  };
+
   const renderSubscriptionSection = () => (
     <View
       style={[
@@ -121,7 +136,7 @@ export const AccountScreen = () => {
             styles.upgradeButton,
             { backgroundColor: currentPalette.quaternary },
           ]}
-          onPress={() => setShowSubscriptionModal(true)}
+          onPress={handleOpenSubscriptionModal}
         >
           <Ionicons name="arrow-up" size={16} color={currentPalette.tertiary} />
           <Text
@@ -401,8 +416,13 @@ export const AccountScreen = () => {
       </View>
       <AppleIAPSubscriptionModal
         visible={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
+        onClose={() => {
+          setShowSubscriptionModal(false);
+          setUserToken(undefined);
+        }}
         onUpgrade={handleUpgradeSubscription}
+        userToken={userToken}
+        userId={userState.user?.id}
       />
       <UserProfileUpdateModal
         visible={showProfileUpdateModal}

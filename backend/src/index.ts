@@ -9,6 +9,7 @@ import * as taskControllers from "../controllers/taskControllers";
 import * as noteControllers from "../controllers/noteControllers";
 import * as galaxyControllers from "../controllers/galaxyControllers";
 import * as subscriptionControllers from "../controllers/subscriptionControllers";
+import * as appleAuth from "../controllers/appleAuthController";
 import * as galaxyAi from "./aiServices/galaxyAi";
 import SchedulerService from "./scheduler";
 const session = require("express-session");
@@ -218,6 +219,7 @@ console.log("✅ Galaxy AI routes registered!");
 
 app.post("/api/auth/register", auth.registerUser);
 app.post("/api/auth/login", auth.loginUser);
+app.post("/api/auth/apple-signin", appleAuth.appleSignIn);
 app.get("/api/auth/me", checkAuthentication, auth.showMe);
 app.delete("/api/auth/logout", auth.logoutUser);
 app.put("/api/auth/email", checkAuthentication, auth.updateUserEmail);
@@ -232,6 +234,20 @@ app.delete("/api/auth/account", checkAuthentication, auth.deleteUserAccount);
 app.get(
   "/api/subscriptions/plans",
   subscriptionControllers.getSubscriptionPlans
+);
+
+// Apple IAP Receipt Validation Routes
+app.post(
+  "/api/subscriptions/validate-apple-receipt",
+  subscriptionControllers.validateAppleReceipt
+);
+app.post(
+  "/api/subscriptions/:id/refresh-apple-receipt",
+  subscriptionControllers.refreshAppleReceipt
+);
+app.get(
+  "/api/subscriptions/:id/apple-receipt-status",
+  subscriptionControllers.getAppleReceiptStatus
 );
 
 // Authenticated routes

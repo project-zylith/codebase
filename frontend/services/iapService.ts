@@ -8,6 +8,7 @@ import {
   ProductPurchase,
   PurchaseError,
 } from "react-native-iap";
+import { API_ENDPOINTS } from "../utils/apiConfig";
 
 // Apple IAP Product IDs - these must match what you configure in App Store Connect
 export const PRODUCT_IDS = {
@@ -26,6 +27,52 @@ export interface IAPProduct {
   period: string;
   productId: ProductId;
   features: string[];
+}
+
+// Apple IAP Backend Integration Types
+export interface AppleReceiptValidationRequest {
+  receiptData: string;
+  userId?: number;
+}
+
+export interface AppleReceiptValidationResponse {
+  success: boolean;
+  subscription?: {
+    id: number;
+    userId: number;
+    planId: number;
+    status: string;
+    appleProductId: string;
+    appleTransactionId: string;
+    appleOriginalTransactionId: string;
+    applePurchaseDate: string;
+    appleExpirationDate?: string;
+    appleIsTrialPeriod: boolean;
+    appleIsIntroOfferPeriod: boolean;
+    appleValidationEnvironment: string;
+    appleLastValidated: string;
+    appleValidationStatus: string;
+  };
+  error?: string;
+  message?: string;
+}
+
+export interface AppleReceiptRefreshRequest {
+  subscriptionId: number;
+}
+
+export interface AppleReceiptStatusResponse {
+  success: boolean;
+  status?: {
+    isValid: boolean;
+    environment: string;
+    lastValidated: string;
+    validationStatus: string;
+    expirationDate?: string;
+    isTrialPeriod: boolean;
+    isIntroOfferPeriod: boolean;
+  };
+  error?: string;
 }
 
 export const SUBSCRIPTION_PLANS: IAPProduct[] = [
@@ -182,6 +229,196 @@ class IAPService {
 
   isProductIdValid(productId: string): productId is ProductId {
     return Object.values(PRODUCT_IDS).includes(productId as ProductId);
+  }
+
+  // ===== Apple IAP Backend Integration =====
+
+  /**
+   * Validate Apple receipt with backend server
+   * This should be called after a successful purchase to verify the receipt
+   */
+  async validateAppleReceipt(
+    receiptData: string,
+    userToken: string,
+    userId?: number
+  ): Promise<AppleReceiptValidationResponse> {
+    try {
+      console.log("🔍 Validating Apple receipt with backend...");
+
+      const response = await fetch(
+        API_ENDPOINTS.SUBSCRIPTIONS.VALIDATE_APPLE_RECEIPT,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            receiptData,
+            userId,
+          } as AppleReceiptValidationRequest),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("✅ Apple receipt validation successful:", result);
+      return result;
+    } catch (error) {
+      console.error("❌ Apple receipt validation failed:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Refresh/Re-validate an existing Apple receipt
+   * Useful for checking subscription status or refreshing expired receipts
+   */
+  async refreshAppleReceipt(
+    subscriptionId: number,
+    userToken: string
+  ): Promise<AppleReceiptValidationResponse> {
+    try {
+      console.log(
+        "🔄 Refreshing Apple receipt for subscription:",
+        subscriptionId
+      );
+
+      const response = await fetch(
+        API_ENDPOINTS.SUBSCRIPTIONS.REFRESH_APPLE_RECEIPT(subscriptionId),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            subscriptionId,
+          } as AppleReceiptRefreshRequest),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("✅ Apple receipt refresh successful:", result);
+      return result;
+    } catch (error) {
+      console.error("❌ Apple receipt refresh failed:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the current Apple receipt validation status
+   * Useful for checking if a subscription is still valid
+   */
+  async getAppleReceiptStatus(
+    subscriptionId: number,
+    userToken: string
+  ): Promise<AppleReceiptStatusResponse> {
+    try {
+      console.log(
+        "📋 Getting Apple receipt status for subscription:",
+        subscriptionId
+      );
+
+      const response = await fetch(
+        API_ENDPOINTS.SUBSCRIPTIONS.APPLE_RECEIPT_STATUS(subscriptionId),
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("✅ Apple receipt status retrieved:", result);
+      return result;
+    } catch (error) {
+      console.error("❌ Failed to get Apple receipt status:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Complete purchase flow with backend validation
+   * This is the main method that should be used for purchases
+   */
+  async completePurchaseWithValidation(
+    productId: ProductId,
+    userToken: string,
+    userId?: number
+  ): Promise<AppleReceiptValidationResponse> {
+    try {
+      console.log("🛒 Starting complete purchase flow for:", productId);
+
+      // Step 1: Request the purchase from Apple
+      const purchase = await this.purchaseProduct(productId);
+      console.log("✅ Apple purchase successful:", purchase.transactionId);
+
+      // Step 2: Extract receipt data from purchase
+      const receiptData = purchase.transactionReceipt;
+      if (!receiptData) {
+        throw new Error("No receipt data received from purchase");
+      }
+
+      // Step 3: Validate receipt with backend
+      const validationResult = await this.validateAppleReceipt(
+        receiptData,
+        userToken,
+        userId
+      );
+
+      if (validationResult.success) {
+        console.log("🎉 Complete purchase flow successful!");
+        return validationResult;
+      } else {
+        throw new Error(validationResult.error || "Receipt validation failed");
+      }
+    } catch (error) {
+      console.error("❌ Complete purchase flow failed:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a subscription is active based on Apple receipt status
+   */
+  async isSubscriptionActive(
+    subscriptionId: number,
+    userToken: string
+  ): Promise<boolean> {
+    try {
+      const status = await this.getAppleReceiptStatus(
+        subscriptionId,
+        userToken
+      );
+      return status.success && status.status?.isValid === true;
+    } catch (error) {
+      console.error("❌ Failed to check subscription status:", error);
+      return false;
+    }
   }
 }
 

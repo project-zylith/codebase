@@ -18,21 +18,43 @@ import {
   ProductId,
 } from "../services/iapService";
 import { Product } from "react-native-iap";
+import { useAppleIAP } from "../hooks/useAppleIAP";
 
 interface AppleIAPSubscriptionModalProps {
   visible: boolean;
   onClose: () => void;
   onUpgrade: (planId: string) => void;
   currentSubscription?: any;
+  userToken?: string;
+  userId?: number;
 }
 
 export const AppleIAPSubscriptionModal: React.FC<
   AppleIAPSubscriptionModalProps
-> = ({ visible, onClose, onUpgrade, currentSubscription }) => {
+> = ({
+  visible,
+  onClose,
+  onUpgrade,
+  currentSubscription,
+  userToken,
+  userId,
+}) => {
   const { currentPalette } = useTheme();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
+
+  // Use the new Apple IAP hook
+  const {
+    isLoading: purchaseLoading,
+    error: purchaseError,
+    currentSubscription: validatedSubscription,
+    purchaseProduct,
+    clearError,
+    resetState,
+  } = useAppleIAP();
+
+  // Track which plan is currently being purchased
+  const [purchasingPlanId, setPurchasingPlanId] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -64,22 +86,34 @@ export const AppleIAPSubscriptionModal: React.FC<
   };
 
   const handleSubscribe = async (plan: any) => {
+    if (!userToken) {
+      Alert.alert(
+        "Authentication Required",
+        "Please log in to purchase a subscription."
+      );
+      return;
+    }
+
     try {
-      setPurchaseLoading(plan.id);
+      setPurchasingPlanId(plan.id);
+      clearError();
 
-      // Use the IAP service to make the purchase
-      await iapService.purchaseProduct(plan.productId);
+      console.log("🛒 Starting purchase for:", plan.name);
 
-      // Success!
+      // Use the new Apple IAP hook with backend validation
+      await purchaseProduct(plan.productId, userToken, userId);
+
+      // Success! The hook will handle the subscription state
       Alert.alert(
         "Subscription Successful!",
-        `You've successfully subscribed to ${plan.name}.`,
+        `You've successfully subscribed to ${plan.name}. Your receipt has been validated with our servers.`,
         [
           {
             text: "OK",
             onPress: () => {
               onUpgrade(plan.id);
               onClose();
+              resetState();
             },
           },
         ]
@@ -107,13 +141,13 @@ export const AppleIAPSubscriptionModal: React.FC<
 
       Alert.alert("Purchase Failed", errorMessage);
     } finally {
-      setPurchaseLoading(null);
+      setPurchasingPlanId(null);
     }
   };
 
   const renderPlanCard = (plan: any) => {
     const isCurrentPlan = currentSubscription?.plan_id === plan.id;
-    const isLoading = purchaseLoading === plan.id;
+    const isLoading = purchasingPlanId === plan.id;
     const isAnnual = plan.period === "/year";
 
     return (
@@ -281,6 +315,26 @@ export const AppleIAPSubscriptionModal: React.FC<
           </Text>
         </View>
 
+        {/* Error Display */}
+        {purchaseError && (
+          <View
+            style={[
+              styles.errorContainer,
+              { backgroundColor: currentPalette.quinary + "20" },
+            ]}
+          >
+            <Text style={[styles.errorText, { color: currentPalette.quinary }]}>
+              {purchaseError}
+            </Text>
+            <TouchableOpacity
+              onPress={clearError}
+              style={styles.errorCloseButton}
+            >
+              <Ionicons name="close" size={16} color={currentPalette.quinary} />
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Subscription Plans */}
         <ScrollView
           style={styles.content}
@@ -438,6 +492,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 16,
     textAlign: "center",
+  },
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    margin: 20,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 0, 0.3)",
+  },
+  errorText: {
+    fontSize: 14,
+    flex: 1,
+    marginRight: 12,
+  },
+  errorCloseButton: {
+    padding: 4,
   },
 });
 

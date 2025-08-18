@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
     UPDATE_EMAIL: `${API_BASE_URL}/api/auth/email`,
     UPDATE_PASSWORD: `${API_BASE_URL}/api/auth/password`,
     DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/account`,
+    APPLE_SIGN_IN: `${API_BASE_URL}/api/auth/apple-signin`,
   },
   TASKS: {
     LIST: `${API_BASE_URL}/api/tasks`,
@@ -68,5 +69,11 @@ export const API_ENDPOINTS = {
     SWITCH_PLAN: `${API_BASE_URL}/api/subscriptions/switch-plan`,
     PAYMENT_INTENT: `${API_BASE_URL}/api/subscriptions/payment-intent`,
     WEBHOOK: `${API_BASE_URL}/api/subscriptions/webhook`,
+    // Apple IAP Receipt Validation Endpoints
+    VALIDATE_APPLE_RECEIPT: `${API_BASE_URL}/api/subscriptions/validate-apple-receipt`,
+    REFRESH_APPLE_RECEIPT: (id: number) =>
+      `${API_BASE_URL}/api/subscriptions/${id}/refresh-apple-receipt`,
+    APPLE_RECEIPT_STATUS: (id: number) =>
+      `${API_BASE_URL}/api/subscriptions/${id}/apple-receipt-status`,
   },
 };

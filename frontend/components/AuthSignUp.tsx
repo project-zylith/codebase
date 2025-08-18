@@ -11,6 +11,7 @@ import {
 import { registerUser } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { AppleSignInButton } from "./AppleSignInButton";
 
 const AuthSignUp: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -146,6 +147,9 @@ const AuthSignUp: React.FC = () => {
           Register
         </Text>
       </TouchableOpacity>
+
+      {/* Apple Sign In Button - Temporarily Disabled */}
+      {/* TODO: Re-enable when App Store Connect is configured */}
     </View>
   );
 };
@@ -187,6 +191,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     letterSpacing: 1,
   },
+  // Apple Sign In styles - temporarily disabled
+  // dividerContainer: { flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 20 },
+  // dividerLine: { flex: 1, height: 1, opacity: 0.3 },
+  // dividerText: { marginHorizontal: 16, fontSize: 14, fontWeight: "500" },
+  // appleButton: { width: "100%", marginTop: 8 },
 });
 
 export default AuthSignUp;
