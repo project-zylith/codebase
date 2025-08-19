@@ -34,6 +34,9 @@ const port = process.env.PORT || 3000;
 app.use((req: Request, res: Response, next) => {
   console.log(`🔍 ${req.method} ${req.url} - ${new Date().toISOString()}`);
   console.log(`📦 Body:`, req.body);
+  console.log(`📋 Headers:`, req.headers);
+  console.log(`🔑 Content-Type:`, req.headers["content-type"]);
+  console.log(`📏 Content-Length:`, req.headers["content-length"]);
   next();
 });
 
@@ -239,6 +242,7 @@ app.get(
 // Apple IAP Receipt Validation Routes
 app.post(
   "/api/subscriptions/validate-apple-receipt",
+  checkAuthentication,
   subscriptionControllers.validateAppleReceipt
 );
 app.post(

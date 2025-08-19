@@ -252,10 +252,7 @@ class IAPService {
       const requestBody = {
         receiptData,
         userId,
-        productId:
-          productId ||
-          this.getPlanByProductId(receiptData)?.productId ||
-          "unknown",
+        productId: productId || "unknown",
       };
       console.log("📦 Request body:", JSON.stringify(requestBody, null, 2));
 
@@ -388,28 +385,46 @@ class IAPService {
       const purchase = await this.purchaseProduct(productId);
       console.log("✅ Apple purchase successful:", purchase.transactionId);
 
-      // Step 2: Extract receipt data from purchase
-      // react-native-iap returns receipt data in different properties
+      // Step 2: Get the completed purchase with receipt data
+      // We need to wait a moment and then get available purchases to get the receipt
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
+
+      const availablePurchases = await this.getAvailablePurchases();
+      const completedPurchase = availablePurchases.find(
+        (p) => p.transactionId === purchase.transactionId
+      );
+
+      if (!completedPurchase) {
+        throw new Error("Could not find completed purchase with receipt data");
+      }
+
+      console.log(
+        "✅ Found completed purchase:",
+        completedPurchase.transactionId
+      );
+
+      // Step 3: Extract receipt data from completed purchase
       let receiptData: string =
-        purchase.transactionReceipt ||
-        purchase.purchaseToken ||
-        purchase.originalTransactionIdentifierIOS ||
-        purchase.transactionId ||
+        completedPurchase.transactionReceipt ||
+        completedPurchase.purchaseToken ||
+        completedPurchase.originalTransactionIdentifierIOS ||
+        completedPurchase.transactionId ||
         "";
 
       if (!receiptData) {
         console.warn(
           "⚠️ No receipt data found, using transaction ID as fallback"
         );
-        receiptData = purchase.transactionId || "";
+        receiptData = completedPurchase.transactionId || "";
       }
 
       console.log(
         "📄 Receipt data extracted:",
         receiptData ? "Present" : "Missing"
       );
+      console.log("📄 Receipt data length:", receiptData.length);
 
-      // Step 3: Validate receipt with backend
+      // Step 4: Validate receipt with backend
       const validationResult = await this.validateAppleReceipt(
         receiptData,
         userToken,
