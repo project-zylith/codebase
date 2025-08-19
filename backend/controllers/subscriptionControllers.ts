@@ -584,16 +584,26 @@ export const validateAppleReceipt = async (
       return res.status(401).json({ error: "User must be authenticated" });
     }
 
-    const { receiptData, productId } = req.body;
+    const { receiptData, productId, userId: bodyUserId } = req.body;
 
-    if (!receiptData || !productId) {
+    if (!receiptData) {
       return res.status(400).json({
-        error: "Receipt data and product ID are required",
+        error: "Receipt data is required",
       });
     }
 
+    // Use productId from body if available, otherwise try to extract from receipt
+    let finalProductId = productId;
+    if (!finalProductId) {
+      console.log(
+        "⚠️ No product ID in request body, attempting to extract from receipt"
+      );
+      // You might need to decode the receipt to get the product ID
+      finalProductId = "unknown"; // Fallback for now
+    }
+
     console.log("🍎 Validating Apple receipt for user:", userId);
-    console.log("📱 Product ID:", productId);
+    console.log("📱 Product ID:", finalProductId);
 
     // Validate the receipt with Apple
     const validator = new AppleReceiptValidator();
@@ -629,7 +639,7 @@ export const validateAppleReceipt = async (
 
     // Find the subscription plan that matches the Apple product ID
     const subscriptionPlan = await db("subscription_plans")
-      .where("apple_product_id", productId)
+      .where("apple_product_id", finalProductId)
       .first();
 
     if (!subscriptionPlan) {
