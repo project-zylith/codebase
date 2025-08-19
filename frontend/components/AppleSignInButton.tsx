@@ -57,7 +57,10 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({
 
   const handleAppleSignIn = async () => {
     try {
+      console.log("🍎 Starting Apple Sign In process...");
       const result = await signIn();
+      console.log("🍎 Sign In result:", result);
+
       if (result.success && result.user) {
         // Store the JWT token from Apple Sign In
         if (result.user.token) {
@@ -68,12 +71,15 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = ({
           // The UserContext will handle this automatically when the app checks for stored sessions
           onSuccess?.();
         } else {
+          console.error("❌ No token received from Apple Sign In");
           onError?.("No authentication token received");
         }
       } else {
+        console.error("❌ Apple Sign In failed:", result.error);
         onError?.(result.error || "Apple Sign In failed");
       }
     } catch (error) {
+      console.error("❌ Apple Sign In exception:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Apple Sign In failed";
       onError?.(errorMessage);
