@@ -43,6 +43,16 @@ class AppleAuthService {
     try {
       console.log("🍎 Starting Apple Sign In...");
 
+      // First check if Apple Sign In is supported
+      const isSupported = await this.isAvailable();
+      if (!isSupported) {
+        return {
+          success: false,
+          error:
+            "Apple Sign In is not supported on this device. It requires iOS 13 or later.",
+        };
+      }
+
       // Request Apple authentication
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
@@ -74,6 +84,7 @@ class AppleAuthService {
 
       let errorMessage = "Apple Sign In failed. Please try again.";
 
+      // Handle specific Apple Auth errors
       if (error.code === appleAuth.Error.CANCELED) {
         errorMessage = "Sign In was cancelled.";
       } else if (error.code === appleAuth.Error.INVALID_RESPONSE) {
@@ -82,6 +93,12 @@ class AppleAuthService {
         errorMessage = "Sign In request was not handled.";
       } else if (error.code === appleAuth.Error.UNKNOWN) {
         errorMessage = "An unknown error occurred. Please try again.";
+      } else if (
+        error.message &&
+        error.message.includes("AppleAuth is not supported")
+      ) {
+        errorMessage =
+          "Apple Sign In is not supported on this device. It requires iOS 13 or later.";
       }
 
       return {
