@@ -2,7 +2,7 @@
   "expo": {
     "name": "REN|AI",
     "slug": "renaissance",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.apiary.zylith",
-      "buildNumber": "15",
+      "buildNumber": "17",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "This app uses the camera to allow users to capture images for their notes and tasks within the Renaissance productivity app.",
@@ -31,8 +31,15 @@
               "NSExceptionRequiresForwardSecrecy": false
             }
           }
-        }
-      }
+        },
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "com.apiary.zylith",
+            "CFBundleURLSchemes": ["com.apiary.zylith"]
+          }
+        ]
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

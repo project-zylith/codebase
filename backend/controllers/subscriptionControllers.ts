@@ -579,6 +579,19 @@ export const validateAppleReceipt = async (
   res: Response
 ) => {
   try {
+    console.log("🍎 validateAppleReceipt controller called");
+    console.log("🍎 Request method:", req.method);
+    console.log("🍎 Request URL:", req.url);
+    console.log("🍎 Request headers:", req.headers);
+    console.log("🍎 Request body:", req.body);
+    console.log("🍎 Request body type:", typeof req.body);
+    console.log(
+      "🍎 Request body keys:",
+      req.body ? Object.keys(req.body) : "undefined"
+    );
+    console.log("🍎 User from request:", req.user);
+    console.log("🍎 Session from request:", req.session);
+
     const userId = getUserId(req);
     if (!userId) {
       return res.status(401).json({ error: "User must be authenticated" });

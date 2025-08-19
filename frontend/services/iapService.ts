@@ -246,8 +246,17 @@ class IAPService {
     try {
       console.log("🔍 Validating Apple receipt with backend...");
       console.log("📄 Receipt data length:", receiptData.length);
+      console.log(
+        "📄 Receipt data (first 100 chars):",
+        receiptData.substring(0, 100)
+      );
       console.log("🔑 User token present:", !!userToken);
+      console.log(
+        "🔑 User token (first 20 chars):",
+        userToken ? userToken.substring(0, 20) + "..." : "undefined"
+      );
       console.log("👤 User ID:", userId);
+      console.log("📱 Product ID:", productId);
 
       const requestBody = {
         receiptData,
@@ -255,6 +264,10 @@ class IAPService {
         productId: productId || "unknown",
       };
       console.log("📦 Request body:", JSON.stringify(requestBody, null, 2));
+      console.log(
+        "📦 Request body stringified length:",
+        JSON.stringify(requestBody).length
+      );
 
       const response = await fetch(
         API_ENDPOINTS.SUBSCRIPTIONS.VALIDATE_APPLE_RECEIPT,
@@ -267,6 +280,9 @@ class IAPService {
           body: JSON.stringify(requestBody),
         }
       );
+
+      console.log("🔍 Response status:", response.status);
+      console.log("🔍 Response headers:", response.headers);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -403,26 +419,82 @@ class IAPService {
         completedPurchase.transactionId
       );
 
-      // Step 3: Extract receipt data from completed purchase
-      let receiptData: string =
-        completedPurchase.transactionReceipt ||
-        completedPurchase.purchaseToken ||
-        completedPurchase.originalTransactionIdentifierIOS ||
-        completedPurchase.transactionId ||
-        "";
+      // Debug: Log all available properties
+      console.log("🔍 Completed purchase object properties:", {
+        transactionId: completedPurchase.transactionId,
+        transactionReceipt: completedPurchase.transactionReceipt
+          ? "Present"
+          : "Missing",
+        purchaseToken: completedPurchase.purchaseToken ? "Present" : "Missing",
+        originalTransactionIdentifierIOS:
+          completedPurchase.originalTransactionIdentifierIOS
+            ? "Present"
+            : "Missing",
+        productId: completedPurchase.productId,
+      });
 
-      if (!receiptData) {
-        console.warn(
-          "⚠️ No receipt data found, using transaction ID as fallback"
+      // Step 3: Extract receipt data from completed purchase
+      // On iOS, receipt data is typically in the transactionReceipt property
+      let receiptData: string = "";
+
+      console.log("🔍 Starting receipt data extraction...");
+      console.log(
+        "🔍 transactionReceipt:",
+        completedPurchase.transactionReceipt ? "Present" : "Missing"
+      );
+      console.log(
+        "🔍 purchaseToken:",
+        completedPurchase.purchaseToken ? "Present" : "Missing"
+      );
+      console.log(
+        "🔍 originalTransactionIdentifierIOS:",
+        completedPurchase.originalTransactionIdentifierIOS
+          ? "Present"
+          : "Missing"
+      );
+
+      if (completedPurchase.transactionReceipt) {
+        receiptData = completedPurchase.transactionReceipt;
+        console.log("✅ Using transactionReceipt for receipt data");
+      } else if (completedPurchase.purchaseToken) {
+        receiptData = completedPurchase.purchaseToken;
+        console.log("✅ Using purchaseToken for receipt data");
+      } else if (completedPurchase.originalTransactionIdentifierIOS) {
+        receiptData = completedPurchase.originalTransactionIdentifierIOS;
+        console.log(
+          "✅ Using originalTransactionIdentifierIOS for receipt data"
         );
-        receiptData = completedPurchase.transactionId || "";
+      } else {
+        // For iOS, we might need to get the receipt from the app bundle
+        console.log(
+          "⚠️ No receipt data found in purchase object, attempting to get app receipt"
+        );
+        try {
+          // Try to get the app receipt from the bundle
+          const appReceipt = await this.getAppReceipt();
+          if (appReceipt) {
+            receiptData = appReceipt;
+            console.log("✅ Using app receipt for receipt data");
+          } else {
+            // Last resort: use transaction ID
+            receiptData = completedPurchase.transactionId || "";
+            console.warn(
+              "⚠️ No receipt data found, using transaction ID as fallback"
+            );
+          }
+        } catch (receiptError) {
+          console.warn("⚠️ Failed to get app receipt:", receiptError);
+          receiptData = completedPurchase.transactionId || "";
+          console.warn("⚠️ Using transaction ID as fallback");
+        }
       }
 
+      console.log("🔍 Final receipt data length:", receiptData.length);
       console.log(
-        "📄 Receipt data extracted:",
-        receiptData ? "Present" : "Missing"
+        "🔍 Final receipt data (first 100 chars):",
+        receiptData.substring(0, 100)
       );
-      console.log("📄 Receipt data length:", receiptData.length);
+      console.log("🔍 Receipt data is empty:", receiptData.length === 0);
 
       // Step 4: Validate receipt with backend
       const validationResult = await this.validateAppleReceipt(
@@ -441,6 +513,22 @@ class IAPService {
     } catch (error) {
       console.error("❌ Complete purchase flow failed:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Get the app receipt from the iOS bundle
+   * This is useful when individual purchase receipts are not available
+   */
+  private async getAppReceipt(): Promise<string | null> {
+    try {
+      // For now, we'll return null since react-native-iap doesn't have a direct method
+      // In a real implementation, you might need to use a native module or different approach
+      console.log("📱 App receipt method called (not implemented yet)");
+      return null;
+    } catch (error) {
+      console.error("❌ Failed to get app receipt:", error);
+      return null;
     }
   }
 
