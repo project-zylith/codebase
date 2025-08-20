@@ -66,30 +66,47 @@ export class AppleReceiptValidator {
    */
   async validateReceipt(receiptData: string): Promise<ReceiptValidationResult> {
     try {
+      console.log("🍎 Starting receipt validation...");
+
       // First, try production environment
+      console.log("🔄 Trying production environment first...");
       const productionResult = await this.validateWithEnvironment(
         receiptData,
         "production"
       );
 
       if (productionResult.isValid) {
+        console.log("✅ Production validation successful");
         return productionResult;
       }
 
-      // If production fails with sandbox receipt error, try sandbox
+      // If production fails with sandbox receipt error (status 21007), try sandbox
       if (
-        productionResult.error?.includes("Sandbox receipt used in production")
+        productionResult.error?.includes("test environment") ||
+        productionResult.error?.includes("21007") ||
+        productionResult.error?.includes("sandbox")
       ) {
         console.log(
-          "🔄 Production validation failed, trying sandbox environment..."
+          "🔄 Production validation failed with sandbox receipt error, trying sandbox environment..."
         );
         const sandboxResult = await this.validateWithEnvironment(
           receiptData,
           "sandbox"
         );
+
+        if (sandboxResult.isValid) {
+          console.log("✅ Sandbox validation successful");
+        } else {
+          console.log(
+            "❌ Sandbox validation also failed:",
+            sandboxResult.error
+          );
+        }
+
         return sandboxResult;
       }
 
+      console.log("❌ Production validation failed:", productionResult.error);
       return productionResult;
     } catch (error) {
       console.error("❌ Receipt validation error:", error);
@@ -115,6 +132,8 @@ export class AppleReceiptValidator {
     const url =
       environment === "production" ? this.productionUrl : this.sandboxUrl;
 
+    console.log(`🌐 Validating with ${environment} environment:`, url);
+
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -133,6 +152,11 @@ export class AppleReceiptValidator {
       }
 
       const result: AppleReceiptValidationResponse = await response.json();
+      console.log(`📡 ${environment} response status:`, result.status);
+      console.log(
+        `📡 ${environment} response environment:`,
+        result.environment
+      );
 
       return this.processValidationResponse(result, environment);
     } catch (error) {
