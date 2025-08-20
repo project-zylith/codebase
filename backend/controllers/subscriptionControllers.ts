@@ -697,19 +697,21 @@ export const validateAppleReceipt = async (
     let subscription;
     if (existingUserSubscription) {
       // Update existing subscription
-      subscription = await db("user_subscriptions")
+      const updatedSubscriptions = await db("user_subscriptions")
         .where("id", existingUserSubscription.id)
         .update(subscriptionData)
-        .returning("*")
-        .first();
+        .returning("*");
+
+      subscription = updatedSubscriptions[0]; // Get the first (and only) updated row
 
       console.log("🔄 Updated existing subscription:", subscription.id);
     } else {
       // Create new subscription
-      subscription = await db("user_subscriptions")
+      const newSubscriptions = await db("user_subscriptions")
         .insert(subscriptionData)
-        .returning("*")
-        .first();
+        .returning("*");
+
+      subscription = newSubscriptions[0]; // Get the first (and only) inserted row
 
       console.log("🆕 Created new subscription:", subscription.id);
     }
