@@ -4,6 +4,12 @@ import { testConnection } from "./database";
 import * as ai from "./aiServices/taskInsights";
 import * as noteInsights from "./aiServices/noteInsights";
 import { checkAuthentication } from "../middleware/checkAuthentication";
+import {
+  checkNoteLimits,
+  checkTaskLimits,
+  checkGalaxyLimits,
+  checkAiInsightLimits,
+} from "../middleware/checkSubscriptionLimits";
 import * as auth from "../controllers/authControllers";
 import * as taskControllers from "../controllers/taskControllers";
 import * as noteControllers from "../controllers/noteControllers";
@@ -133,7 +139,12 @@ app.get("/", (req: Request, res: Response) => {
 
 // Task routes - all require authentication
 app.get("/api/tasks", checkAuthentication, taskControllers.getTasks);
-app.post("/api/tasks", checkAuthentication, taskControllers.createTask);
+app.post(
+  "/api/tasks",
+  checkAuthentication,
+  checkTaskLimits,
+  taskControllers.createTask
+);
 app.put("/api/tasks/:id", checkAuthentication, taskControllers.updateTask);
 app.delete("/api/tasks/:id", checkAuthentication, taskControllers.deleteTask);
 app.patch(
@@ -158,7 +169,12 @@ app.delete(
 
 // Note routes - all require authentication
 app.get("/api/notes", checkAuthentication, noteControllers.getNotes);
-app.post("/api/notes", checkAuthentication, noteControllers.createNote);
+app.post(
+  "/api/notes",
+  checkAuthentication,
+  checkNoteLimits,
+  noteControllers.createNote
+);
 app.get("/api/notes/:id", checkAuthentication, noteControllers.getNoteById);
 app.put("/api/notes/:id", checkAuthentication, noteControllers.updateNote);
 app.delete("/api/notes/:id", checkAuthentication, noteControllers.deleteNote);
@@ -169,7 +185,12 @@ app.delete("/api/notes/:id", checkAuthentication, noteControllers.deleteNote);
 
 // Galaxy CRUD routes - all require authentication
 app.get("/api/galaxies", checkAuthentication, galaxyControllers.getGalaxies);
-app.post("/api/galaxies", checkAuthentication, galaxyControllers.createGalaxy);
+app.post(
+  "/api/galaxies",
+  checkAuthentication,
+  checkGalaxyLimits,
+  galaxyControllers.createGalaxy
+);
 app.post(
   "/api/galaxies/generate",
   checkAuthentication,
@@ -205,15 +226,50 @@ app.post(
 // AI Routes
 /////////////////////////////////
 
-app.post("/api/insights", ai.insights);
-app.post("/api/finalInsight", ai.finalInsight);
-app.post("/api/noteInsight", noteInsights.generateNoteInsight);
+app.post(
+  "/api/insights",
+  checkAuthentication,
+  checkAiInsightLimits,
+  ai.insights
+);
+app.post(
+  "/api/finalInsight",
+  checkAuthentication,
+  checkAiInsightLimits,
+  ai.finalInsight
+);
+app.post(
+  "/api/noteInsight",
+  checkAuthentication,
+  checkAiInsightLimits,
+  noteInsights.generateNoteInsight
+);
 // Galaxy Routes these should be used on the home screen, no I need a ai button
 console.log("🔧 Registering galaxy AI routes...");
-app.post("/api/generateGalaxy", galaxyAi.generateGalaxy);
-app.post("/api/reSortGalaxy", galaxyAi.reSortGalaxy);
-app.post("/api/generateGalaxyInsight", galaxyAi.generateGalaxyInsight);
-app.post("/api/generateGalaxyInsightAll", galaxyAi.generateGalaxyInsightAll);
+app.post(
+  "/api/generateGalaxy",
+  checkAuthentication,
+  checkAiInsightLimits,
+  galaxyAi.generateGalaxy
+);
+app.post(
+  "/api/reSortGalaxy",
+  checkAuthentication,
+  checkAiInsightLimits,
+  galaxyAi.reSortGalaxy
+);
+app.post(
+  "/api/generateGalaxyInsight",
+  checkAuthentication,
+  checkAiInsightLimits,
+  galaxyAi.generateGalaxyInsight
+);
+app.post(
+  "/api/generateGalaxyInsightAll",
+  checkAuthentication,
+  checkAiInsightLimits,
+  galaxyAi.generateGalaxyInsightAll
+);
 console.log("✅ Galaxy AI routes registered!");
 
 /////////////////////////////////
@@ -259,6 +315,11 @@ app.get(
   "/api/subscriptions/user",
   checkAuthentication,
   subscriptionControllers.getUserSubscription
+);
+app.get(
+  "/api/subscriptions/user/usage",
+  checkAuthentication,
+  subscriptionControllers.getUserUsage
 );
 app.post(
   "/api/subscriptions/create",

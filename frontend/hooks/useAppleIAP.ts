@@ -5,6 +5,7 @@ import {
   AppleReceiptValidationResponse,
   AppleReceiptStatusResponse,
 } from "../services/iapService";
+import { useSubscription } from "../contexts/SubscriptionContext";
 
 export interface UseAppleIAPReturn {
   // State
@@ -45,6 +46,8 @@ export const useAppleIAP = (): UseAppleIAPReturn => {
     AppleReceiptValidationResponse["subscription"] | null
   >(null);
 
+  const { refreshSubscription } = useSubscription();
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -75,6 +78,9 @@ export const useAppleIAP = (): UseAppleIAPReturn => {
             "✅ Purchase completed successfully:",
             result.subscription
           );
+
+          // Refresh the global subscription state
+          await refreshSubscription();
         } else {
           throw new Error(result.error || "Purchase validation failed");
         }
@@ -107,6 +113,9 @@ export const useAppleIAP = (): UseAppleIAPReturn => {
         if (result.success && result.subscription) {
           setCurrentSubscription(result.subscription);
           console.log("✅ Receipt validation successful:", result.subscription);
+
+          // Refresh the global subscription state
+          await refreshSubscription();
         } else {
           throw new Error(result.error || "Receipt validation failed");
         }
@@ -138,6 +147,9 @@ export const useAppleIAP = (): UseAppleIAPReturn => {
         if (result.success && result.subscription) {
           setCurrentSubscription(result.subscription);
           console.log("✅ Receipt refresh successful:", result.subscription);
+
+          // Refresh the global subscription state
+          await refreshSubscription();
         } else {
           throw new Error(result.error || "Receipt refresh failed");
         }

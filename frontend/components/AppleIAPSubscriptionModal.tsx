@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
+import { useSubscription } from "../contexts/SubscriptionContext";
 import {
   iapService,
   SUBSCRIPTION_PLANS,
@@ -40,6 +41,7 @@ export const AppleIAPSubscriptionModal: React.FC<
   userId,
 }) => {
   const { currentPalette } = useTheme();
+  const { refreshSubscription } = useSubscription();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -110,7 +112,9 @@ export const AppleIAPSubscriptionModal: React.FC<
         [
           {
             text: "OK",
-            onPress: () => {
+            onPress: async () => {
+              // Refresh the subscription state
+              await refreshSubscription();
               onUpgrade(plan.id);
               onClose();
               resetState();

@@ -63,9 +63,6 @@ export const getUserSubscription = async (): Promise<{
     const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.USER, {
       method: "GET",
       headers: await getAuthHeaders(),
-      headers: {
-        ...(await getAuthHeaders()),
-      },
     });
 
     if (!response.ok) {
@@ -75,6 +72,39 @@ export const getUserSubscription = async (): Promise<{
     return await response.json();
   } catch (error) {
     console.error("Error fetching user subscription:", error);
+    throw error;
+  }
+};
+
+// Get current user's usage counts
+export const getUserUsage = async (): Promise<{
+  success: boolean;
+  usage: {
+    notes: { current: number; limit: number; remaining: number };
+    tasks: { current: number; limit: number; remaining: number };
+    galaxies: { current: number; limit: number; remaining: number };
+    ai_insights: { current: number; limit: number; remaining: number };
+  };
+  limits: {
+    note_limit: number;
+    task_limit: number;
+    galaxy_limit: number;
+    ai_insights_per_day: number;
+  };
+}> => {
+  try {
+    const response = await fetch(API_ENDPOINTS.SUBSCRIPTIONS.USER_USAGE, {
+      method: "GET",
+      headers: await getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching user usage:", error);
     throw error;
   }
 };

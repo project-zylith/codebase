@@ -49,6 +49,23 @@ export const ProjectsSection = () => {
       icon: "📝",
       color: "cosmic-electric-cyan",
     },
+    {
+      title: "Poke Bowls",
+      description:
+        "An accessible recipe page featuring popular and mouth-watering poké bowl recipes from around the world. Discover fresh, flavorful dishes to inspire your next culinary creation.",
+      tech: [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Responsive Design",
+        "Recipe Management",
+      ],
+      status: "Live Website",
+      icon: "🍣",
+      color: "cosmic-neon-purple",
+      link: "https://poke-bowls.onrender.com/",
+      external: true,
+    },
   ];
 
   return (
@@ -89,7 +106,7 @@ export const ProjectsSection = () => {
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer`}
+                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer h-full flex flex-col`}
                   >
                     {project.link && (
                       <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
@@ -120,7 +137,7 @@ export const ProjectsSection = () => {
                       </span>
                     </div>
 
-                    <p className="text-cosmic-light-green mb-4 leading-relaxed">
+                    <p className="text-cosmic-light-green mb-4 leading-relaxed flex-grow">
                       {project.description}
                     </p>
 
@@ -138,7 +155,7 @@ export const ProjectsSection = () => {
                 ) : project.link ? (
                   <Link
                     to={project.link}
-                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer`}
+                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer h-full flex flex-col`}
                   >
                     {project.link && (
                       <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
@@ -169,7 +186,7 @@ export const ProjectsSection = () => {
                       </span>
                     </div>
 
-                    <p className="text-cosmic-light-green mb-4 leading-relaxed">
+                    <p className="text-cosmic-light-green mb-4 leading-relaxed flex-grow">
                       {project.description}
                     </p>
 
@@ -186,7 +203,7 @@ export const ProjectsSection = () => {
                   </Link>
                 ) : (
                   <div
-                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative`}
+                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative h-full flex flex-col`}
                   >
                     <div
                       className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
@@ -211,7 +228,7 @@ export const ProjectsSection = () => {
                       </span>
                     </div>
 
-                    <p className="text-cosmic-light-green mb-4 leading-relaxed">
+                    <p className="text-cosmic-light-green mb-4 leading-relaxed flex-grow">
                       {project.description}
                     </p>
 

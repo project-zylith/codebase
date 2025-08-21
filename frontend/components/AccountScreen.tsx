@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../contexts/UserContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useSubscription } from "../contexts/SubscriptionContext";
 import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
 import { AppleIAPSubscriptionModal } from "./AppleIAPSubscriptionModal";
@@ -25,6 +26,8 @@ export const AccountScreen = () => {
   const { state: userState, logout } = useUser();
   const { currentPalette, currentPaletteId, paletteOptions, switchPalette } =
     useTheme();
+  const { state: subscriptionState, setOpenSubscriptionModalHandler } =
+    useSubscription();
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showProfileUpdateModal, setShowProfileUpdateModal] = useState(false);
@@ -39,6 +42,11 @@ export const AccountScreen = () => {
   useEffect(() => {
     setSelectedPaletteId(currentPaletteId);
   }, [currentPaletteId]);
+
+  // Connect the subscription modal handler to the context
+  useEffect(() => {
+    setOpenSubscriptionModalHandler(() => () => setShowSubscriptionModal(true));
+  }, [setOpenSubscriptionModalHandler]);
 
   const handleLogout = async () => {
     try {
@@ -97,60 +105,115 @@ export const AccountScreen = () => {
     }
   };
 
-  const renderSubscriptionSection = () => (
-    <View
-      style={[
-        styles.subscriptionSection,
-        { backgroundColor: currentPalette.card },
-      ]}
-    >
-      <View style={styles.sectionHeader}>
-        <Ionicons name="diamond" size={24} color={currentPalette.quaternary} />
-        <Text style={[styles.sectionTitle, { color: currentPalette.tertiary }]}>
-          Subscription
-        </Text>
-      </View>
+  const renderSubscriptionSection = () => {
+    if (subscriptionState.isLoading) {
+      return (
+        <View
+          style={[
+            styles.subscriptionSection,
+            { backgroundColor: currentPalette.card },
+          ]}
+        >
+          <View style={styles.sectionHeader}>
+            <Ionicons
+              name="diamond"
+              size={24}
+              color={currentPalette.quaternary}
+            />
+            <Text
+              style={[styles.sectionTitle, { color: currentPalette.tertiary }]}
+            >
+              Subscription
+            </Text>
+          </View>
+          <View style={styles.subscriptionContent}>
+            <Text
+              style={[
+                styles.subscriptionDescription,
+                { color: currentPalette.quinary },
+              ]}
+            >
+              Loading subscription status...
+            </Text>
+          </View>
+        </View>
+      );
+    }
 
-      <View style={styles.subscriptionContent}>
-        <View style={styles.subscriptionInfo}>
+    const subscription = subscriptionState.subscription;
+    const isActive = subscription && subscription.status === "active";
+    const planName = subscription?.plan_name || "Free Demo";
+    const description = subscription
+      ? `Active ${planName} subscription`
+      : "Basic features with limited usage";
+
+    return (
+      <View
+        style={[
+          styles.subscriptionSection,
+          { backgroundColor: currentPalette.card },
+        ]}
+      >
+        <View style={styles.sectionHeader}>
+          <Ionicons
+            name="diamond"
+            size={24}
+            color={currentPalette.quaternary}
+          />
           <Text
-            style={[
-              styles.subscriptionStatus,
-              { color: currentPalette.quaternary },
-            ]}
+            style={[styles.sectionTitle, { color: currentPalette.tertiary }]}
           >
-            Free Demo
-          </Text>
-          <Text
-            style={[
-              styles.subscriptionDescription,
-              { color: currentPalette.quinary },
-            ]}
-          >
-            Basic features with limited usage
+            Subscription
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.upgradeButton,
-            { backgroundColor: currentPalette.quaternary },
-          ]}
-          onPress={handleOpenSubscriptionModal}
-        >
-          <Ionicons name="arrow-up" size={16} color={currentPalette.tertiary} />
-          <Text
-            style={[
-              styles.upgradeButtonText,
-              { color: currentPalette.tertiary },
-            ]}
-          >
-            Upgrade
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.subscriptionContent}>
+          <View style={styles.subscriptionInfo}>
+            <Text
+              style={[
+                styles.subscriptionStatus,
+                { color: currentPalette.quaternary },
+              ]}
+            >
+              {planName}
+            </Text>
+            <Text
+              style={[
+                styles.subscriptionDescription,
+                { color: currentPalette.quinary },
+              ]}
+            >
+              {description}
+            </Text>
+          </View>
+
+          {!isActive && (
+            <TouchableOpacity
+              style={[
+                styles.upgradeButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={handleOpenSubscriptionModal}
+            >
+              <Ionicons
+                name="arrow-up"
+                size={16}
+                color={currentPalette.tertiary}
+              />
+              <Text
+                style={[
+                  styles.upgradeButtonText,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                Upgrade
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderStylishPaletteSelector = () => (
     <View

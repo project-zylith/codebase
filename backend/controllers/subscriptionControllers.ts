@@ -5,6 +5,7 @@ import {
   AppleReceiptValidator,
   ReceiptValidationResult,
 } from "../src/services/appleReceiptValidation";
+import { SubscriptionLimitService } from "../src/services/subscriptionLimitService";
 
 interface AuthenticatedRequest extends Request {
   session?: {
@@ -879,6 +880,103 @@ export const getAppleReceiptStatus = async (
     console.error("❌ Error getting Apple receipt status:", error);
     res.status(500).json({
       error: "Failed to get receipt status",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+/**
+ * Gets user's current usage counts for subscription limits
+ * @route GET /api/subscriptions/user/usage
+ */
+export const getUserUsage = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User must be authenticated" });
+    }
+
+    console.log("📊 Getting usage counts for user:", userId);
+
+    // Get current counts for each resource type
+    const [noteCount, taskCount, galaxyCount, aiInsightCount] =
+      await Promise.all([
+        db("notes").where("user_id", userId).count("* as count").first(),
+        db("tasks").where("user_id", userId).count("* as count").first(),
+        db("galaxies").where("user_id", userId).count("* as count").first(),
+        db("insights")
+          .where("user_id", userId)
+          .where("created_at", ">=", new Date().setHours(0, 0, 0, 0))
+          .count("* as count")
+          .first(),
+      ]);
+
+    // Get user's subscription limits
+    const limits = await SubscriptionLimitService.getUserLimits(userId);
+
+    const usage = {
+      notes: {
+        current: parseInt(noteCount?.count as string) || 0,
+        limit: limits.note_limit,
+        remaining:
+          limits.note_limit === -1
+            ? -1
+            : Math.max(
+                0,
+                limits.note_limit - (parseInt(noteCount?.count as string) || 0)
+              ),
+      },
+      tasks: {
+        current: parseInt(taskCount?.count as string) || 0,
+        limit: limits.task_limit,
+        remaining:
+          limits.task_limit === -1
+            ? -1
+            : Math.max(
+                0,
+                limits.task_limit - (parseInt(taskCount?.count as string) || 0)
+              ),
+      },
+      galaxies: {
+        current: parseInt(galaxyCount?.count as string) || 0,
+        limit: limits.galaxy_limit,
+        remaining:
+          limits.galaxy_limit === -1
+            ? -1
+            : Math.max(
+                0,
+                limits.galaxy_limit -
+                  (parseInt(galaxyCount?.count as string) || 0)
+              ),
+      },
+      ai_insights: {
+        current: parseInt(aiInsightCount?.count as string) || 0,
+        limit: limits.ai_insights_per_day,
+        remaining:
+          limits.ai_insights_per_day === -1
+            ? -1
+            : Math.max(
+                0,
+                limits.ai_insights_per_day -
+                  (parseInt(aiInsightCount?.count as string) || 0)
+              ),
+      },
+    };
+
+    console.log("✅ Usage counts retrieved:", usage);
+
+    res.json({
+      success: true,
+      usage,
+      limits,
+    });
+  } catch (error) {
+    console.error("❌ Error getting user usage:", error);
+    res.status(500).json({
+      error: "Failed to get user usage",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }

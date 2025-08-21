@@ -191,4 +191,13 @@ export class SubscriptionLimitService {
       return { allowed: false, current: 0, limit: 0 };
     }
   }
+
+  /**
+   * Check if user can use AI insights today (alias for consistency)
+   */
+  static async canUseAiInsight(
+    userId: number
+  ): Promise<{ allowed: boolean; current: number; limit: number }> {
+    return this.canUseAIInsight(userId);
+  }
 }

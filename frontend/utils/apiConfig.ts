@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
   SUBSCRIPTIONS: {
     PLANS: `${API_BASE_URL}/api/subscriptions/plans`,
     USER: `${API_BASE_URL}/api/subscriptions/user`,
+    USER_USAGE: `${API_BASE_URL}/api/subscriptions/user/usage`,
     CREATE: `${API_BASE_URL}/api/subscriptions/create`,
     CANCEL: `${API_BASE_URL}/api/subscriptions/cancel`,
     RESUBSCRIBE: `${API_BASE_URL}/api/subscriptions/resubscribe`,

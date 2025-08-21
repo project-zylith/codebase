@@ -230,7 +230,7 @@ export const ResumePage = () => {
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-lg font-semibold text-cosmic-off-white">
-                    Renaissance
+                    REN|AI
                   </h3>
                   <p className="text-cosmic-main-teal">
                     AI-powered note taking app, transforming ideas into goals so
@@ -298,6 +298,29 @@ export const ResumePage = () => {
                   • Led a cross-functional team, managing all project phases
                   from strategic planning and technical design to deployment and
                   optimization.
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-cosmic-card-dark/50 backdrop-blur-sm rounded-xl p-6 border border-cosmic-main-teal/30">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h3 className="text-lg font-semibold text-cosmic-off-white">
+                    GSWEP (Google Software Engineering Program)
+                  </h3>
+                  <p className="text-cosmic-main-teal">
+                    G-SWEP Engineering Fellow
+                  </p>
+                  <p className="text-cosmic-light-green text-sm">
+                    New York, NY | Mar 2025 - Present
+                  </p>
+                </div>
+              </div>
+              <ul className="text-cosmic-light-green space-y-2 text-sm">
+                <li>
+                  • Selected as 1 of 15 fellows for a 10-week Google SWE
+                  mentorship program, receiving 1:1 technical interview coaching
+                  and professional guidance
                 </li>
               </ul>
             </div>
