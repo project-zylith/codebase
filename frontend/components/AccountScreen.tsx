@@ -96,7 +96,7 @@ export const AccountScreen = () => {
   const handleCancelSubscription = async () => {
     Alert.alert(
       "Cancel Subscription",
-      "Are you sure you want to cancel your subscription? You'll lose access to premium features at the end of your current billing period.",
+      "Are you sure you want to cancel your subscription? Changes take effect immediately.",
       [
         {
           text: "Keep Subscription",
@@ -110,7 +110,7 @@ export const AccountScreen = () => {
               await cancelSubscription();
               Alert.alert(
                 "Subscription Canceled",
-                "Your subscription has been canceled. You'll continue to have access until the end of your current billing period.",
+                "Your subscription has been canceled. Changes take effect immediately.",
                 [{ text: "OK" }]
               );
               // Refresh subscription state
@@ -179,10 +179,18 @@ export const AccountScreen = () => {
 
     const subscription = subscriptionState.subscription;
     const isActive = subscription && subscription.status === "active";
+    const isCanceled = subscription && subscription.status === "canceled";
+    const hasSubscription =
+      subscription &&
+      (subscription.status === "active" || subscription.status === "canceled");
     const planName = subscription?.plan_name || "Free Demo";
-    const description = subscription
-      ? `Active ${planName} subscription`
-      : "Basic features with limited usage";
+
+    let description = "Basic features with limited usage";
+    if (isActive) {
+      description = `Active ${planName} subscription`;
+    } else if (isCanceled) {
+      description = `Your ${planName} subscription has been canceled.`;
+    }
 
     return (
       <View
@@ -206,14 +214,33 @@ export const AccountScreen = () => {
 
         <View style={styles.subscriptionContent}>
           <View style={styles.subscriptionInfo}>
-            <Text
-              style={[
-                styles.subscriptionStatus,
-                { color: currentPalette.quaternary },
-              ]}
-            >
-              {planName}
-            </Text>
+            <View style={styles.statusContainer}>
+              <Text
+                style={[
+                  styles.subscriptionStatus,
+                  { color: currentPalette.quaternary },
+                ]}
+              >
+                {planName}
+              </Text>
+              {isCanceled && (
+                <View
+                  style={[
+                    styles.statusBadge,
+                    { backgroundColor: currentPalette.quinary + "20" },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusBadgeText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    Canceled
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text
               style={[
                 styles.subscriptionDescription,
@@ -224,7 +251,7 @@ export const AccountScreen = () => {
             </Text>
 
             {/* Subscription Details */}
-            {isActive && subscription && (
+            {hasSubscription && subscription && (
               <View style={styles.subscriptionDetails}>
                 <View style={styles.detailRow}>
                   <Ionicons
@@ -256,7 +283,7 @@ export const AccountScreen = () => {
                         { color: currentPalette.quinary },
                       ]}
                     >
-                      Next billing:{" "}
+                      {isCanceled ? "Access until: " : "Next billing: "}
                       {new Date(subscription.end_date).toLocaleDateString()}
                     </Text>
                   </View>
@@ -278,11 +305,30 @@ export const AccountScreen = () => {
                     Billed through Apple App Store
                   </Text>
                 </View>
+
+                {/* Disclaimer for canceled subscriptions */}
+                {isCanceled && (
+                  <View style={styles.disclaimerContainer}>
+                    <Ionicons
+                      name="information-circle"
+                      size={14}
+                      color={currentPalette.quaternary}
+                    />
+                    <Text
+                      style={[
+                        styles.disclaimerText,
+                        { color: currentPalette.quaternary },
+                      ]}
+                    >
+                      Changes to your subscription take effect immediately
+                    </Text>
+                  </View>
+                )}
               </View>
             )}
           </View>
 
-          {!isActive ? (
+          {!hasSubscription ? (
             <TouchableOpacity
               style={[
                 styles.upgradeButton,
@@ -328,27 +374,29 @@ export const AccountScreen = () => {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  { backgroundColor: currentPalette.quinary + "20" },
-                ]}
-                onPress={handleCancelSubscription}
-              >
-                <Ionicons
-                  name="close-circle"
-                  size={16}
-                  color={currentPalette.quinary}
-                />
-                <Text
+              {isActive && (
+                <TouchableOpacity
                   style={[
-                    styles.actionButtonText,
-                    { color: currentPalette.quinary },
+                    styles.actionButton,
+                    { backgroundColor: currentPalette.quinary + "20" },
                   ]}
+                  onPress={handleCancelSubscription}
                 >
-                  Cancel
-                </Text>
-              </TouchableOpacity>
+                  <Ionicons
+                    name="close-circle"
+                    size={16}
+                    color={currentPalette.quinary}
+                  />
+                  <Text
+                    style={[
+                      styles.actionButtonText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -682,57 +730,122 @@ const styles = StyleSheet.create({
   },
   subscriptionSection: {
     borderRadius: 16,
-    padding: 20,
+    padding: 24,
     marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
   },
   subscriptionContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     marginTop: 15,
   },
   subscriptionInfo: {
-    flex: 1,
+    marginBottom: 15,
+  },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 12,
   },
   subscriptionStatus: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 5,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   subscriptionDescription: {
-    fontSize: 14,
+    fontSize: 16,
+    marginBottom: 15,
+    lineHeight: 22,
   },
-
   upgradeButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    marginLeft: 10,
+    justifyContent: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    backgroundColor: "#7C3AED",
+    marginTop: 15,
+    width: "100%",
+    minHeight: 50,
+    shadowColor: "#7C3AED",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   upgradeButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    marginLeft: 5,
+    marginLeft: 8,
+    color: "#FFFFFF",
   },
   subscriptionActions: {
     flexDirection: "row",
-    gap: 10,
-    marginLeft: 10,
+    gap: 12,
+    marginTop: 15,
   },
   subscriptionDetails: {
-    marginTop: 15,
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   detailRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 16,
+    paddingVertical: 4,
   },
   detailText: {
-    fontSize: 12,
-    marginLeft: 8,
-    opacity: 0.8,
+    fontSize: 14,
+    marginLeft: 12,
+    opacity: 0.85,
+    lineHeight: 20,
+    flex: 1,
+  },
+  disclaimerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
+    gap: 8,
+  },
+  disclaimerText: {
+    fontSize: 13,
+    fontStyle: "italic",
+    opacity: 0.9,
+    lineHeight: 18,
+    flex: 1,
   },
   paletteSection: {
     borderRadius: 16,
@@ -742,13 +855,17 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 10,
+    fontSize: 20,
+    fontWeight: "700",
+    marginLeft: 12,
     flex: 1,
+    letterSpacing: 0.5,
   },
   refreshButton: {
     padding: 5,
@@ -824,6 +941,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     marginTop: 15,
+    flex: 1,
+    minHeight: 48,
   },
   actionButtonText: {
     fontSize: 16,
