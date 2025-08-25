@@ -339,6 +339,42 @@ export const AppleIAPSubscriptionModal: React.FC<
           </View>
         )}
 
+        {/* Debug Test Button */}
+        {__DEV__ && (
+          <TouchableOpacity
+            style={[
+              styles.debugButton,
+              { backgroundColor: currentPalette.quinary + "20" },
+            ]}
+            onPress={async () => {
+              try {
+                console.log("🧪 Testing direct purchase...");
+                const testProductId = "com.renai.basic_monthly2";
+                console.log(
+                  "📱 Calling iapService.purchaseProduct directly..."
+                );
+                const result = await iapService.purchaseProduct(
+                  testProductId as any
+                );
+                console.log("✅ Direct purchase result:", result);
+                Alert.alert("Test Success", "Direct purchase completed!");
+              } catch (error: any) {
+                console.error("❌ Direct purchase test failed:", error);
+                Alert.alert("Test Failed", error.message);
+              }
+            }}
+          >
+            <Text
+              style={[
+                styles.debugButtonText,
+                { color: currentPalette.quinary },
+              ]}
+            >
+              🧪 Test Direct Purchase (Dev Only)
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Subscription Plans */}
         <ScrollView
           style={styles.content}
@@ -347,6 +383,31 @@ export const AppleIAPSubscriptionModal: React.FC<
         >
           {SUBSCRIPTION_PLANS.map(renderPlanCard)}
         </ScrollView>
+
+        {/* Plan Switching Info for Existing Subscribers */}
+        {currentSubscription && (
+          <View style={styles.switchingInfo}>
+            <Text
+              style={[
+                styles.switchingTitle,
+                { color: currentPalette.tertiary },
+              ]}
+            >
+              Want to change your plan?
+            </Text>
+            <Text
+              style={[styles.switchingText, { color: currentPalette.quinary }]}
+            >
+              You can upgrade, downgrade, or switch between monthly and annual
+              billing. Changes take effect at your next billing cycle.
+            </Text>
+            <Text
+              style={[styles.switchingNote, { color: currentPalette.quinary }]}
+            >
+              💡 Tip: Annual plans save you 17% compared to monthly billing!
+            </Text>
+          </View>
+        )}
 
         {/* Footer Info */}
         <View style={styles.footer}>
@@ -486,6 +547,31 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     marginBottom: 8,
   },
+  switchingInfo: {
+    padding: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 12,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  switchingTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  switchingText: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  switchingNote: {
+    fontSize: 12,
+    textAlign: "center",
+    fontStyle: "italic",
+    opacity: 0.8,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -514,6 +600,18 @@ const styles = StyleSheet.create({
   },
   errorCloseButton: {
     padding: 4,
+  },
+  debugButton: {
+    margin: 20,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    alignItems: "center",
+  },
+  debugButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
 

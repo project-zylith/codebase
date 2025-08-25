@@ -54,25 +54,23 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({
   });
 
   // This will be set by the parent component that has the subscription modal
-  const [openSubscriptionModal, setOpenSubscriptionModal] = useState<
-    (() => void) | null
-  >(null);
+  const [modalHandler, setModalHandler] = useState<(() => void) | null>(null);
 
   const clearError = useCallback(() => {
     setState((prev) => ({ ...prev, error: null }));
   }, []);
 
   const setOpenSubscriptionModalHandler = useCallback((handler: () => void) => {
-    setOpenSubscriptionModal(() => handler);
+    setModalHandler(() => handler);
   }, []);
 
   const openSubscriptionModal = useCallback(() => {
-    if (openSubscriptionModal) {
-      openSubscriptionModal();
+    if (modalHandler) {
+      modalHandler();
     } else {
       console.warn("Subscription modal handler not set");
     }
-  }, [openSubscriptionModal]);
+  }, [modalHandler]);
 
   const refreshSubscription = useCallback(async () => {
     if (!userState.user) {

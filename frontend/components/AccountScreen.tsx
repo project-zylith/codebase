@@ -19,6 +19,7 @@ import AuthSignUp from "./AuthSignUp";
 import { AppleIAPSubscriptionModal } from "./AppleIAPSubscriptionModal";
 import UserProfileUpdateModal from "./UserProfileUpdateModal";
 import { getToken } from "../adapters/userAdapters";
+import { cancelSubscription } from "../adapters/subscriptionAdapters";
 
 const { width } = Dimensions.get("window");
 
@@ -89,6 +90,42 @@ export const AccountScreen = () => {
       "Success! 🎉",
       `Your subscription has been updated! You now have access to all the features of your new plan.`,
       [{ text: "OK" }]
+    );
+  };
+
+  const handleCancelSubscription = async () => {
+    Alert.alert(
+      "Cancel Subscription",
+      "Are you sure you want to cancel your subscription? You'll lose access to premium features at the end of your current billing period.",
+      [
+        {
+          text: "Keep Subscription",
+          style: "cancel",
+        },
+        {
+          text: "Cancel Subscription",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await cancelSubscription();
+              Alert.alert(
+                "Subscription Canceled",
+                "Your subscription has been canceled. You'll continue to have access until the end of your current billing period.",
+                [{ text: "OK" }]
+              );
+              // Refresh subscription state
+              // The subscription context should handle this automatically
+            } catch (error: any) {
+              console.error("Error canceling subscription:", error);
+              Alert.alert(
+                "Error",
+                error.message ||
+                  "Failed to cancel subscription. Please try again."
+              );
+            }
+          },
+        },
+      ]
     );
   };
 
@@ -185,9 +222,67 @@ export const AccountScreen = () => {
             >
               {description}
             </Text>
+
+            {/* Subscription Details */}
+            {isActive && subscription && (
+              <View style={styles.subscriptionDetails}>
+                <View style={styles.detailRow}>
+                  <Ionicons
+                    name="calendar"
+                    size={14}
+                    color={currentPalette.quinary}
+                  />
+                  <Text
+                    style={[
+                      styles.detailText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    Started:{" "}
+                    {new Date(subscription.start_date).toLocaleDateString()}
+                  </Text>
+                </View>
+
+                {subscription.end_date && (
+                  <View style={styles.detailRow}>
+                    <Ionicons
+                      name="time"
+                      size={14}
+                      color={currentPalette.quinary}
+                    />
+                    <Text
+                      style={[
+                        styles.detailText,
+                        { color: currentPalette.quinary },
+                      ]}
+                    >
+                      Next billing:{" "}
+                      {new Date(subscription.end_date).toLocaleDateString()}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Payment Method Info */}
+                <View style={styles.detailRow}>
+                  <Ionicons
+                    name="card"
+                    size={14}
+                    color={currentPalette.quinary}
+                  />
+                  <Text
+                    style={[
+                      styles.detailText,
+                      { color: currentPalette.quinary },
+                    ]}
+                  >
+                    Billed through Apple App Store
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
 
-          {!isActive && (
+          {!isActive ? (
             <TouchableOpacity
               style={[
                 styles.upgradeButton,
@@ -209,6 +304,52 @@ export const AccountScreen = () => {
                 Upgrade
               </Text>
             </TouchableOpacity>
+          ) : (
+            <View style={styles.subscriptionActions}>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: currentPalette.button },
+                ]}
+                onPress={handleOpenSubscriptionModal}
+              >
+                <Ionicons
+                  name="swap-horizontal"
+                  size={16}
+                  color={currentPalette.buttonText}
+                />
+                <Text
+                  style={[
+                    styles.actionButtonText,
+                    { color: currentPalette.buttonText },
+                  ]}
+                >
+                  Change Plan
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: currentPalette.quinary + "20" },
+                ]}
+                onPress={handleCancelSubscription}
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={16}
+                  color={currentPalette.quinary}
+                />
+                <Text
+                  style={[
+                    styles.actionButtonText,
+                    { color: currentPalette.quinary },
+                  ]}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>
@@ -574,6 +715,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     marginLeft: 5,
+  },
+  subscriptionActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginLeft: 10,
+  },
+  subscriptionDetails: {
+    marginTop: 15,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  detailText: {
+    fontSize: 12,
+    marginLeft: 8,
+    opacity: 0.8,
   },
   paletteSection: {
     borderRadius: 16,

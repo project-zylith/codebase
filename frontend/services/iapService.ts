@@ -167,11 +167,16 @@ class IAPService {
 
     try {
       console.log("🛒 Requesting purchase for:", productId);
+      console.log(
+        "📱 About to call requestPurchase() - this should show Apple's modal"
+      );
 
       const purchase = await requestPurchase({
         sku: productId,
         andDangerouslyFinishTransactionAutomaticallyIOS: false,
       });
+
+      console.log("🔄 requestPurchase() completed, response:", purchase);
 
       if (
         purchase &&
