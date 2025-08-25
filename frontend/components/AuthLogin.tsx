@@ -11,7 +11,6 @@ import {
 import { loginUser } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { AppleSignInButton } from "./AppleSignInButton";
 
 const AuthLogin: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -98,23 +97,6 @@ const AuthLogin: React.FC = () => {
         </Text>
       </TouchableOpacity>
 
-      {/* Divider */}
-      <View style={styles.dividerContainer}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
-      </View>
-
-      <AppleSignInButton
-        onSuccess={() => {
-          // Handle successful Apple Sign In
-          console.log("Apple Sign In successful");
-        }}
-        onError={(error) => {
-          Alert.alert("Apple Sign In Error", error);
-        }}
-      />
-
       <TouchableOpacity
         style={styles.forgotPasswordButton}
         onPress={() => {
@@ -165,31 +147,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     letterSpacing: 1,
   },
-  // Divider styles
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e0e0e0",
-  },
-  dividerText: {
-    marginHorizontal: 15,
-    color: "#666",
-    fontSize: 14,
-  },
-  appleButton: {
-    backgroundColor: "#000",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 8,
-  },
+
   forgotPasswordButton: {
     marginTop: 15,
   },

@@ -11,7 +11,6 @@ import {
 import { registerUser } from "../adapters/userAdapters";
 import { useUser } from "../contexts/UserContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { AppleSignInButton } from "./AppleSignInButton";
 
 const AuthSignUp: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -147,23 +146,6 @@ const AuthSignUp: React.FC = () => {
           Register
         </Text>
       </TouchableOpacity>
-
-      {/* Divider */}
-      <View style={styles.dividerContainer}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
-      </View>
-
-      <AppleSignInButton
-        onSuccess={() => {
-          // Handle successful Apple Sign In
-          console.log("Apple Sign In successful");
-        }}
-        onError={(error) => {
-          Alert.alert("Apple Sign In Error", error);
-        }}
-      />
     </View>
   );
 };
@@ -204,30 +186,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e0e0e0",
-  },
-  dividerText: {
-    marginHorizontal: 15,
-    color: "#666",
-    fontSize: 14,
-  },
-  appleButton: {
-    backgroundColor: "#000",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 8,
   },
 });
 

@@ -38,8 +38,7 @@
             "CFBundleURLSchemes": ["com.apiary.zylith"]
           }
         ]
-      },
-      "usesAppleSignIn": true
+      }
     },
     "android": {
       "adaptiveIcon": {
