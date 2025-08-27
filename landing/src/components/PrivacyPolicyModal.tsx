@@ -122,6 +122,12 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                         </a>
                       </p>
                     </section>
+
+                    <section>
+                      <p className="text-sm text-cosmic-light-green font-style-italic">
+                        Last updated: August 2025
+                      </p>
+                    </section>
                   </div>
                 </div>
 

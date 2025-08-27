@@ -18,6 +18,8 @@ import AuthLogin from "./AuthLogin";
 import AuthSignUp from "./AuthSignUp";
 import { AppleIAPSubscriptionModal } from "./AppleIAPSubscriptionModal";
 import UserProfileUpdateModal from "./UserProfileUpdateModal";
+import { TermsOfServiceModal } from "./TermsOfServiceModal";
+import { PrivacyPolicyModal } from "./PrivacyPolicyModal";
 import { getToken } from "../adapters/userAdapters";
 import { cancelSubscription } from "../adapters/subscriptionAdapters";
 
@@ -32,6 +34,8 @@ export const AccountScreen = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showProfileUpdateModal, setShowProfileUpdateModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [selectedPaletteId, setSelectedPaletteId] = useState(currentPaletteId);
   const [scaleAnim] = useState(new Animated.Value(1));
   const [userToken, setUserToken] = useState<string | undefined>(undefined);
@@ -606,6 +610,71 @@ export const AccountScreen = () => {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Legal Section */}
+        <View
+          style={[
+            styles.actionsSection,
+            { backgroundColor: currentPalette.card },
+          ]}
+        >
+          <View style={styles.sectionHeader}>
+            <Ionicons
+              name="document-text"
+              size={24}
+              color={currentPalette.quaternary}
+            />
+            <Text
+              style={[styles.sectionTitle, { color: currentPalette.tertiary }]}
+            >
+              Legal
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: currentPalette.button },
+            ]}
+            onPress={() => setShowTermsModal(true)}
+          >
+            <Ionicons
+              name="document"
+              size={20}
+              color={currentPalette.buttonText}
+            />
+            <Text
+              style={[
+                styles.actionButtonText,
+                { color: currentPalette.buttonText },
+              ]}
+            >
+              Terms of Service (EULA)
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: currentPalette.button },
+            ]}
+            onPress={() => setShowPrivacyModal(true)}
+          >
+            <Ionicons
+              name="shield-checkmark"
+              size={20}
+              color={currentPalette.buttonText}
+            />
+            <Text
+              style={[
+                styles.actionButtonText,
+                { color: currentPalette.buttonText },
+              ]}
+            >
+              Privacy Policy
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     );
   };
@@ -683,6 +752,14 @@ export const AccountScreen = () => {
           // Refresh user data if needed
           console.log("Profile updated, refreshing data...");
         }}
+      />
+      <TermsOfServiceModal
+        visible={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
+      <PrivacyPolicyModal
+        visible={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
       />
     </SafeAreaView>
   );

@@ -1,17 +1,3 @@
-const colorPalette = {
-  primary: "#18111B", // Deep black background
-  secondary: "#5B21B6", // Dark purple for cards/containers
-  tertiary: "#F8F8FF", // Off-white for text
-  quaternary: "#7C3AED", // Main purple for buttons/accents
-  quinary: "#C4B5FD", // Light purple for subtle text
-  accent: "#A21CAF", // Neon purple for highlights
-  background: "#18111B", // Main background (same as primary)
-  card: "#23182A", // Card background (darker than secondary)
-  border: "#7C3AED", // Border accent (same as quaternary)
-  button: "#7C3AED", // Button background (same as quaternary)
-  buttonText: "#F8F8FF", // Button text (same as tertiary)
-};
-
 const colorPalette2 = {
   primary: "#E8D5E8", // Soft lavender background
   secondary: "#A8C8E8", // Soft blue for cards/containers
@@ -68,20 +54,6 @@ const colorPalette3 = {
 //   buttonText: "#F1F8E9", // Light text on green buttons
 // };
 
-const colorPalette4 = {
-  primary: "#1A3A32", // Deep mint green
-  secondary: "#2D5A4F", // Medium mint green for cards/containers
-  tertiary: "#F0FDF4", // Very light mint-white for text
-  quaternary: "#10B981", // Fresh mint for buttons/accents
-  quinary: "#6EE7B7", // Light mint for subtle text
-  accent: "#34D399", // Bright mint accent
-  background: "#0F2F26", // Very dark mint background
-  card: "#1E4A3F", // Medium mint card background
-  border: "#10B981", // Mint border accent
-  button: "#10B981", // Mint button background
-  buttonText: "#F0FDF4", // Light text on mint buttons
-};
-
 const colorPalette5 = {
   primary: "#FFFFFF", // Pure white
   secondary: "#F8F9FA", // Light gray for cards/containers
@@ -96,32 +68,18 @@ const colorPalette5 = {
   buttonText: "#FFFFFF", // White text on dark buttons
 };
 
-const colorPalette6 = {
-  primary: "#0C1821", // Deep ocean blue
-  secondary: "#1B3A4B", // Medium ocean blue for cards/containers
-  tertiary: "#F0F9FF", // Ice white for text
-  quaternary: "#0EA5E9", // Bright sky blue for buttons/accents
-  quinary: "#7DD3FC", // Light sky blue for subtle text
-  accent: "#38BDF8", // Electric blue accent
-  background: "#020617", // Very dark ocean background
-  card: "#1E3A8A", // Deep blue card background
-  border: "#0EA5E9", // Sky blue border accent
-  button: "#0EA5E9", // Sky blue button background
-  buttonText: "#F0F9FF", // Light text on blue buttons
-};
-
 const colorPalette7 = {
-  primary: "#1A1A2E", // Deep midnight blue
-  secondary: "#16213E", // Medium midnight for cards/containers
-  tertiary: "#FFEAA7", // Warm gold for text
-  quaternary: "#FDCB6E", // Sunset orange for buttons/accents
-  quinary: "#FD79A8", // Soft coral for subtle text
-  accent: "#FF7675", // Bright coral accent
-  background: "#0D1421", // Very dark midnight background
-  card: "#2C3E50", // Dark blue-gray card background
-  border: "#FDCB6E", // Orange border accent
-  button: "#FDCB6E", // Orange button background
-  buttonText: "#1A1A2E", // Dark text on orange buttons
+  primary: "#FF6B35", // Vibrant orange fruit background
+  secondary: "#FF8C42", // Medium orange for cards/containers
+  tertiary: "#FFFFFF", // Pure white for text (better contrast)
+  quaternary: "#FF5722", // Deep orange for buttons/accents
+  quinary: "#FFFFFF", // White for subtle text (better contrast)
+  accent: "#FF9800", // Bright orange accent
+  background: "#E65100", // Dark orange background
+  card: "#FF7043", // Medium orange card background
+  border: "#FF5722", // Orange border accent
+  button: "#FF5722", // Orange button background
+  buttonText: "#FFFFFF", // Pure white text on orange buttons
 };
 
 const colorPalette8 = {
@@ -180,19 +138,36 @@ const nebula = {
   buttonText: "#FFFFFF", // White text on pink buttons
 };
 
+const cosmicOcean = {
+  primary: "#0A1A0F", // Deep cosmic black-green (main background)
+  secondary: "#064E3B", // Dark emerald green for cards/containers
+  tertiary: "#F0FDF4", // Off-white for text (like starlight)
+  quaternary: "#14B8A6", // Main teal for buttons/accents
+  quinary: "#A7F3D0", // Light green for subtle text
+  accent: "#00D4FF", // Electric cyan for highlights
+  background: "#0A0A1A", // Very dark space background
+  card: "#1A2F23", // Dark green card background
+  border: "#14B8A6", // Teal border accent
+  button: "#14B8A6", // Teal button background
+  buttonText: "#F0FDF4", // Light text on teal buttons
+  success: "#10B981", // Emerald green for success states
+  warning: "#F59E0B", // Amber for warnings
+  error: "#EF4444", // Red for errors
+  info: "#3B82F6", // Blue for info states
+};
+
 // It would be cool to have a color palette that is random. Which I can achieve by making a number of different palettes and then randomly selecting one.
 // Creating each how I have the first one and putting them in an array would work.
 
-export default colorPalette;
+export default cosmicOcean;
 export {
   colorPalette2,
   colorPalette3,
-  colorPalette4,
   colorPalette5,
-  colorPalette6,
   colorPalette7,
   colorPalette8,
   colorPalette9,
   colorPalette10,
   nebula,
+  cosmicOcean,
 };

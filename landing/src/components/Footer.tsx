@@ -1,10 +1,7 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { PrivacyPolicyModal } from "./PrivacyPolicyModal";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   return (
     <>
@@ -106,12 +103,12 @@ export const Footer = () => {
               </p>
 
               <div className="flex items-center space-x-6">
-                <button
-                  onClick={() => setIsPrivacyModalOpen(true)}
+                <Link
+                  to="/legal"
                   className="text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors text-sm underline decoration-cosmic-main-teal/50 hover:decoration-cosmic-main-teal"
                 >
-                  Privacy Policy
-                </button>
+                  Legal
+                </Link>
                 <span className="text-cosmic-light-green text-sm">
                   Built with
                 </span>
@@ -136,12 +133,6 @@ export const Footer = () => {
           </div>
         </div>
       </footer>
-
-      {/* Privacy Policy Modal */}
-      <PrivacyPolicyModal
-        isOpen={isPrivacyModalOpen}
-        onClose={() => setIsPrivacyModalOpen(false)}
-      />
     </>
   );
 };

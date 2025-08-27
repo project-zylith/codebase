@@ -1,16 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import colorPalette, {
+import {
   colorPalette2,
   colorPalette3,
-  colorPalette4,
   colorPalette5,
-  colorPalette6,
   colorPalette7,
   colorPalette8,
   colorPalette9,
   colorPalette10,
   nebula,
+  cosmicOcean,
 } from "../assets/colorPalette";
 import { useUser } from "./UserContext";
 
@@ -35,17 +34,15 @@ export interface PaletteOption {
 }
 
 const paletteOptions: PaletteOption[] = [
-  { id: "default", name: "Navy & Cyan", palette: colorPalette8 },
+  { id: "default", name: "Cosmic Ocean", palette: cosmicOcean },
   { id: "nebula", name: "Nebula", palette: nebula },
   { id: "palette2", name: "Night Sky", palette: colorPalette3 },
-  { id: "palette3", name: "Dark Purple", palette: colorPalette },
-  { id: "palette4", name: "Watercolor", palette: colorPalette2 },
-  { id: "palette5", name: "Mint Green", palette: colorPalette4 },
-  { id: "palette6", name: "Monochrome", palette: colorPalette5 },
-  { id: "palette7", name: "Ocean Depths", palette: colorPalette6 },
-  { id: "palette8", name: "Sunset Gradient", palette: colorPalette7 },
-  { id: "palette9", name: "Coffee & Cream", palette: colorPalette9 },
-  { id: "palette10", name: "Cosmic Violet", palette: colorPalette10 },
+  { id: "palette3", name: "Watercolor", palette: colorPalette2 },
+  { id: "palette4", name: "Monochrome", palette: colorPalette5 },
+  { id: "palette5", name: "Navy & Cyan", palette: colorPalette8 },
+  { id: "palette6", name: "Orange Fruit", palette: colorPalette7 },
+  { id: "palette7", name: "Coffee & Cream", palette: colorPalette9 },
+  { id: "palette8", name: "Cosmic Violet", palette: colorPalette10 },
 ];
 
 interface ThemeContextType {
@@ -63,7 +60,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   const { state: userState } = useUser();
   const [currentPaletteId, setCurrentPaletteId] = useState<string>("default");
   const [currentPalette, setCurrentPalette] =
-    useState<ColorPalette>(colorPalette8);
+    useState<ColorPalette>(cosmicOcean);
 
   // Get user-specific storage key
   const getStorageKey = (userId: number) => `selectedPalette_user_${userId}`;
@@ -74,7 +71,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       // Reset to default when no user is logged in
       setCurrentPaletteId("default");
-      setCurrentPalette(colorPalette8);
+      setCurrentPalette(cosmicOcean);
     }
   }, [userState.user?.id]);
 
@@ -91,13 +88,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       } else {
         // No saved palette for this user, use default
         setCurrentPaletteId("default");
-        setCurrentPalette(colorPalette8);
+        setCurrentPalette(cosmicOcean);
       }
     } catch (error) {
       console.error("Error loading saved palette:", error);
       // Fallback to default on error
       setCurrentPaletteId("default");
-      setCurrentPalette(colorPalette8);
+      setCurrentPalette(cosmicOcean);
     }
   };
 

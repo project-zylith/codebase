@@ -204,26 +204,32 @@ export const AppleIAPSubscriptionModal: React.FC<
           </View>
         </View>
 
-        {/* Plan Description */}
-        <Text
-          style={[styles.planDescription, { color: currentPalette.quinary }]}
-        >
-          {plan.features[0]}
-        </Text>
+        {/* Plan Features */}
+        <View style={styles.featuresContainer}>
+          {plan.features.map((feature: string, index: number) => {
+            const [iconName, ...featureTextParts] = feature.split(" ");
+            const featureText = featureTextParts.join(" ");
 
-        {/* Additional Features for Annual Plans */}
-        {isAnnual && plan.features.length > 1 && (
-          <View style={styles.additionalFeatures}>
-            {plan.features.slice(1).map((feature: string, index: number) => (
-              <Text
-                key={index}
-                style={[styles.featureText, { color: currentPalette.tertiary }]}
-              >
-                • {feature}
-              </Text>
-            ))}
-          </View>
-        )}
+            return (
+              <View key={index} style={styles.featureRow}>
+                <Ionicons
+                  name={iconName as any}
+                  size={16}
+                  color={currentPalette.quaternary}
+                  style={styles.featureIcon}
+                />
+                <Text
+                  style={[
+                    styles.featureText,
+                    { color: currentPalette.tertiary },
+                  ]}
+                >
+                  {featureText}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
 
         {/* Subscribe Button */}
         <TouchableOpacity
@@ -339,42 +345,6 @@ export const AppleIAPSubscriptionModal: React.FC<
           </View>
         )}
 
-        {/* Debug Test Button */}
-        {__DEV__ && (
-          <TouchableOpacity
-            style={[
-              styles.debugButton,
-              { backgroundColor: currentPalette.quinary + "20" },
-            ]}
-            onPress={async () => {
-              try {
-                console.log("🧪 Testing direct purchase...");
-                const testProductId = "com.renai.basic_monthly2";
-                console.log(
-                  "📱 Calling iapService.purchaseProduct directly..."
-                );
-                const result = await iapService.purchaseProduct(
-                  testProductId as any
-                );
-                console.log("✅ Direct purchase result:", result);
-                Alert.alert("Test Success", "Direct purchase completed!");
-              } catch (error: any) {
-                console.error("❌ Direct purchase test failed:", error);
-                Alert.alert("Test Failed", error.message);
-              }
-            }}
-          >
-            <Text
-              style={[
-                styles.debugButtonText,
-                { color: currentPalette.quinary },
-              ]}
-            >
-              🧪 Test Direct Purchase (Dev Only)
-            </Text>
-          </TouchableOpacity>
-        )}
-
         {/* Subscription Plans */}
         <ScrollView
           style={styles.content}
@@ -470,12 +440,21 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    gap: 16,
   },
   planCard: {
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 3,
+    marginBottom: 20,
+    marginHorizontal: 4,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   planHeader: {
     marginBottom: 12,
@@ -487,15 +466,28 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   planName: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "800",
     flex: 1,
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   annualBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
     marginLeft: 8,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   annualBadgeText: {
     fontSize: 10,
@@ -505,32 +497,55 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: "row",
     alignItems: "baseline",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   price: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 32,
+    fontWeight: "900",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   period: {
     fontSize: 16,
     marginLeft: 4,
   },
-  planDescription: {
-    fontSize: 16,
-    marginBottom: 12,
-    lineHeight: 22,
-  },
-  additionalFeatures: {
+  featuresContainer: {
     marginBottom: 20,
+    paddingVertical: 8,
+  },
+  featureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  featureIcon: {
+    marginRight: 8,
   },
   featureText: {
     fontSize: 14,
-    marginBottom: 4,
     lineHeight: 18,
+    flex: 1,
   },
   subscribeButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   subscribeButtonText: {
     fontSize: 16,
@@ -600,18 +615,6 @@ const styles = StyleSheet.create({
   },
   errorCloseButton: {
     padding: 4,
-  },
-  debugButton: {
-    margin: 20,
-    padding: 15,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    alignItems: "center",
-  },
-  debugButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
   },
 });
 

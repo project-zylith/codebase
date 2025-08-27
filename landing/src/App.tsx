@@ -4,6 +4,7 @@ import { DeveloperPage } from "./pages/DeveloperPage";
 import { ResumePage } from "./pages/ResumePage";
 import { RENAIPage } from "./pages/RENAIPage";
 import { UpdatesPage } from "./pages/UpdatesPage";
+import { LegalPage } from "./pages/LegalPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/resume" element={<ResumePage />} />
             <Route path="/renai" element={<RENAIPage />} />
             <Route path="/updates" element={<UpdatesPage />} />
+            <Route path="/legal" element={<LegalPage />} />
           </Routes>
         </main>
       </div>

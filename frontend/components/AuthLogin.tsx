@@ -104,7 +104,14 @@ const AuthLogin: React.FC = () => {
           Alert.alert("Forgot Password", "Please contact support");
         }}
       >
-        <Text style={styles.forgotPasswordButtonText}>Forgot Password?</Text>
+        <Text
+          style={[
+            styles.forgotPasswordButtonText,
+            { color: currentPalette.quaternary },
+          ]}
+        >
+          Forgot Password?
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -152,7 +159,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   forgotPasswordButtonText: {
-    color: "#007bff",
     textDecorationLine: "underline",
   },
 });

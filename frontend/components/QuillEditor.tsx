@@ -301,7 +301,10 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           </View>
 
           <View style={styles.headerRight}>
-            <TouchableOpacity onPress={handleInsight} style={styles.headerButton}>
+            <TouchableOpacity
+              onPress={handleInsight}
+              style={styles.headerButton}
+            >
               <Ionicons name="bulb-outline" size={24} color="#007AFF" />
             </TouchableOpacity>
 
@@ -337,14 +340,20 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
                     <Ionicons name="save-outline" size={20} color="#007AFF" />
                     <Text style={styles.dropdownText}>Save Note</Text>
                   </TouchableOpacity>
-                  
+
                   {note?.id && (
                     <TouchableOpacity
                       style={styles.dropdownItem}
                       onPress={handleDelete}
                     >
-                      <Ionicons name="trash-outline" size={20} color="#FF3B30" />
-                      <Text style={[styles.dropdownText, { color: "#FF3B30" }]}>Delete Note</Text>
+                      <Ionicons
+                        name="trash-outline"
+                        size={20}
+                        color="#FF3B30"
+                      />
+                      <Text style={[styles.dropdownText, { color: "#FF3B30" }]}>
+                        Delete Note
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>

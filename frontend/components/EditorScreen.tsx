@@ -7,7 +7,7 @@ import {
 } from "@react-navigation/native";
 import { QuillEditor, QuillEditorRef } from "./QuillEditor";
 import { NoteInsightModal } from "./NoteInsightModal";
-import colorPalette from "../assets/colorPalette";
+import { useTheme } from "../contexts/ThemeContext";
 import {
   Note,
   getNoteById,
@@ -23,6 +23,7 @@ interface RouteParams {
 }
 
 export const EditorScreen = () => {
+  const { currentPalette } = useTheme();
   const route = useRoute();
   const navigation = useNavigation();
   const params = route.params as RouteParams;
@@ -271,7 +272,9 @@ export const EditorScreen = () => {
   console.log("Current note:", currentNote);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: currentPalette.tertiary }]}
+    >
       <QuillEditor
         ref={editorRef}
         initialContent={initialContent}
@@ -319,6 +322,5 @@ export const EditorScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colorPalette.tertiary,
   },
 });
