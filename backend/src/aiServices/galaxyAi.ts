@@ -194,7 +194,12 @@ export const generateGalaxiesWithAI = async (
         console.log(
           "🔄 Initial parse failed, attempting to fix common JSON issues..."
         );
-        console.log("🔍 Initial parse error:", initialParseError.message);
+        console.log(
+          "🔍 Initial parse error:",
+          initialParseError instanceof Error
+            ? initialParseError.message
+            : String(initialParseError)
+        );
 
         // Try to fix common JSON issues
         let fixedResponse = responseToParse;
@@ -216,7 +221,10 @@ export const generateGalaxiesWithAI = async (
         try {
           parsedResponse = JSON.parse(fixedResponse);
         } catch (fixError) {
-          console.log("🔍 Fix attempt failed:", fixError.message);
+          console.log(
+            "🔍 Fix attempt failed:",
+            fixError instanceof Error ? fixError.message : String(fixError)
+          );
           console.log("🔍 Response length:", fixedResponse.length);
           console.log("🔍 Last 200 characters:", fixedResponse.slice(-200));
           throw fixError;
