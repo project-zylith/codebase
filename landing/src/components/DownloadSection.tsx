@@ -1,10 +1,6 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { BetaAccessModal } from "./BetaAccessModal";
 
 export const DownloadSection = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
     <>
       <section id="download" className="py-20 px-4 sm:px-6 lg:px-8 relative">
@@ -19,39 +15,43 @@ export const DownloadSection = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-gradient">Ready to Get Started?</span>
+              <span className="text-gradient">
+                Ready to Transform Your Notes?
+              </span>
             </h2>
 
             <p className="text-xl text-cosmic-light-green mb-12 max-w-2xl mx-auto">
-              REN|AI is currently in beta testing. Get early access to the
-              future of AI-powered note-taking and productivity.
+              REN|AI is now available on the App Store! Download and start
+              transforming your notes into reality with AI-powered productivity.
             </p>
 
-            {/* Beta access button */}
+            {/* App Store download button */}
             <div className="flex justify-center items-center mb-12">
-              <motion.button
-                onClick={() => setIsModalOpen(true)}
+              <motion.a
+                href="https://apps.apple.com/us/app/ren-ai/id6749666233"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="cosmic-card hover:scale-105 transition-all duration-300 p-6 rounded-2xl cosmic-glow-hover group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-cosmic-off-white rounded-xl flex items-center justify-center">
-                    <span className="text-3xl">🚀</span>
+                    <span className="text-3xl">📱</span>
                   </div>
                   <div className="text-left">
                     <p className="text-sm text-cosmic-light-green">
                       Get Access to
                     </p>
                     <p className="text-xl font-semibold text-cosmic-off-white">
-                      Beta
+                      REN|AI
                     </p>
                     <p className="text-sm text-cosmic-electric-cyan">
-                      Early Access Available
+                      Available on App Store
                     </p>
                   </div>
                 </div>
-              </motion.button>
+              </motion.a>
             </div>
 
             {/* Beta features preview */}
@@ -78,12 +78,6 @@ export const DownloadSection = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Beta Access Modal */}
-      <BetaAccessModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </>
   );
 };

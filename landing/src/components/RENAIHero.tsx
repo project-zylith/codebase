@@ -77,7 +77,9 @@ export const RENAIHero = () => {
             transition={{ duration: 0.8, delay: 0.6 }}
           >
             <motion.a
-              href="#download"
+              href="https://apps.apple.com/us/app/ren-ai/id6749666233"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-cosmic-vibrant-pink hover:bg-cosmic-neon-purple px-8 py-4 rounded-xl font-semibold text-lg text-cosmic-off-white transition-all duration-300 cosmic-glow-hover flex items-center space-x-2"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -88,7 +90,7 @@ export const RENAIHero = () => {
 
             <motion.a
               href="#features"
-              className="border-2 border-cosmic-main-purple hover:bg-cosmic-main-purple px-8 py-4 rounded-xl font-semibold text-lg text-cosmic-light-purple hover:text-cosmic-off-white transition-all duration-300"
+              className="px-8 py-4 rounded-xl font-semibold text-lg text-cosmic-light-purple hover:text-cosmic-off-white transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
