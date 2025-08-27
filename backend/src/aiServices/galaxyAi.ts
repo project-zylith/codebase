@@ -26,6 +26,9 @@ Rules:
 - 2-5 galaxies total
 - Min 2 notes per galaxy (unless very few notes)
 - Return ONLY valid JSON, no explanations
+- IMPORTANT: Do not include HTML tags or entities in the content
+- If content contains HTML, strip it and return plain text only
+- Ensure all quotes are properly escaped for valid JSON
 
 Examples:
 - Travel notes → "Travel Planning" 
@@ -33,7 +36,7 @@ Examples:
 - Health/fitness notes → "Health & Fitness"
 - Programming/tech notes → "Software Development"
 
-RETURN ONLY JSON:`;
+CRITICAL: Return ONLY valid, parseable JSON with no HTML content or special characters that would break JSON parsing.`;
 const galaxyReSortPrompt = `You are Zylith, an AI assistant inside of a note taking/todo app. Your job is to re-sort existing galaxies based on the current notes.
 
 You will be provided all of the notes with their title and content inside of a nested array: [[title, content], [title, content], [title, content], ...]
@@ -61,6 +64,20 @@ const generateGalaxyInsightAllPrompt = ``;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Function to generate galaxies with AI and return parsed data
+// Helper function to clean HTML content from notes
+const cleanHtmlContent = (content: string): string => {
+  // Remove HTML tags and entities, convert to plain text
+  return content
+    .replace(/<[^>]*>/g, "") // Remove HTML tags
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+};
+
 export const generateGalaxiesWithAI = async (
   notes: [string, string][]
 ): Promise<[string, [string, string][]][]> => {
@@ -70,6 +87,12 @@ export const generateGalaxiesWithAI = async (
       notes.length,
       "notes"
     );
+
+    // Clean HTML content from notes before processing
+    const cleanedNotes = notes.map(([title, content]) => [
+      title,
+      cleanHtmlContent(content),
+    ]);
 
     if (!API_KEY) {
       console.error("❌ API_KEY not found! Using mock response for testing.");
@@ -108,7 +131,7 @@ export const generateGalaxiesWithAI = async (
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Truncate note content to prevent response truncation while keeping context
-    const truncatedNotes = notes.map(([title, content]) => [
+    const truncatedNotes = cleanedNotes.map(([title, content]) => [
       title,
       content.length > 500 ? content.substring(0, 500) + "..." : content,
     ]);
@@ -149,11 +172,56 @@ export const generateGalaxiesWithAI = async (
         responseToParse = response.replace(/```\s*/, "").replace(/\s*```/, "");
       }
 
+      // Clean the response to handle potential HTML entities and special characters
+      responseToParse = responseToParse
+        .trim()
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&#39;/g, "'");
+
       console.log(
         "🔧 Attempting to parse:",
         responseToParse.substring(0, 200) + "..."
       );
-      const parsedResponse = JSON.parse(responseToParse);
+
+      // Try to parse the cleaned response
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(responseToParse);
+      } catch (initialParseError) {
+        console.log(
+          "🔄 Initial parse failed, attempting to fix common JSON issues..."
+        );
+        console.log("🔍 Initial parse error:", initialParseError.message);
+
+        // Try to fix common JSON issues
+        let fixedResponse = responseToParse;
+
+        // Remove any trailing commas before closing brackets/braces
+        fixedResponse = fixedResponse.replace(/,(\s*[\]}])/g, "$1");
+
+        // Try to fix unescaped quotes in HTML content by escaping them
+        fixedResponse = fixedResponse.replace(/(<[^>]*>)/g, (match) => {
+          return match.replace(/"/g, '\\"');
+        });
+
+        console.log("🔧 Attempting to parse fixed response...");
+        console.log(
+          "🔍 Fixed response preview:",
+          fixedResponse.substring(0, 300) + "..."
+        );
+
+        try {
+          parsedResponse = JSON.parse(fixedResponse);
+        } catch (fixError) {
+          console.log("🔍 Fix attempt failed:", fixError.message);
+          console.log("🔍 Response length:", fixedResponse.length);
+          console.log("🔍 Last 200 characters:", fixedResponse.slice(-200));
+          throw fixError;
+        }
+      }
 
       if (Array.isArray(parsedResponse)) {
         console.log(
