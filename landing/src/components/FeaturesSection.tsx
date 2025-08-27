@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import renaissanceLogo from "../assets/icon.png";
 
 export const FeaturesSection = () => {
   const features = [
