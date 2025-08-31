@@ -65,7 +65,12 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Function to generate galaxies with AI and return parsed data
 // Helper function to clean HTML content from notes
-const cleanHtmlContent = (content: string): string => {
+const cleanHtmlContent = (content: string | null): string => {
+  // Handle null or undefined content
+  if (!content) {
+    return "";
+  }
+
   // Remove HTML tags and entities, convert to plain text
   return content
     .replace(/<[^>]*>/g, "") // Remove HTML tags
@@ -79,7 +84,7 @@ const cleanHtmlContent = (content: string): string => {
 };
 
 export const generateGalaxiesWithAI = async (
-  notes: [string, string][]
+  notes: [string, string | null][]
 ): Promise<[string, [string, string][]][]> => {
   try {
     console.log(
@@ -88,11 +93,34 @@ export const generateGalaxiesWithAI = async (
       "notes"
     );
 
+    // Log the first few notes to debug any null content issues
+    console.log("🔍 Sample notes data:", notes.slice(0, 3));
+
+    // Validate notes structure
+    if (!Array.isArray(notes)) {
+      throw new Error("Notes must be an array");
+    }
+
+    if (notes.length === 0) {
+      throw new Error("Notes array cannot be empty");
+    }
+
     // Clean HTML content from notes before processing
-    const cleanedNotes = notes.map(([title, content]) => [
-      title,
-      cleanHtmlContent(content),
-    ]);
+    // Filter out notes with null content and clean the remaining ones
+    const cleanedNotes = notes
+      .filter(([title, content]) => title && content) // Ensure both title and content exist
+      .map(([title, content]) => [title, cleanHtmlContent(content)]);
+
+    console.log(
+      `🧹 Filtered notes: ${notes.length} → ${cleanedNotes.length} valid notes`
+    );
+
+    // Ensure we still have notes after filtering
+    if (cleanedNotes.length === 0) {
+      throw new Error(
+        "No valid notes found after filtering null/empty content"
+      );
+    }
 
     if (!API_KEY) {
       console.error("❌ API_KEY not found! Using mock response for testing.");
@@ -133,11 +161,13 @@ export const generateGalaxiesWithAI = async (
     // Truncate note content to prevent response truncation while keeping context
     const truncatedNotes = cleanedNotes.map(([title, content]) => [
       title,
-      content.length > 500 ? content.substring(0, 500) + "..." : content,
+      typeof content === "string" && content.length > 500
+        ? content.substring(0, 500) + "..."
+        : content,
     ]);
 
     console.log(
-      `📝 Processing ${notes.length} notes, truncated content for AI efficiency`
+      `📝 Processing ${cleanedNotes.length} notes, truncated content for AI efficiency`
     );
 
     // Combine the prompt with the notes data
@@ -150,8 +180,24 @@ export const generateGalaxiesWithAI = async (
       fullPrompt.substring(0, 200) + "..."
     );
 
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response.text();
+    let result, response;
+    try {
+      result = await model.generateContent(fullPrompt);
+      response = await result.response.text();
+    } catch (aiError) {
+      console.error("❌ Error calling AI service:", aiError);
+      throw new Error(
+        `AI service error: ${
+          aiError instanceof Error ? aiError.message : String(aiError)
+        }`
+      );
+    }
+
+    if (!response || typeof response !== "string") {
+      throw new Error(
+        `Invalid AI response: expected string, got ${typeof response}`
+      );
+    }
 
     console.log("🤖 AI Response:", response);
     console.log("🤖 AI Response length:", response.length);
@@ -232,12 +278,33 @@ export const generateGalaxiesWithAI = async (
       }
 
       if (Array.isArray(parsedResponse)) {
+        // Validate the structure of each galaxy
+        const validGalaxies = parsedResponse.filter((galaxy, index) => {
+          if (!Array.isArray(galaxy) || galaxy.length !== 2) {
+            console.warn(
+              `⚠️ Invalid galaxy structure at index ${index}:`,
+              galaxy
+            );
+            return false;
+          }
+          const [galaxyName, galaxyNotes] = galaxy;
+          if (typeof galaxyName !== "string" || !Array.isArray(galaxyNotes)) {
+            console.warn(`⚠️ Invalid galaxy data at index ${index}:`, galaxy);
+            return false;
+          }
+          return true;
+        });
+
+        if (validGalaxies.length === 0) {
+          throw new Error("No valid galaxies found in AI response");
+        }
+
         console.log(
           "✅ Successfully parsed Zylith response into",
-          parsedResponse.length,
-          "galaxies"
+          validGalaxies.length,
+          "valid galaxies"
         );
-        return parsedResponse;
+        return validGalaxies;
       } else {
         console.error("❌ Zylith response is not an array:", parsedResponse);
         throw new Error("Zylith response is not in expected array format");
@@ -254,7 +321,7 @@ export const generateGalaxiesWithAI = async (
 
       // Fallback: create a single galaxy with all notes
       console.log("🔄 Creating fallback galaxy with all notes");
-      return [["General Notes", notes]];
+      return [["General Notes", cleanedNotes]];
     }
   } catch (error) {
     console.error("❌ Error in generateGalaxiesWithAI:", error);
