@@ -115,7 +115,7 @@ export const generateGalaxies = async (
     }
 
     // Use validNotes if we filtered, otherwise use original notes
-    const notesToProcess =
+    let notesToProcess =
       invalidNotes.length > 0
         ? notes.filter(([title, content]) => title && content)
         : notes;
@@ -131,7 +131,7 @@ export const generateGalaxies = async (
       .whereIn("title", userNoteTitles);
 
     if (actualUserNotes.length !== notesToProcess.length) {
-      const foundTitles = actualUserNotes.map((n) => n.title);
+      const foundTitles = actualUserNotes.map((n: any) => n.title);
       const missingTitles = userNoteTitles.filter(
         (title) => !foundTitles.includes(title)
       );
@@ -142,7 +142,7 @@ export const generateGalaxies = async (
 
       // Only process notes that actually belong to the user
       const verifiedNotes = notesToProcess.filter(([title]) =>
-        actualUserNotes.some((n) => n.title === title)
+        actualUserNotes.some((n: any) => n.title === title)
       );
 
       if (verifiedNotes.length === 0) {

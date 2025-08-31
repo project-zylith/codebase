@@ -321,7 +321,7 @@ export const generateGalaxiesWithAI = async (
 
       // Fallback: create a single galaxy with all notes
       console.log("🔄 Creating fallback galaxy with all notes");
-      return [["General Notes", cleanedNotes]];
+      return [["General Notes", cleanedNotes as [string, string][]]];
     }
   } catch (error) {
     console.error("❌ Error in generateGalaxiesWithAI:", error);
