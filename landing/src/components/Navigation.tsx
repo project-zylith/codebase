@@ -10,7 +10,7 @@ export const Navigation = () => {
     { path: "/", label: "Portfolio" },
     // { path: "/resume", label: "Resume" },
     { path: "/renai", label: "REN|AI" },
-    { path: "/updates", label: "Updates" },
+    // { path: "/updates", label: "Updates" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
