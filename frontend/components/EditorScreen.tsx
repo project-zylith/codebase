@@ -238,6 +238,18 @@ export const EditorScreen = () => {
     );
   };
 
+  const handleTitleUpdate = (newTitle: string) => {
+    if (currentNote) {
+      // Preserve the current content when updating title to prevent clearing
+      const updatedNote = {
+        ...currentNote,
+        title: newTitle,
+        content: currentContent || currentNote.content, // Use current editor content
+      };
+      setCurrentNote(updatedNote);
+    }
+  };
+
   const loadGalaxyData = async (note: Note) => {
     if (note.galaxy_id) {
       try {
@@ -298,6 +310,7 @@ export const EditorScreen = () => {
         relatedNotes={relatedNotes}
         onInsight={handleInsight}
         onDelete={handleDelete}
+        onTitleUpdate={handleTitleUpdate}
       />
       <NoteInsightModal
         visible={showInsightModal}

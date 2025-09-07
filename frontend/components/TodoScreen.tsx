@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   Task,
   getTasks,
@@ -78,6 +79,13 @@ export const TodoScreen = () => {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  // Refresh tasks when screen comes into focus (fixes AI task update issue)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTasks();
+    }, [])
+  );
 
   const handleToggleComplete = async (task: Task) => {
     try {
@@ -503,21 +511,6 @@ export const TodoScreen = () => {
           </Text>
         </TouchableOpacity>
         <View style={styles.taskActions}>
-          <View
-            style={[
-              styles.checkbox,
-              { borderColor: currentPalette.quinary },
-              item.is_completed && [
-                styles.checkedCheckbox,
-                {
-                  backgroundColor: currentPalette.quaternary,
-                  borderColor: currentPalette.quaternary,
-                },
-              ],
-            ]}
-          >
-            {item.is_completed && <Text style={styles.checkmark}>✓</Text>}
-          </View>
           <TouchableOpacity
             style={styles.hamburgerButton}
             onPress={() => setShowMenuForTask(item.id)}

@@ -18,9 +18,11 @@ import {
   TouchableWithoutFeedback,
   Modal,
   Dimensions,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
+import { updateNote } from "../adapters/noteAdapters";
 
 interface QuillEditorProps {
   initialContent?: string;
@@ -45,6 +47,7 @@ interface QuillEditorProps {
   }> | null;
   onInsight?: () => void;
   onDelete?: () => void;
+  onTitleUpdate?: (newTitle: string) => void;
 }
 
 export interface QuillEditorRef {
@@ -65,6 +68,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
       relatedNotes,
       onInsight,
       onDelete,
+      onTitleUpdate,
     },
     ref
   ) => {
@@ -73,6 +77,9 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showToolsDropdown, setShowToolsDropdown] = useState(false);
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editedTitle, setEditedTitle] = useState("");
+    const [lastTapTime, setLastTapTime] = useState(0);
     const webViewRef = useRef<WebView>(null);
 
     // Expose methods to parent component
@@ -112,9 +119,9 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
       };
     }, []);
 
-    // Initialize content when editor is ready
+    // Initialize content when editor is ready - only on first load
     useEffect(() => {
-      if (isEditorReady && initialContent) {
+      if (isEditorReady && initialContent && !currentHtmlContent) {
         webViewRef.current?.postMessage(
           JSON.stringify({
             type: "SET_CONTENT",
@@ -173,6 +180,49 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
 
     const dismissKeyboard = () => {
       Keyboard.dismiss();
+    };
+
+    // Title editing handlers
+    const handleTitlePress = () => {
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTime;
+
+      if (timeSinceLastTap < 500 && note) {
+        // Double-tap detected
+        setIsEditingTitle(true);
+        setEditedTitle(note.title);
+      }
+
+      setLastTapTime(now);
+    };
+
+    const handleTitleSave = async () => {
+      if (!note || !editedTitle.trim()) {
+        setIsEditingTitle(false);
+        return;
+      }
+
+      try {
+        const response = await updateNote(note.id, {
+          title: editedTitle.trim(),
+        });
+        if (response.ok) {
+          if (onTitleUpdate) {
+            onTitleUpdate(editedTitle.trim());
+          }
+          setIsEditingTitle(false);
+        } else {
+          Alert.alert("Error", "Failed to update note title");
+        }
+      } catch (error) {
+        console.error("Error updating note title:", error);
+        Alert.alert("Error", "Failed to update note title");
+      }
+    };
+
+    const handleTitleCancel = () => {
+      setIsEditingTitle(false);
+      setEditedTitle("");
     };
 
     const quillHtml = `
@@ -294,7 +344,40 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>{note?.title || "New Note"}</Text>
+            {isEditingTitle ? (
+              <View style={styles.titleEditContainer}>
+                <TextInput
+                  style={styles.titleInput}
+                  value={editedTitle}
+                  onChangeText={setEditedTitle}
+                  autoFocus
+                  selectTextOnFocus
+                  onSubmitEditing={handleTitleSave}
+                  onBlur={handleTitleCancel}
+                  placeholder="Note title"
+                />
+                <View style={styles.titleEditButtons}>
+                  <TouchableOpacity
+                    onPress={handleTitleSave}
+                    style={styles.titleSaveButton}
+                  >
+                    <Ionicons name="checkmark" size={16} color="#007AFF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleTitleCancel}
+                    style={styles.titleCancelButton}
+                  >
+                    <Ionicons name="close" size={16} color="#FF3B30" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity onPress={handleTitlePress} activeOpacity={0.7}>
+                <Text style={styles.headerTitle}>
+                  {note?.title || "New Note"}
+                </Text>
+              </TouchableOpacity>
+            )}
             {galaxy && (
               <Text style={styles.headerSubtitle}>in {galaxy.name}</Text>
             )}
@@ -459,5 +542,32 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 16,
     color: "#007AFF",
+  },
+  titleEditContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  titleInput: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#000000",
+    borderBottomWidth: 1,
+    borderBottomColor: "#007AFF",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginRight: 8,
+  },
+  titleEditButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  titleSaveButton: {
+    padding: 4,
+    marginRight: 8,
+  },
+  titleCancelButton: {
+    padding: 4,
   },
 });
