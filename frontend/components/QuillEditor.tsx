@@ -237,7 +237,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
       <style>
         body {
           margin: 0;
-          padding: 16px;
+          padding: 0;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           background-color: ${isDarkModeNotes ? "#1C1C1E" : "#ffffff"};
           color: ${isDarkModeNotes ? "#ffffff" : "#000000"};
@@ -246,39 +246,21 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           min-height: 300px;
           border: none;
           outline: none;
+          margin: 0;
+          padding: 0;
         }
         .ql-toolbar {
-          border: none;
-          border-bottom: 1px solid ${isDarkModeNotes ? "#48484A" : "#e0e0e0"};
-          padding: 8px 0;
-          background-color: ${isDarkModeNotes ? "#1C1C1E" : "#ffffff"};
-          position: sticky;
-          top: 0;
-          z-index: 1000;
+          display: none !important;
         }
-        .ql-toolbar .ql-formats {
-          margin-right: 15px;
-        }
-        .ql-toolbar button {
-          color: ${isDarkModeNotes ? "#ffffff" : "#444444"} !important;
-        }
-          .ql-toolbar button:hover {
-            background-color: ${
-              isDarkModeNotes ? "#48484A" : "#f0f0f0"
-            } !important;
-          }
-          .ql-toolbar button.ql-active {
-            background-color: ${
-              isDarkModeNotes ? "#636366" : "#e0e0e0"
-            } !important;
-          }
         .ql-container {
           border: none;
           font-size: 16px;
           line-height: 1.6;
+          margin: 0;
+          padding: 0;
         }
         .ql-editor {
-          padding: 16px 0;
+          padding: 0 16px;
           color: ${isDarkModeNotes ? "#ffffff" : "#000000"};
         }
           .ql-editor.ql-blank::before {
@@ -307,12 +289,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           theme: 'snow',
           placeholder: '${placeholder}',
           modules: {
-            toolbar: [
-              ['bold', 'italic', 'underline'],
-              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-              [{ 'header': [1, 2, 3, false] }],
-              ['clean']
-            ]
+            toolbar: false
           }
         });
 
@@ -379,6 +356,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           styles.container,
           { backgroundColor: isDarkModeNotes ? "#1C1C1E" : "#ffffff" },
         ]}
+        edges={["top", "left", "right"]}
       >
         {/* Header */}
         <View

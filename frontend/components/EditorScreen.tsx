@@ -23,7 +23,7 @@ interface RouteParams {
 }
 
 export const EditorScreen = () => {
-  const { currentPalette } = useTheme();
+  const { currentPalette, isDarkModeNotes } = useTheme();
   const route = useRoute();
   const navigation = useNavigation();
   const params = route.params as RouteParams;
@@ -285,7 +285,11 @@ export const EditorScreen = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: currentPalette.tertiary }]}
+      style={[
+        styles.container,
+        { backgroundColor: isDarkModeNotes ? "#1C1C1E" : "#ffffff" },
+      ]}
+      edges={["top", "left", "right"]}
     >
       <QuillEditor
         ref={editorRef}

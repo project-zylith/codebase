@@ -37,7 +37,10 @@
             "CFBundleURLName": "com.apiary.zylith",
             "CFBundleURLSchemes": ["com.apiary.zylith"]
           }
-        ]
+        ],
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "UIStatusBarHidden": true,
+        "UIHomeIndicatorAutoHidden": true
       }
     },
 
