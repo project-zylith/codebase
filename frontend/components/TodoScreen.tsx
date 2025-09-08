@@ -479,7 +479,7 @@ export const TodoScreen = () => {
           <Text
             style={[
               styles.aiGeneratedLabel,
-              { color: currentPalette.tertiary },
+              { color: currentPalette.lightText },
             ]}
           >
             REN|AI GENERATED
@@ -598,7 +598,7 @@ export const TodoScreen = () => {
               <Text
                 style={[
                   styles.filterButtonText,
-                  { color: currentPalette.tertiary },
+                  { color: currentPalette.lightText },
                 ]}
               >
                 Status: {getFilterDisplayName("status", filters.status)}
@@ -606,7 +606,7 @@ export const TodoScreen = () => {
               <Ionicons
                 name="chevron-down"
                 size={16}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -620,7 +620,7 @@ export const TodoScreen = () => {
               <Text
                 style={[
                   styles.filterButtonText,
-                  { color: currentPalette.tertiary },
+                  { color: currentPalette.lightText },
                 ]}
               >
                 Priority: {getFilterDisplayName("priority", filters.priority)}
@@ -628,7 +628,7 @@ export const TodoScreen = () => {
               <Ionicons
                 name="chevron-down"
                 size={16}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -642,7 +642,7 @@ export const TodoScreen = () => {
               <Text
                 style={[
                   styles.filterButtonText,
-                  { color: currentPalette.tertiary },
+                  { color: currentPalette.lightText },
                 ]}
               >
                 Time: {getFilterDisplayName("time", filters.time)}
@@ -650,7 +650,7 @@ export const TodoScreen = () => {
               <Ionicons
                 name="chevron-down"
                 size={16}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -701,7 +701,7 @@ export const TodoScreen = () => {
           <Text
             style={[
               styles.createTaskButtonText,
-              { color: currentPalette.tertiary },
+              { color: currentPalette.lightText },
             ]}
           >
             Create Task

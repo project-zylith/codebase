@@ -23,6 +23,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import { updateNote } from "../adapters/noteAdapters";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface QuillEditorProps {
   initialContent?: string;
@@ -74,6 +75,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
   ) => {
     const [currentHtmlContent, setCurrentHtmlContent] = useState("");
     const [currentTextContent, setCurrentTextContent] = useState("");
+    const { isDarkModeNotes } = useTheme();
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showToolsDropdown, setShowToolsDropdown] = useState(false);
@@ -237,7 +239,8 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           margin: 0;
           padding: 16px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background-color: #ffffff;
+          background-color: ${isDarkModeNotes ? "#1C1C1E" : "#ffffff"};
+          color: ${isDarkModeNotes ? "#ffffff" : "#000000"};
         }
         #editor {
           min-height: 300px;
@@ -246,9 +249,29 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
         }
         .ql-toolbar {
           border: none;
-          border-bottom: 1px solid #e0e0e0;
+          border-bottom: 1px solid ${isDarkModeNotes ? "#48484A" : "#e0e0e0"};
           padding: 8px 0;
+          background-color: ${isDarkModeNotes ? "#1C1C1E" : "#ffffff"};
+          position: sticky;
+          top: 0;
+          z-index: 1000;
         }
+        .ql-toolbar .ql-formats {
+          margin-right: 15px;
+        }
+        .ql-toolbar button {
+          color: ${isDarkModeNotes ? "#ffffff" : "#444444"} !important;
+        }
+          .ql-toolbar button:hover {
+            background-color: ${
+              isDarkModeNotes ? "#48484A" : "#f0f0f0"
+            } !important;
+          }
+          .ql-toolbar button.ql-active {
+            background-color: ${
+              isDarkModeNotes ? "#636366" : "#e0e0e0"
+            } !important;
+          }
         .ql-container {
           border: none;
           font-size: 16px;
@@ -256,12 +279,23 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
         }
         .ql-editor {
           padding: 16px 0;
+          color: ${isDarkModeNotes ? "#ffffff" : "#000000"};
         }
-        .ql-editor.ql-blank::before {
-          color: #999;
-          font-style: normal;
-          content: attr(data-placeholder);
-        }
+          .ql-editor.ql-blank::before {
+            color: ${isDarkModeNotes ? "#8E8E93" : "#999999"};
+            font-style: normal;
+            content: attr(data-placeholder);
+          }
+          .ql-snow .ql-tooltip {
+            background-color: ${isDarkModeNotes ? "#2C2C2E" : "#ffffff"};
+            border: 1px solid ${isDarkModeNotes ? "#48484A" : "#ccc"};
+            color: ${isDarkModeNotes ? "#ffffff" : "#000000"};
+          }
+          .ql-snow .ql-tooltip input[type=text] {
+            background-color: ${isDarkModeNotes ? "#1C1C1E" : "#ffffff"};
+            color: ${isDarkModeNotes ? "#ffffff" : "#000000"};
+            border: 1px solid ${isDarkModeNotes ? "#48484A" : "#ccc"};
+          }
       </style>
     </head>
     <body>
@@ -340,14 +374,31 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
     `;
 
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: isDarkModeNotes ? "#1C1C1E" : "#ffffff" },
+        ]}
+      >
         {/* Header */}
-        <View style={styles.header}>
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: isDarkModeNotes ? "#1C1C1E" : "#ffffff" },
+          ]}
+        >
           <View style={styles.headerCenter}>
             {isEditingTitle ? (
               <View style={styles.titleEditContainer}>
                 <TextInput
-                  style={styles.titleInput}
+                  style={[
+                    styles.titleInput,
+                    {
+                      backgroundColor: isDarkModeNotes ? "#2C2C2E" : "#f8f9fa",
+                      color: isDarkModeNotes ? "#ffffff" : "#000000",
+                      borderColor: isDarkModeNotes ? "#48484A" : "#e0e0e0",
+                    },
+                  ]}
                   value={editedTitle}
                   onChangeText={setEditedTitle}
                   autoFocus
@@ -355,17 +406,32 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
                   onSubmitEditing={handleTitleSave}
                   onBlur={handleTitleCancel}
                   placeholder="Note title"
+                  placeholderTextColor={isDarkModeNotes ? "#8E8E93" : "#999999"}
                 />
                 <View style={styles.titleEditButtons}>
                   <TouchableOpacity
                     onPress={handleTitleSave}
-                    style={styles.titleSaveButton}
+                    style={[
+                      styles.titleSaveButton,
+                      {
+                        backgroundColor: isDarkModeNotes
+                          ? "#2C2C2E"
+                          : "#ffffff",
+                      },
+                    ]}
                   >
                     <Ionicons name="checkmark" size={16} color="#007AFF" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleTitleCancel}
-                    style={styles.titleCancelButton}
+                    style={[
+                      styles.titleCancelButton,
+                      {
+                        backgroundColor: isDarkModeNotes
+                          ? "#2C2C2E"
+                          : "#ffffff",
+                      },
+                    ]}
                   >
                     <Ionicons name="close" size={16} color="#FF3B30" />
                   </TouchableOpacity>
@@ -373,13 +439,25 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
               </View>
             ) : (
               <TouchableOpacity onPress={handleTitlePress} activeOpacity={0.7}>
-                <Text style={styles.headerTitle}>
+                <Text
+                  style={[
+                    styles.headerTitle,
+                    { color: isDarkModeNotes ? "#ffffff" : "#000000" },
+                  ]}
+                >
                   {note?.title || "New Note"}
                 </Text>
               </TouchableOpacity>
             )}
             {galaxy && (
-              <Text style={styles.headerSubtitle}>in {galaxy.name}</Text>
+              <Text
+                style={[
+                  styles.headerSubtitle,
+                  { color: isDarkModeNotes ? "#8E8E93" : "#666666" },
+                ]}
+              >
+                in {galaxy.name}
+              </Text>
             )}
           </View>
 
@@ -388,14 +466,22 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
               onPress={handleInsight}
               style={styles.headerButton}
             >
-              <Ionicons name="bulb-outline" size={24} color="#007AFF" />
+              <Ionicons
+                name="bulb-outline"
+                size={24}
+                color={isDarkModeNotes ? "#ffffff" : "#007AFF"}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setShowToolsDropdown(!showToolsDropdown)}
               style={styles.headerButton}
             >
-              <Ionicons name="ellipsis-horizontal" size={24} color="#007AFF" />
+              <Ionicons
+                name="ellipsis-horizontal"
+                size={24}
+                color={isDarkModeNotes ? "#ffffff" : "#007AFF"}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -412,7 +498,14 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
               onPress={() => setShowToolsDropdown(false)}
             >
               <View style={styles.modalOverlay}>
-                <View style={styles.dropdown}>
+                <View
+                  style={[
+                    styles.dropdown,
+                    {
+                      backgroundColor: isDarkModeNotes ? "#2C2C2E" : "#ffffff",
+                    },
+                  ]}
+                >
                   <TouchableOpacity
                     style={styles.dropdownItem}
                     onPress={() => {
@@ -420,8 +513,19 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
                       handleSave();
                     }}
                   >
-                    <Ionicons name="save-outline" size={20} color="#007AFF" />
-                    <Text style={styles.dropdownText}>Save Note</Text>
+                    <Ionicons
+                      name="save-outline"
+                      size={20}
+                      color={isDarkModeNotes ? "#ffffff" : "#007AFF"}
+                    />
+                    <Text
+                      style={[
+                        styles.dropdownText,
+                        { color: isDarkModeNotes ? "#ffffff" : "#000000" },
+                      ]}
+                    >
+                      Save Note
+                    </Text>
                   </TouchableOpacity>
 
                   {note?.id && (
@@ -448,7 +552,10 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
         {/* Editor */}
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.editorContainer}
+          style={[
+            styles.editorContainer,
+            { backgroundColor: isDarkModeNotes ? "#1C1C1E" : "#ffffff" },
+          ]}
         >
           <WebView
             ref={webViewRef}

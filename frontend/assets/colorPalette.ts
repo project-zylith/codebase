@@ -10,6 +10,10 @@ const colorPalette2 = {
   border: "#E53E3E", // Consistent border color
   button: "#E53E3E", // Consistent button color
   buttonText: "#FFFFFF", // White button text
+  // Additional contrast variables
+  darkBackground: "#1A202C", // Dark background for high contrast areas
+  lightText: "#FFFFFF", // White text for dark backgrounds
+  darkText: "#1A202C", // Dark text for light backgrounds
 };
 
 const colorPalette3 = {
@@ -24,6 +28,10 @@ const colorPalette3 = {
   border: "#C4A484", // Sandy border accent
   button: "#C4A484", // Sandy button background
   buttonText: "#0F1419", // Darker text for better contrast on sandy buttons
+  // Additional contrast variables
+  darkBackground: "#0F1419", // Very dark background for high contrast areas
+  lightText: "#F4E4C1", // Cream text for dark backgrounds
+  darkText: "#0F1419", // Dark text for light backgrounds
 };
 
 // const colorPalette5 = {
@@ -66,6 +74,10 @@ const colorPalette5 = {
   border: "#2D3748", // Consistent border color
   button: "#2D3748", // Consistent button color
   buttonText: "#FFFFFF", // White text on dark buttons
+  // Additional contrast variables
+  darkBackground: "#000000", // Pure black background for high contrast areas
+  lightText: "#FFFFFF", // Pure white text for dark backgrounds
+  darkText: "#000000", // Pure black text for light backgrounds
 };
 
 // const colorPalette7 = {
@@ -94,6 +106,10 @@ const colorPalette8 = {
   border: "#06B6D4", // Cyan border accent
   button: "#06B6D4", // Cyan button background
   buttonText: "#0F172A", // Dark text on cyan buttons
+  // Additional contrast variables
+  darkBackground: "#020617", // Very dark navy background for high contrast areas
+  lightText: "#FFFFFF", // Pure white text for dark backgrounds
+  darkText: "#0F172A", // Dark navy text for light backgrounds
 };
 
 // const colorPalette9 = {
@@ -122,6 +138,10 @@ const colorPalette10 = {
   border: "#8B5CF6", // Violet border accent
   button: "#8B5CF6", // Violet button background
   buttonText: "#FFFFFF", // Pure white text for maximum contrast
+  // Additional contrast variables
+  darkBackground: "#1E1B4B", // Very dark cosmic background for high contrast areas
+  lightText: "#FFFFFF", // Pure white text for dark backgrounds
+  darkText: "#2D1B4E", // Dark purple text for light backgrounds
 };
 
 // const nebula = {

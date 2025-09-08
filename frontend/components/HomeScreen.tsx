@@ -783,7 +783,7 @@ export const HomeScreen = () => {
               <Ionicons
                 name="search"
                 size={20}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
           )}
@@ -813,7 +813,7 @@ export const HomeScreen = () => {
               <Ionicons
                 name={currentGalaxyIndex === -1 ? "planet" : "list"}
                 size={20}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -830,7 +830,7 @@ export const HomeScreen = () => {
                 <Ionicons
                   name="bulb"
                   size={20}
-                  color={currentPalette.tertiary}
+                  color={currentPalette.lightText}
                 />
               </TouchableOpacity>
             )}
@@ -859,12 +859,12 @@ export const HomeScreen = () => {
                 <Ionicons
                   name="add"
                   size={32}
-                  color={currentPalette.tertiary}
+                  color={currentPalette.lightText}
                 />
                 <Text
                   style={[
                     styles.buttonText,
-                    { color: currentPalette.tertiary },
+                    { color: currentPalette.lightText },
                   ]}
                 >
                   New Note
