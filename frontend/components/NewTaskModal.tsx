@@ -126,7 +126,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             <Text
               style={[
                 styles.createButtonText,
-                { color: currentPalette.tertiary },
+                { color: currentPalette.lightText },
               ]}
             >
               {isSubmitting ? "Creating..." : "Create"}

@@ -23,7 +23,7 @@ interface RouteParams {
 }
 
 export const EditorScreen = () => {
-  const { currentPalette } = useTheme();
+  const { currentPalette, isDarkModeNotes } = useTheme();
   const route = useRoute();
   const navigation = useNavigation();
   const params = route.params as RouteParams;
@@ -238,6 +238,18 @@ export const EditorScreen = () => {
     );
   };
 
+  const handleTitleUpdate = (newTitle: string) => {
+    if (currentNote) {
+      // Preserve the current content when updating title to prevent clearing
+      const updatedNote = {
+        ...currentNote,
+        title: newTitle,
+        content: currentContent || currentNote.content, // Use current editor content
+      };
+      setCurrentNote(updatedNote);
+    }
+  };
+
   const loadGalaxyData = async (note: Note) => {
     if (note.galaxy_id) {
       try {
@@ -273,7 +285,11 @@ export const EditorScreen = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: currentPalette.tertiary }]}
+      style={[
+        styles.container,
+        { backgroundColor: isDarkModeNotes ? "#1C1C1E" : "#ffffff" },
+      ]}
+      edges={["top", "left", "right"]}
     >
       <QuillEditor
         ref={editorRef}
@@ -298,6 +314,7 @@ export const EditorScreen = () => {
         relatedNotes={relatedNotes}
         onInsight={handleInsight}
         onDelete={handleDelete}
+        onTitleUpdate={handleTitleUpdate}
       />
       <NoteInsightModal
         visible={showInsightModal}
