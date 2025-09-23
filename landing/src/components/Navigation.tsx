@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Menu, X, User, Code, Mail } from "lucide-react";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,29 +17,29 @@ export const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="relative z-50 bg-cosmic-deep-black/80 backdrop-blur-lg border-b border-cosmic-main-teal/30">
+    <nav className="relative z-50 bg-dark-bg-primary border-b border-dark-border-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-cosmic-main-teal rounded-lg flex items-center justify-center cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300">
-              <span className="text-xl font-bold text-cosmic-off-white">I</span>
+            <div className="w-8 h-8 bg-dark-accent-blue rounded-md flex items-center justify-center group-hover:bg-dark-accent-purple transition-colors duration-200">
+              <User className="w-4 h-4 text-dark-text-primary" />
             </div>
-            <span className="text-xl font-bold text-gradient">
+            <span className="text-lg font-medium text-dark-text-primary minimal-heading">
               Ibrahim Hudson
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                   isActive(item.path)
-                    ? "bg-cosmic-main-teal text-cosmic-off-white cosmic-glow"
-                    : "text-cosmic-light-green hover:text-cosmic-off-white hover:bg-cosmic-card-dark"
+                    ? "bg-dark-bg-secondary text-dark-text-primary"
+                    : "text-dark-text-secondary hover:text-dark-text-primary hover:bg-dark-bg-hover"
                 }`}
               >
                 {item.label}
@@ -48,36 +49,25 @@ export const Navigation = () => {
             {/* Contact Button */}
             <motion.a
               href="#contact"
-              className="bg-cosmic-vibrant-blue hover:bg-cosmic-emerald px-6 py-2 rounded-lg font-semibold text-cosmic-off-white transition-all duration-300 cosmic-glow-hover"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="dark-button px-4 py-2 text-sm flex items-center space-x-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Contact Me
+              <Mail className="w-4 h-4" />
+              <span>Contact</span>
             </motion.a>
           </div>
 
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-cosmic-light-green hover:text-cosmic-off-white hover:bg-cosmic-card-dark transition-colors"
+            className="md:hidden p-2 rounded-md text-dark-text-secondary hover:text-dark-text-primary hover:bg-dark-bg-hover transition-colors"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={
-                  isMenuOpen
-                    ? "M6 18L18 6M6 6l12 12"
-                    : "M4 6h16M4 12h16M4 18h16"
-                }
-              />
-            </svg>
+            {isMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
 
@@ -87,17 +77,17 @@ export const Navigation = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="md:hidden py-4 border-t border-cosmic-main-teal/30"
+            className="md:hidden py-4 border-t border-dark-border-light"
           >
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsMenuOpen(false)}
-                className={`block px-4 py-3 rounded-lg transition-all duration-300 ${
+                className={`block px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
                   isActive(item.path)
-                    ? "bg-cosmic-main-teal text-cosmic-off-white"
-                    : "text-cosmic-light-green hover:text-cosmic-off-white hover:bg-cosmic-card-dark"
+                    ? "bg-dark-bg-secondary text-dark-text-primary"
+                    : "text-dark-text-secondary hover:text-dark-text-primary hover:bg-dark-bg-hover"
                 }`}
               >
                 {item.label}
@@ -106,9 +96,10 @@ export const Navigation = () => {
             <a
               href="#contact"
               onClick={() => setIsMenuOpen(false)}
-              className="block mt-4 bg-cosmic-vibrant-blue hover:bg-cosmic-emerald px-4 py-3 rounded-lg font-semibold text-cosmic-off-white text-center transition-all duration-300"
+              className="block mt-4 dark-button px-4 py-3 text-sm text-center flex items-center justify-center space-x-2"
             >
-              Contact Me
+              <Mail className="w-4 h-4" />
+              <span>Contact</span>
             </a>
           </motion.div>
         )}

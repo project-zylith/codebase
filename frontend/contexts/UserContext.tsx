@@ -25,10 +25,11 @@ interface UserState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isRainyDayMode: boolean;
 }
 
 interface UserAction {
-  type: "SET_USER" | "SET_LOADING" | "LOGOUT";
+  type: "SET_USER" | "SET_LOADING" | "LOGOUT" | "SET_RAINY_DAY_MODE";
   payload?: any;
 }
 
@@ -37,6 +38,7 @@ const initialState: UserState = {
   user: null,
   isLoading: true,
   isAuthenticated: false,
+  isRainyDayMode: false,
 };
 
 // Reducer
@@ -48,6 +50,7 @@ const userReducer = (state: UserState, action: UserAction): UserState => {
         user: action.payload,
         isAuthenticated: !!action.payload,
         isLoading: false,
+        isRainyDayMode: action.payload?.username === "Rainy Day",
       };
     case "SET_LOADING":
       return {
@@ -60,6 +63,12 @@ const userReducer = (state: UserState, action: UserAction): UserState => {
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        isRainyDayMode: false,
+      };
+    case "SET_RAINY_DAY_MODE":
+      return {
+        ...state,
+        isRainyDayMode: action.payload,
       };
     default:
       return state;
@@ -88,7 +97,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   const checkStoredSession = async () => {
     try {
       console.log("🔍 Checking stored session...");
-      
+
       // Add overall timeout for the entire session check
       const sessionCheckTimeout = setTimeout(() => {
         console.log("⏰ Session check timeout - forcing login screen");
@@ -112,7 +121,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
           clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_USER", payload: currentUser });
         } else {
-          console.log("❌ Session invalid, clearing stored data. Status:", response?.status);
+          console.log(
+            "❌ Session invalid, clearing stored data. Status:",
+            response?.status
+          );
           // Session is invalid, clear stored data
           await AsyncStorage.removeItem("user");
           clearTimeout(sessionCheckTimeout);
@@ -131,7 +143,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
           clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_USER", payload: currentUser });
         } else {
-          console.log("❌ No valid session, showing login. Status:", response?.status);
+          console.log(
+            "❌ No valid session, showing login. Status:",
+            response?.status
+          );
           clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_LOADING", payload: false });
         }

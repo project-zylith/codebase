@@ -4,60 +4,75 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Green and blue cosmic palette
-        cosmic: {
+        // Dark space grey palette inspired by Camille Mormal
+        dark: {
           // Primary backgrounds
-          "deep-black": "#0A1A0F",
-          "dark-green": "#064E3B",
-          "card-dark": "#1A2F23",
-          "space-black": "#0A0A1A",
-          "cosmic-teal": "#0A2A1A",
+          "bg-primary": "#0A0A0A",
+          "bg-secondary": "#1A1A1A",
+          "bg-tertiary": "#2A2A2A",
+          "bg-card": "#1A1A1A",
+          "bg-hover": "#2A2A2A",
 
           // Text colors
-          "off-white": "#F0FDF4",
-          "pure-white": "#FFFFFF",
-          "light-green": "#A7F3D0",
-          cyan: "#00D4FF",
+          "text-primary": "#FFFFFF",
+          "text-secondary": "#B3B3B3",
+          "text-tertiary": "#808080",
+          "text-muted": "#666666",
 
           // Accent colors
-          "main-teal": "#14B8A6",
-          emerald: "#10B981",
-          "vibrant-blue": "#3B82F6",
-          "electric-cyan": "#00D4FF",
-          mint: "#6EE7B7",
+          "accent-blue": "#4A9EFF",
+          "accent-purple": "#8B5CF6",
+          "accent-green": "#10B981",
+          "accent-orange": "#F59E0B",
+          "accent-red": "#EF4444",
+          "accent-cyan": "#06B6D4",
+
+          // Borders and dividers
+          "border-light": "#333333",
+          "border-medium": "#404040",
+          "border-dark": "#555555",
         },
-        // Additional gradients for cosmic effects
+        // Dark space grey gradients
         gradient: {
-          "cosmic-start": "#0A1A0F",
-          "cosmic-end": "#064E3B",
-          "nebula-start": "#0A0A1A",
-          "nebula-end": "#0A2A1A",
+          "dark-subtle": "linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%)",
+          "dark-card": "linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%)",
         },
       },
       backgroundImage: {
-        "cosmic-gradient": "linear-gradient(135deg, #0A1A0F 0%, #064E3B 100%)",
-        "nebula-gradient":
-          "linear-gradient(135deg, #0A0A1A 0%, #1A1A3A 30%, #0A2A1A 60%, #0A1A0F 100%)",
-        "star-glow":
-          "radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%)",
+        "dark-subtle": "linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%)",
+        "dark-card": "linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%)",
       },
       animation: {
-        float: "float 6s ease-in-out infinite",
-        "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        glow: "glow 2s ease-in-out infinite alternate",
+        "fade-in": "fadeIn 0.6s ease-out",
+        "slide-up": "slideUp 0.6s ease-out",
+        "hover-lift": "hoverLift 0.2s ease-out",
       },
       keyframes: {
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-20px)" },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
         },
-        glow: {
-          "0%": { boxShadow: "0 0 20px rgba(124, 58, 237, 0.5)" },
-          "100%": { boxShadow: "0 0 30px rgba(124, 58, 237, 0.8)" },
+        slideUp: {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        hoverLift: {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(-2px)" },
         },
       },
       fontFamily: {
-        cosmic: ["Inter", "system-ui", "sans-serif"],
+        notion: [
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
       },
     },
   },

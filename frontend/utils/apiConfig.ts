@@ -77,4 +77,12 @@ export const API_ENDPOINTS = {
     APPLE_RECEIPT_STATUS: (id: number) =>
       `${API_BASE_URL}/api/subscriptions/${id}/apple-receipt-status`,
   },
+  LOVE_LETTERS: {
+    GET_ALL: `${API_BASE_URL}/api/love-letters`,
+    CREATE: `${API_BASE_URL}/api/love-letters`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/api/love-letters/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/api/love-letters/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/api/love-letters/${id}`,
+    GET_OCCASIONS: `${API_BASE_URL}/api/love-letters/occasions`,
+  },
 };

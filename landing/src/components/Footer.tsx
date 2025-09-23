@@ -1,29 +1,33 @@
 import { Link } from "react-router-dom";
+import {
+  User,
+  Mail,
+  Linkedin,
+  Github,
+  React,
+  Palette,
+  Zap,
+} from "lucide-react";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
     <>
-      <footer className="relative py-16 px-4 sm:px-6 lg:px-8 border-t border-cosmic-main-teal/30">
-        {/* Background decoration */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-cosmic-main-teal/5 rounded-full blur-3xl" />
-
-        <div className="max-w-6xl mx-auto relative z-10">
+      <footer className="py-16 px-4 sm:px-6 lg:px-8 border-t border-dark-border-light bg-dark-bg-primary">
+        <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             {/* Brand section */}
             <div className="md:col-span-2">
               <Link to="/" className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-cosmic-main-teal rounded-lg flex items-center justify-center cosmic-glow">
-                  <span className="text-xl font-bold text-cosmic-off-white">
-                    I
-                  </span>
+                <div className="w-8 h-8 bg-dark-accent-blue rounded-md flex items-center justify-center">
+                  <User className="w-4 h-4 text-dark-text-primary" />
                 </div>
-                <span className="text-xl font-bold text-gradient">
+                <span className="text-lg font-medium text-dark-text-primary minimal-heading">
                   Ibrahim Hudson
                 </span>
               </Link>
-              <p className="text-cosmic-light-green leading-relaxed max-w-md">
+              <p className="text-dark-text-secondary leading-relaxed max-w-md minimal-text">
                 Full-stack developer passionate about creating intelligent,
                 beautiful applications that solve real problems and enhance
                 human creativity.
@@ -32,31 +36,31 @@ export const Footer = () => {
 
             {/* Navigation links */}
             <div>
-              <h3 className="text-cosmic-off-white font-semibold mb-4">
+              <h3 className="text-dark-text-primary font-medium mb-4 minimal-heading">
                 Navigation
               </h3>
               <div className="space-y-2">
                 <Link
                   to="/"
-                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                  className="block text-dark-text-secondary hover:text-dark-text-primary transition-colors minimal-text"
                 >
                   Portfolio
                 </Link>
                 <Link
                   to="/resume"
-                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                  className="block text-dark-text-secondary hover:text-dark-text-primary transition-colors minimal-text"
                 >
                   Resume
                 </Link>
                 <Link
                   to="/renai"
-                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                  className="block text-dark-text-secondary hover:text-dark-text-primary transition-colors minimal-text"
                 >
                   REN|AI App
                 </Link>
                 <Link
                   to="/updates"
-                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                  className="block text-dark-text-secondary hover:text-dark-text-primary transition-colors minimal-text"
                 >
                   Updates
                 </Link>
@@ -65,13 +69,13 @@ export const Footer = () => {
 
             {/* Connect section */}
             <div>
-              <h3 className="text-cosmic-off-white font-semibold mb-4">
+              <h3 className="text-dark-text-primary font-medium mb-4 minimal-heading">
                 Connect
               </h3>
               <div className="space-y-2">
                 <a
                   href="mailto:ibrahim.hudson.swe@gmail.com"
-                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                  className="block text-dark-text-secondary hover:text-dark-text-primary transition-colors minimal-text"
                 >
                   Email
                 </a>
@@ -79,7 +83,7 @@ export const Footer = () => {
                   href="https://www.linkedin.com/in/ibrahim-hudson-swe"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                  className="block text-dark-text-secondary hover:text-dark-text-primary transition-colors minimal-text"
                 >
                   LinkedIn
                 </a>
@@ -87,7 +91,7 @@ export const Footer = () => {
                   href="https://github.com/Ibra-Hud"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors"
+                  className="block text-dark-text-secondary hover:text-dark-text-primary transition-colors minimal-text"
                 >
                   GitHub
                 </a>
@@ -96,35 +100,37 @@ export const Footer = () => {
           </div>
 
           {/* Bottom section */}
-          <div className="border-t border-cosmic-main-teal/30 pt-8">
+          <div className="border-t border-dark-border-light pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-cosmic-light-green text-sm mb-4 md:mb-0">
+              <p className="text-dark-text-secondary text-sm mb-4 md:mb-0 minimal-text">
                 © {currentYear} Ibrahim Hudson. All rights reserved.
               </p>
 
               <div className="flex items-center space-x-6">
                 <Link
                   to="/legal"
-                  className="text-cosmic-light-green hover:text-cosmic-electric-cyan transition-colors text-sm underline decoration-cosmic-main-teal/50 hover:decoration-cosmic-main-teal"
+                  className="text-dark-text-secondary hover:text-dark-text-primary transition-colors text-sm underline decoration-dark-border-medium hover:decoration-dark-border-dark minimal-text"
                 >
                   Legal
                 </Link>
-                <span className="text-cosmic-light-green text-sm">
+                <span className="text-dark-text-secondary text-sm minimal-text">
                   Built with
                 </span>
                 <div className="flex items-center space-x-2">
-                  <span className="text-cosmic-electric-cyan">⚛️</span>
-                  <span className="text-cosmic-light-green text-sm">React</span>
+                  <React className="w-4 h-4 text-dark-accent-blue" />
+                  <span className="text-dark-text-secondary text-sm minimal-text">
+                    React
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-cosmic-electric-cyan">🎨</span>
-                  <span className="text-cosmic-light-green text-sm">
+                  <Palette className="w-4 h-4 text-dark-accent-blue" />
+                  <span className="text-dark-text-secondary text-sm minimal-text">
                     Tailwind
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-cosmic-electric-cyan">✨</span>
-                  <span className="text-cosmic-light-green text-sm">
+                  <Zap className="w-4 h-4 text-dark-accent-blue" />
+                  <span className="text-dark-text-secondary text-sm minimal-text">
                     Framer Motion
                   </span>
                 </div>

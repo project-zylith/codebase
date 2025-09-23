@@ -8,12 +8,9 @@ import { LegalPage } from "./pages/LegalPage";
 
 function App() {
   return (
-    <div className="min-h-screen bg-nebula-gradient relative overflow-hidden">
-      {/* Animated star field background */}
-      <div className="star-field absolute inset-0 z-0" />
-
+    <div className="min-h-screen bg-dark-bg-primary font-notion">
       {/* Main content */}
-      <div className="relative z-10">
+      <div className="relative">
         <Navigation />
         <main>
           <Routes>

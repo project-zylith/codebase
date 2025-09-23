@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import renaissanceLogo from "../assets/icon.png";
+import { Smartphone, Globe, Brain, FileText, Utensils } from "lucide-react";
 
 export const ProjectsSection = () => {
   const projects = [
     {
       title: "REN|AI",
       description:
-        "AI-powered note-taking and task management app with cosmic-themed UI and intelligent organization features.",
+        "AI-powered note-taking and task management app with intelligent organization features and modern UI design.",
       tech: [
         "React Native",
         "TypeScript",
@@ -16,8 +17,8 @@ export const ProjectsSection = () => {
         "PostgreSQL",
       ],
       status: "Beta Testing",
-      icon: "🌌",
-      color: "cosmic-vibrant-blue",
+      icon: Brain,
+      color: "dark-accent-blue",
       link: "/renai",
     },
     {
@@ -26,8 +27,8 @@ export const ProjectsSection = () => {
         "A web application for discovering and exploring anime. Features search functionality, detailed anime info, personalized recommendations, and genre filtering.",
       tech: ["HTML", "CSS", "JavaScript", "Web APIs", "Responsive Design"],
       status: "Live Website",
-      icon: "🎌",
-      color: "cosmic-electric-cyan",
+      icon: Globe,
+      color: "dark-accent-cyan",
       link: "https://bul-dak.github.io/anime-web/",
       external: true,
     },
@@ -37,8 +38,8 @@ export const ProjectsSection = () => {
         "Intelligent AI system that automatically groups related notes into themed collections using advanced NLP.",
       tech: ["Google Generative AI", "Node.js", "TypeScript", "Express"],
       status: "Featured in REN|AI",
-      icon: "🌟",
-      color: "cosmic-main-teal",
+      icon: Brain,
+      color: "dark-accent-green",
     },
     {
       title: "Rich Text Editor Integration",
@@ -46,8 +47,8 @@ export const ProjectsSection = () => {
         "Custom implementation of advanced text editing with formatting, real-time collaboration features.",
       tech: ["React Native", "Quill.js", "WebView", "JavaScript"],
       status: "Production Ready",
-      icon: "📝",
-      color: "cosmic-electric-cyan",
+      icon: FileText,
+      color: "dark-accent-purple",
     },
     {
       title: "Poke Bowls",
@@ -61,30 +62,27 @@ export const ProjectsSection = () => {
         "Recipe Management",
       ],
       status: "Live Website",
-      icon: "🍣",
-      color: "cosmic-neon-purple",
+      icon: Utensils,
+      color: "dark-accent-orange",
       link: "https://poke-bowls.onrender.com/",
       external: true,
     },
   ];
 
   return (
-    <section id="projects" className="py-20 px-4 sm:px-6 lg:px-8 relative">
-      {/* Background decoration */}
-      <div className="absolute top-20 right-20 w-64 h-64 bg-cosmic-vibrant-pink/10 rounded-full blur-3xl" />
-
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section id="projects" className="dark-section py-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="text-gradient">Featured Projects</span>
+          <h2 className="text-4xl md:text-5xl font-light mb-6 text-dark-text-primary minimal-heading">
+            Featured Projects
           </h2>
-          <p className="text-xl text-cosmic-light-green max-w-3xl mx-auto">
+          <p className="text-xl text-dark-text-secondary max-w-3xl mx-auto minimal-text">
             A showcase of my work in mobile development, AI integration, and
             user experience design
           </p>
@@ -106,16 +104,16 @@ export const ProjectsSection = () => {
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer h-full flex flex-col`}
+                    className={`dark-card p-6 hover:shadow-lg transition-all duration-300 group block relative cursor-pointer h-full flex flex-col`}
                   >
                     {project.link && (
-                      <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-4 right-4 text-dark-accent-blue opacity-70 group-hover:opacity-100 transition-opacity">
                         <span className="text-sm">View Project →</span>
                       </div>
                     )}
 
                     <div
-                      className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
+                      className={`w-14 h-14 bg-${project.color} rounded-lg flex items-center justify-center mb-4 transition-all duration-300 overflow-hidden`}
                     >
                       {project.title === "REN|AI" ? (
                         <img
@@ -124,20 +122,20 @@ export const ProjectsSection = () => {
                           className="w-10 h-10 object-contain"
                         />
                       ) : (
-                        <span className="text-2xl">{project.icon}</span>
+                        <project.icon className="w-6 h-6 text-dark-text-primary" />
                       )}
                     </div>
 
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xl font-semibold text-cosmic-off-white">
+                      <h3 className="text-xl font-medium text-dark-text-primary minimal-heading">
                         {project.title}
                       </h3>
-                      <span className="px-3 py-1 bg-cosmic-main-purple/30 rounded-full text-cosmic-electric-cyan text-xs">
+                      <span className="px-3 py-1 bg-dark-bg-tertiary rounded-full text-dark-text-secondary text-xs font-medium border border-dark-border-light">
                         {project.status}
                       </span>
                     </div>
 
-                    <p className="text-cosmic-light-green mb-4 leading-relaxed flex-grow">
+                    <p className="text-dark-text-secondary mb-4 leading-relaxed flex-grow minimal-text">
                       {project.description}
                     </p>
 
@@ -145,7 +143,7 @@ export const ProjectsSection = () => {
                       {project.tech.map((tech) => (
                         <span
                           key={tech}
-                          className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
+                          className="px-3 py-1 bg-dark-bg-tertiary rounded-md text-dark-text-secondary text-sm font-medium border border-dark-border-light"
                         >
                           {tech}
                         </span>
@@ -155,16 +153,16 @@ export const ProjectsSection = () => {
                 ) : project.link ? (
                   <Link
                     to={project.link}
-                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative cursor-pointer h-full flex flex-col`}
+                    className={`dark-card p-6 hover:shadow-lg transition-all duration-300 group block relative cursor-pointer h-full flex flex-col`}
                   >
                     {project.link && (
-                      <div className="absolute top-4 right-4 text-cosmic-electric-cyan opacity-70 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-4 right-4 text-dark-accent-blue opacity-70 group-hover:opacity-100 transition-opacity">
                         <span className="text-sm">View Project →</span>
                       </div>
                     )}
 
                     <div
-                      className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
+                      className={`w-14 h-14 bg-${project.color} rounded-lg flex items-center justify-center mb-4 transition-all duration-300 overflow-hidden`}
                     >
                       {project.title === "REN|AI" ? (
                         <img
@@ -173,20 +171,20 @@ export const ProjectsSection = () => {
                           className="w-10 h-10 object-contain"
                         />
                       ) : (
-                        <span className="text-2xl">{project.icon}</span>
+                        <project.icon className="w-6 h-6 text-dark-text-primary" />
                       )}
                     </div>
 
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xl font-semibold text-cosmic-off-white">
+                      <h3 className="text-xl font-medium text-dark-text-primary minimal-heading">
                         {project.title}
                       </h3>
-                      <span className="px-3 py-1 bg-cosmic-main-purple/30 rounded-full text-cosmic-electric-cyan text-xs">
+                      <span className="px-3 py-1 bg-dark-bg-tertiary rounded-full text-dark-text-secondary text-xs font-medium border border-dark-border-light">
                         {project.status}
                       </span>
                     </div>
 
-                    <p className="text-cosmic-light-green mb-4 leading-relaxed flex-grow">
+                    <p className="text-dark-text-secondary mb-4 leading-relaxed flex-grow minimal-text">
                       {project.description}
                     </p>
 
@@ -194,7 +192,7 @@ export const ProjectsSection = () => {
                       {project.tech.map((tech) => (
                         <span
                           key={tech}
-                          className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
+                          className="px-3 py-1 bg-dark-bg-tertiary rounded-md text-dark-text-secondary text-sm font-medium border border-dark-border-light"
                         >
                           {tech}
                         </span>
@@ -203,10 +201,10 @@ export const ProjectsSection = () => {
                   </Link>
                 ) : (
                   <div
-                    className={`cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group block relative h-full flex flex-col`}
+                    className={`dark-card p-6 hover:shadow-lg transition-all duration-300 group block relative h-full flex flex-col`}
                   >
                     <div
-                      className={`w-14 h-14 bg-${project.color} rounded-xl flex items-center justify-center mb-4 cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300 overflow-hidden`}
+                      className={`w-14 h-14 bg-${project.color} rounded-lg flex items-center justify-center mb-4 transition-all duration-300 overflow-hidden`}
                     >
                       {project.title === "REN|AI" ? (
                         <img
@@ -215,20 +213,20 @@ export const ProjectsSection = () => {
                           className="w-10 h-10 object-contain"
                         />
                       ) : (
-                        <span className="text-2xl">{project.icon}</span>
+                        <project.icon className="w-6 h-6 text-dark-text-primary" />
                       )}
                     </div>
 
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xl font-semibold text-cosmic-off-white">
+                      <h3 className="text-xl font-medium text-dark-text-primary minimal-heading">
                         {project.title}
                       </h3>
-                      <span className="px-3 py-1 bg-cosmic-main-purple/30 rounded-full text-cosmic-electric-cyan text-xs">
+                      <span className="px-3 py-1 bg-dark-bg-tertiary rounded-full text-dark-text-secondary text-xs font-medium border border-dark-border-light">
                         {project.status}
                       </span>
                     </div>
 
-                    <p className="text-cosmic-light-green mb-4 leading-relaxed flex-grow">
+                    <p className="text-dark-text-secondary mb-4 leading-relaxed flex-grow minimal-text">
                       {project.description}
                     </p>
 
@@ -236,7 +234,7 @@ export const ProjectsSection = () => {
                       {project.tech.map((tech) => (
                         <span
                           key={tech}
-                          className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
+                          className="px-3 py-1 bg-dark-bg-tertiary rounded-md text-dark-text-secondary text-sm font-medium border border-dark-border-light"
                         >
                           {tech}
                         </span>
@@ -255,12 +253,12 @@ export const ProjectsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
-          className="mt-20 cosmic-card rounded-3xl p-8 md:p-12 text-center"
+          className="mt-20 dark-card p-8 md:p-12 text-center"
         >
-          <h3 className="text-3xl md:text-4xl font-bold mb-6">
-            <span className="text-gradient">Development Philosophy</span>
+          <h3 className="text-3xl md:text-4xl font-light mb-6 text-dark-text-primary minimal-heading">
+            Development Philosophy
           </h3>
-          <p className="text-xl text-cosmic-light-green max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl text-dark-text-secondary max-w-4xl mx-auto leading-relaxed minimal-text">
             I believe in creating software that doesn't just function—it
             inspires. Every line of code should contribute to an experience that
             feels magical, intuitive, and empowering. Through REN|AI, I'm

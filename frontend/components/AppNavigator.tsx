@@ -6,6 +6,7 @@ import { HomeScreen } from "./HomeScreen";
 import { TodoScreen } from "./TodoScreen";
 import { EditorScreen } from "./EditorScreen";
 import { AccountScreen } from "./AccountScreen";
+import RainyDayScreen from "./RainyDayScreen";
 
 import { Ionicons } from "@expo/vector-icons";
 import { RootTabParamList, RootStackParamList } from "../types/types";
@@ -241,6 +242,15 @@ const AppNavigator = () => {
       return (
         <NavigationContainer>
           <AccountScreen />
+        </NavigationContainer>
+      );
+    }
+
+    // Show Rainy Day mode if special credentials are used
+    if (state.isRainyDayMode) {
+      return (
+        <NavigationContainer>
+          <RainyDayScreen />
         </NavigationContainer>
       );
     }

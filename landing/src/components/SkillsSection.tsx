@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
+import { Code, Brain, Smartphone, Wrench } from "lucide-react";
 
 export const SkillsSection = () => {
   const skillCategories = [
     {
       title: "Full Stack Development",
-      icon: "💻",
+      icon: Code,
       skills: [
         "React",
         "TypeScript",
@@ -20,7 +21,7 @@ export const SkillsSection = () => {
     },
     {
       title: "AI & Machine Learning",
-      icon: "🤖",
+      icon: Brain,
       skills: [
         "Google AI",
         "Natural Language Processing",
@@ -30,7 +31,7 @@ export const SkillsSection = () => {
     },
     {
       title: "App Developer",
-      icon: "📱",
+      icon: Smartphone,
       skills: [
         "React Native",
         "Expo",
@@ -42,7 +43,7 @@ export const SkillsSection = () => {
     },
     {
       title: "Tools & Technologies",
-      icon: "🛠️",
+      icon: Wrench,
       skills: [
         "Git",
         "Vite",
@@ -55,19 +56,19 @@ export const SkillsSection = () => {
   ];
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 relative">
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section className="dark-section-alt py-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="text-gradient">Technical Skills</span>
+          <h2 className="text-4xl md:text-5xl font-light mb-6 text-dark-text-primary minimal-heading">
+            Technical Skills
           </h2>
-          <p className="text-xl text-cosmic-light-green max-w-3xl mx-auto">
+          <p className="text-xl text-dark-text-secondary max-w-3xl mx-auto minimal-text">
             A comprehensive toolkit for building modern, intelligent
             applications
           </p>
@@ -81,13 +82,13 @@ export const SkillsSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300"
+              className="dark-card p-8 hover:shadow-lg transition-all duration-300"
             >
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-cosmic-main-teal rounded-xl flex items-center justify-center mr-4 cosmic-glow">
-                  <span className="text-2xl">{category.icon}</span>
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-dark-accent-blue rounded-lg flex items-center justify-center mr-4">
+                  <category.icon className="w-6 h-6 text-dark-text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-cosmic-off-white">
+                <h3 className="text-xl font-medium text-dark-text-primary minimal-heading">
                   {category.title}
                 </h3>
               </div>
@@ -96,7 +97,7 @@ export const SkillsSection = () => {
                 {category.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="px-3 py-1 bg-cosmic-main-teal/20 border border-cosmic-main-teal/40 rounded-lg text-cosmic-electric-cyan text-sm"
+                    className="px-3 py-1 bg-dark-bg-tertiary rounded-md text-dark-text-secondary text-sm font-medium border border-dark-border-light"
                   >
                     {skill}
                   </span>

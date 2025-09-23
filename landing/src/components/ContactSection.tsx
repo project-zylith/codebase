@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Mail, Linkedin, Github } from "lucide-react";
 
 export const ContactSection = () => {
   const handleEmailClick = () => {
@@ -10,45 +11,45 @@ export const ContactSection = () => {
 
   const contactMethods = [
     {
-      icon: "📧",
+      icon: Mail,
       label: "Email",
       value: "ibrahim.hudson.swe@gmail.com",
       onClick: handleEmailClick,
-      color: "cosmic-vibrant-blue",
+      color: "dark-accent-blue",
     },
     {
-      icon: "💼",
+      icon: Linkedin,
       label: "LinkedIn",
       value: "Connect with me",
       href: "https://www.linkedin.com/in/ibrahim-hudson-swe",
-      color: "cosmic-main-teal",
+      color: "dark-accent-cyan",
     },
     {
-      icon: "🐙",
+      icon: Github,
       label: "GitHub",
       value: "View my code",
       href: "https://github.com/Ibra-Hud",
-      color: "cosmic-electric-cyan",
+      color: "dark-accent-purple",
     },
   ];
 
   return (
-    <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 relative">
-      {/* Background effects */}
-      <div className="absolute top-10 left-10 w-64 h-64 bg-cosmic-main-teal/10 rounded-full blur-3xl" />
-
-      <div className="max-w-4xl mx-auto text-center relative z-10">
+    <section
+      id="contact"
+      className="dark-section-alt py-24 px-4 sm:px-6 lg:px-8"
+    >
+      <div className="max-w-4xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="text-gradient">Let's Connect</span>
+          <h2 className="text-4xl md:text-5xl font-light mb-6 text-dark-text-primary minimal-heading">
+            Let's Connect
           </h2>
 
-          <p className="text-xl text-cosmic-light-green mb-12 max-w-2xl mx-auto">
+          <p className="text-xl text-dark-text-secondary mb-16 max-w-2xl mx-auto minimal-text">
             I'm always interested in discussing new opportunities,
             collaborations, or just chatting about technology and innovation.
           </p>
@@ -72,21 +73,21 @@ export const ContactSection = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="cosmic-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group text-center border-none bg-transparent cursor-pointer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="dark-card p-6 hover:shadow-lg transition-all duration-300 group text-center cursor-pointer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <div
-                    className={`w-14 h-14 bg-${method.color} rounded-xl flex items-center justify-center mb-4 mx-auto cosmic-glow group-hover:cosmic-glow-hover transition-all duration-300`}
+                    className={`w-14 h-14 bg-${method.color} rounded-lg flex items-center justify-center mb-4 mx-auto transition-all duration-300`}
                   >
-                    <span className="text-2xl">{method.icon}</span>
+                    <method.icon className="w-6 h-6 text-dark-text-primary" />
                   </div>
 
-                  <h3 className="text-lg font-semibold text-cosmic-off-white mb-2">
+                  <h3 className="text-lg font-medium text-dark-text-primary mb-2 minimal-heading">
                     {method.label}
                   </h3>
 
-                  <p className="text-cosmic-light-green text-sm">
+                  <p className="text-dark-text-secondary text-sm minimal-text">
                     {method.value}
                   </p>
                 </Component>

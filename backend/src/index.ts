@@ -16,6 +16,7 @@ import * as noteControllers from "../controllers/noteControllers";
 import * as galaxyControllers from "../controllers/galaxyControllers";
 import * as subscriptionControllers from "../controllers/subscriptionControllers";
 import * as appleAuth from "../controllers/appleAuthController";
+import * as loveLetterControllers from "../controllers/loveLetterControllers";
 import * as galaxyAi from "./aiServices/galaxyAi";
 import SchedulerService from "./scheduler";
 const session = require("express-session");
@@ -345,6 +346,42 @@ app.post(
   "/api/subscriptions/switch-plan",
   checkAuthentication,
   subscriptionControllers.switchPlan
+);
+
+/////////////////////////////////
+// Love Letter Routes (Authenticated)
+/////////////////////////////////
+
+// Love letter CRUD routes - all require authentication
+app.get(
+  "/api/love-letters",
+  checkAuthentication,
+  loveLetterControllers.getLoveLetters
+);
+app.post(
+  "/api/love-letters",
+  checkAuthentication,
+  loveLetterControllers.createLoveLetter
+);
+app.get(
+  "/api/love-letters/:id",
+  checkAuthentication,
+  loveLetterControllers.getLoveLetterById
+);
+app.put(
+  "/api/love-letters/:id",
+  checkAuthentication,
+  loveLetterControllers.updateLoveLetter
+);
+app.delete(
+  "/api/love-letters/:id",
+  checkAuthentication,
+  loveLetterControllers.deleteLoveLetter
+);
+app.get(
+  "/api/love-letters/occasions",
+  checkAuthentication,
+  loveLetterControllers.getOccasions
 );
 
 app.listen(Number(port), "0.0.0.0", () => {
