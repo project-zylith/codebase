@@ -10,6 +10,8 @@ import {
   Alert,
   Modal,
   PanResponder,
+  TextInput,
+  FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -67,6 +69,9 @@ export const HomeScreen = () => {
   const [longPressNote, setLongPressNote] = useState<NoteWithPosition | null>(
     null
   );
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<NoteWithPosition[]>([]);
 
   // PanResponder for Galaxy View Modal swipe-down-to-dismiss
   const galaxyModalPanY = useRef(new Animated.Value(0)).current;
@@ -200,6 +205,27 @@ export const HomeScreen = () => {
     }
   };
 
+  // Search functionality
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const filtered = notes.filter((note) =>
+      note.title.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchResults(filtered);
+  };
+
+  const handleSearchResultPress = (note: NoteWithPosition) => {
+    setShowSearchModal(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    (navigation.navigate as any)("NoteEditor", { noteId: note.id });
+  };
+
   // Generate random positions for stars around the center, avoiding restricted areas
   const generateStarPosition = (
     index: number,
@@ -210,10 +236,22 @@ export const HomeScreen = () => {
     const starSize = 60; // Approximate size of star + label
     let attempts = 0;
 
+    // For the first 20 notes, use stricter bounds to ensure they appear on screen
+    const isFirstTwenty = index < 20;
+
     while (attempts < maxAttempts) {
       const angle = (index / total) * 2 * Math.PI;
-      const radius = 80 + Math.random() * 120; // Random radius between 80-200
-      const offsetAngle = (Math.random() - 0.5) * 0.8; // Random angle offset
+      let radius, offsetAngle;
+
+      if (isFirstTwenty) {
+        // For first 20 notes, use smaller radius to keep them closer to center and in bounds
+        radius = 80 + Math.random() * 80; // Smaller radius range: 80-160
+        offsetAngle = (Math.random() - 0.5) * 0.4; // Smaller angle variation
+      } else {
+        // For additional notes, allow original behavior
+        radius = 80 + Math.random() * 120; // Original radius: 80-200
+        offsetAngle = (Math.random() - 0.5) * 0.8; // Original angle offset
+      }
 
       let x = centerX + Math.cos(angle + offsetAngle) * radius - 60; // -60 to center the star
       let y = centerY + Math.sin(angle + offsetAngle) * radius - 100; // -100 to account for header
@@ -238,6 +276,19 @@ export const HomeScreen = () => {
         y = buttonY + Math.sin(angleFromButton) * minDistanceFromButton;
       }
 
+      // For first 20 notes, ensure they stay within screen bounds
+      if (isFirstTwenty) {
+        const padding = 40; // Extra padding for first 20 notes
+        const maxX = screenWidth - starSize - padding;
+        const maxY = screenHeight - starSize - padding - 100; // Extra bottom padding
+        const minX = padding;
+        const minY = padding + 120; // Extra top padding for header
+
+        // Clamp to safe bounds
+        x = Math.max(minX, Math.min(maxX, x));
+        y = Math.max(minY, Math.min(maxY, y));
+      }
+
       // Check collision with existing stars
       const minDistanceBetweenStars = starSize + 10; // Minimum distance between stars
       let hasCollision = false;
@@ -260,28 +311,23 @@ export const HomeScreen = () => {
       attempts++;
     }
 
-    // If we can't find a non-overlapping position after max attempts,
-    // return a position with some offset to minimize overlap
+    // Fallback positioning
     const fallbackAngle =
       (index / total) * 2 * Math.PI + (Math.random() - 0.5) * 0.5;
-    const fallbackRadius = 100 + Math.random() * 100;
+    const fallbackRadius = isFirstTwenty ? 100 : 100 + Math.random() * 100;
     let x = centerX + Math.cos(fallbackAngle) * fallbackRadius - 60;
     let y = centerY + Math.sin(fallbackAngle) * fallbackRadius - 100;
 
-    // Ensure star doesn't go off screen
-    const padding = 20;
+    // Ensure star doesn't go off screen - stricter bounds for first 20
+    const padding = isFirstTwenty ? 40 : 20;
     const maxX = screenWidth - starSize - padding;
-    const maxY = screenHeight - starSize - padding;
+    const maxY = screenHeight - starSize - padding - (isFirstTwenty ? 100 : 0);
     const minX = padding;
-    const minY = padding + 100; // Extra padding for header
+    const minY = padding + (isFirstTwenty ? 120 : 100);
 
-    // Clamp X position
-    if (x < minX) x = minX;
-    if (x > maxX) x = maxX;
-
-    // Clamp Y position
-    if (y < minY) y = minY;
-    if (y > maxY) y = maxY;
+    // Clamp positions
+    x = Math.max(minX, Math.min(maxX, x));
+    y = Math.max(minY, Math.min(maxY, y));
 
     return { x, y };
   };
@@ -290,6 +336,7 @@ export const HomeScreen = () => {
   useEffect(() => {
     const loadNotes = async () => {
       try {
+        setIsLoading(true);
         const response = await getNotes();
         if (response.ok) {
           const apiNotes: Note[] = await response.json();
@@ -316,11 +363,15 @@ export const HomeScreen = () => {
         }
       } catch (error) {
         console.error("Error loading notes:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (userState.user) {
       loadNotes();
+    } else {
+      setIsLoading(false);
     }
   }, [userState.user]);
 
@@ -695,6 +746,21 @@ export const HomeScreen = () => {
     );
   };
 
+  // Show loading screen to prevent flashing
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: currentPalette.primary }]}
+      >
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: currentPalette.quinary }]}>
+            Loading your notes...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: currentPalette.primary }]}
@@ -704,6 +770,24 @@ export const HomeScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
+          {/* Search Button - Top Right - Only on home page */}
+          {currentGalaxyIndex === -1 && (
+            <TouchableOpacity
+              style={[
+                styles.searchButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setShowSearchModal(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="search"
+                size={20}
+                color={currentPalette.lightText}
+              />
+            </TouchableOpacity>
+          )}
+
           {/* Centered Title and Welcome Message */}
           <View style={styles.headerText}>
             <Text
@@ -729,7 +813,7 @@ export const HomeScreen = () => {
               <Ionicons
                 name={currentGalaxyIndex === -1 ? "planet" : "list"}
                 size={20}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -746,7 +830,7 @@ export const HomeScreen = () => {
                 <Ionicons
                   name="bulb"
                   size={20}
-                  color={currentPalette.tertiary}
+                  color={currentPalette.lightText}
                 />
               </TouchableOpacity>
             )}
@@ -775,12 +859,12 @@ export const HomeScreen = () => {
                 <Ionicons
                   name="add"
                   size={32}
-                  color={currentPalette.tertiary}
+                  color={currentPalette.lightText}
                 />
                 <Text
                   style={[
                     styles.buttonText,
-                    { color: currentPalette.tertiary },
+                    { color: currentPalette.lightText },
                   ]}
                 >
                   New Note
@@ -857,6 +941,147 @@ export const HomeScreen = () => {
           onClose={() => setShowAIModal(false)}
           onGalaxiesGenerated={handleGalaxiesGenerated}
         />
+
+        {/* Search Modal */}
+        <Modal
+          visible={showSearchModal}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          transparent={false}
+          onRequestClose={() => setShowSearchModal(false)}
+        >
+          <SafeAreaView
+            style={[
+              styles.searchModalContainer,
+              { backgroundColor: currentPalette.primary },
+            ]}
+          >
+            <View style={styles.searchModalHeader}>
+              <TouchableOpacity
+                onPress={() => setShowSearchModal(false)}
+                style={styles.searchModalCloseButton}
+              >
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color={currentPalette.tertiary}
+                />
+              </TouchableOpacity>
+              <Text
+                style={[
+                  styles.searchModalTitle,
+                  { color: currentPalette.tertiary },
+                ]}
+              >
+                Search Notes
+              </Text>
+              <View style={styles.searchModalPlaceholder} />
+            </View>
+
+            <View style={styles.searchInputContainer}>
+              <Ionicons
+                name="search"
+                size={20}
+                color={currentPalette.quinary}
+                style={styles.searchIcon}
+              />
+              <TextInput
+                style={[
+                  styles.searchInput,
+                  {
+                    color: currentPalette.tertiary,
+                    backgroundColor: currentPalette.card,
+                    borderColor: currentPalette.border,
+                  },
+                ]}
+                placeholder="Search by note title..."
+                placeholderTextColor={currentPalette.quinary}
+                value={searchQuery}
+                onChangeText={handleSearch}
+                autoFocus
+              />
+            </View>
+
+            <FlatList
+              data={searchResults}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.searchResultItem,
+                    { backgroundColor: currentPalette.card },
+                  ]}
+                  onPress={() => handleSearchResultPress(item)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.searchResultContent}>
+                    <Text
+                      style={[
+                        styles.searchResultTitle,
+                        { color: currentPalette.tertiary },
+                      ]}
+                    >
+                      {item.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.searchResultPreview,
+                        { color: currentPalette.quinary },
+                      ]}
+                      numberOfLines={2}
+                    >
+                      {item.content
+                        ?.replace(/<[^>]*>/g, "")
+                        .substring(0, 100) || "No content"}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={currentPalette.quinary}
+                  />
+                </TouchableOpacity>
+              )}
+              style={styles.searchResultsList}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              ListEmptyComponent={
+                searchQuery ? (
+                  <View style={styles.searchEmptyState}>
+                    <Ionicons
+                      name="search"
+                      size={48}
+                      color={currentPalette.quinary}
+                    />
+                    <Text
+                      style={[
+                        styles.searchEmptyText,
+                        { color: currentPalette.quinary },
+                      ]}
+                    >
+                      No notes found for "{searchQuery}"
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.searchEmptyState}>
+                    <Ionicons
+                      name="document-text"
+                      size={48}
+                      color={currentPalette.quinary}
+                    />
+                    <Text
+                      style={[
+                        styles.searchEmptyText,
+                        { color: currentPalette.quinary },
+                      ]}
+                    >
+                      Start typing to search your notes
+                    </Text>
+                  </View>
+                )
+              }
+            />
+          </SafeAreaView>
+        </Modal>
 
         {/* Galaxy View Modal */}
         <Modal
@@ -1049,6 +1274,107 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: "transparent",
+  },
+  searchButton: {
+    position: "absolute",
+    top: 20,
+    right: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 10,
+  },
+  searchModalContainer: {
+    flex: 1,
+  },
+  searchModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.1)",
+  },
+  searchModalCloseButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  searchModalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  searchModalPlaceholder: {
+    width: 40,
+  },
+  searchInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  searchResultsList: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  searchResultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  searchResultContent: {
+    flex: 1,
+    marginRight: 12,
+  },
+  searchResultTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  searchResultPreview: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  searchEmptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  searchEmptyText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: "400",
   },
 });
 

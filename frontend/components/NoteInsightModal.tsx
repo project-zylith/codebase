@@ -314,12 +314,12 @@ export const NoteInsightModal: React.FC<NoteInsightModalProps> = ({
                         <Ionicons
                           name="add-circle-outline"
                           size={16}
-                          color={currentPalette.tertiary}
+                          color={currentPalette.lightText}
                         />
                         <Text
                           style={[
                             styles.addToTodoText,
-                            { color: currentPalette.tertiary },
+                            { color: currentPalette.lightText },
                           ]}
                         >
                           Add to Todo

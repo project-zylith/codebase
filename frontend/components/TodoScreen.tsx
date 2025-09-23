@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   Task,
   getTasks,
@@ -78,6 +79,13 @@ export const TodoScreen = () => {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  // Refresh tasks when screen comes into focus (fixes AI task update issue)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTasks();
+    }, [])
+  );
 
   const handleToggleComplete = async (task: Task) => {
     try {
@@ -471,7 +479,7 @@ export const TodoScreen = () => {
           <Text
             style={[
               styles.aiGeneratedLabel,
-              { color: currentPalette.tertiary },
+              { color: currentPalette.lightText },
             ]}
           >
             REN|AI GENERATED
@@ -503,21 +511,6 @@ export const TodoScreen = () => {
           </Text>
         </TouchableOpacity>
         <View style={styles.taskActions}>
-          <View
-            style={[
-              styles.checkbox,
-              { borderColor: currentPalette.quinary },
-              item.is_completed && [
-                styles.checkedCheckbox,
-                {
-                  backgroundColor: currentPalette.quaternary,
-                  borderColor: currentPalette.quaternary,
-                },
-              ],
-            ]}
-          >
-            {item.is_completed && <Text style={styles.checkmark}>✓</Text>}
-          </View>
           <TouchableOpacity
             style={styles.hamburgerButton}
             onPress={() => setShowMenuForTask(item.id)}
@@ -605,7 +598,7 @@ export const TodoScreen = () => {
               <Text
                 style={[
                   styles.filterButtonText,
-                  { color: currentPalette.tertiary },
+                  { color: currentPalette.lightText },
                 ]}
               >
                 Status: {getFilterDisplayName("status", filters.status)}
@@ -613,7 +606,7 @@ export const TodoScreen = () => {
               <Ionicons
                 name="chevron-down"
                 size={16}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -627,7 +620,7 @@ export const TodoScreen = () => {
               <Text
                 style={[
                   styles.filterButtonText,
-                  { color: currentPalette.tertiary },
+                  { color: currentPalette.lightText },
                 ]}
               >
                 Priority: {getFilterDisplayName("priority", filters.priority)}
@@ -635,7 +628,7 @@ export const TodoScreen = () => {
               <Ionicons
                 name="chevron-down"
                 size={16}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -649,7 +642,7 @@ export const TodoScreen = () => {
               <Text
                 style={[
                   styles.filterButtonText,
-                  { color: currentPalette.tertiary },
+                  { color: currentPalette.lightText },
                 ]}
               >
                 Time: {getFilterDisplayName("time", filters.time)}
@@ -657,7 +650,7 @@ export const TodoScreen = () => {
               <Ionicons
                 name="chevron-down"
                 size={16}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
             </TouchableOpacity>
 
@@ -708,7 +701,7 @@ export const TodoScreen = () => {
           <Text
             style={[
               styles.createTaskButtonText,
-              { color: currentPalette.tertiary },
+              { color: currentPalette.lightText },
             ]}
           >
             Create Task

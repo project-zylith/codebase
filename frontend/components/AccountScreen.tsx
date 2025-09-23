@@ -27,8 +27,15 @@ const { width } = Dimensions.get("window");
 
 export const AccountScreen = () => {
   const { state: userState, logout } = useUser();
-  const { currentPalette, currentPaletteId, paletteOptions, switchPalette } =
-    useTheme();
+  const {
+    currentPalette,
+    currentPaletteId,
+    paletteOptions,
+    switchPalette,
+    isDarkModeNotes,
+    toggleDarkModeNotes,
+    canUseDarkMode,
+  } = useTheme();
   const { state: subscriptionState, setOpenSubscriptionModalHandler } =
     useSubscription();
   const [showSignUp, setShowSignUp] = useState(false);
@@ -131,6 +138,28 @@ export const AccountScreen = () => {
         },
       ]
     );
+  };
+
+  const handleDarkModeToggle = async () => {
+    const success = await toggleDarkModeNotes();
+
+    if (!success && !canUseDarkMode) {
+      // Show upgrade prompt
+      Alert.alert(
+        "Premium Feature",
+        "Dark mode for notes is available with Basic and Pro subscriptions. Upgrade to unlock this feature!",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Upgrade",
+            onPress: handleOpenSubscriptionModal,
+          },
+        ]
+      );
+    }
   };
 
   const handleOpenSubscriptionModal = async () => {
@@ -343,12 +372,12 @@ export const AccountScreen = () => {
               <Ionicons
                 name="arrow-up"
                 size={16}
-                color={currentPalette.tertiary}
+                color={currentPalette.lightText}
               />
               <Text
                 style={[
                   styles.upgradeButtonText,
-                  { color: currentPalette.tertiary },
+                  { color: currentPalette.lightText },
                 ]}
               >
                 Upgrade
@@ -505,6 +534,57 @@ export const AccountScreen = () => {
           );
         })}
       </ScrollView>
+
+      {/* Dark Mode Toggle for Notes */}
+      <View style={styles.darkModeSection}>
+        <View style={styles.darkModeHeader}>
+          <Ionicons name="moon" size={20} color={currentPalette.quaternary} />
+          <Text
+            style={[styles.darkModeTitle, { color: currentPalette.tertiary }]}
+          >
+            Dark Mode for Notes
+          </Text>
+        </View>
+        <View style={styles.darkModeDescriptionContainer}>
+          <Text
+            style={[styles.darkModeSubtitle, { color: currentPalette.quinary }]}
+          >
+            Use dark background with white text when editing notes
+          </Text>
+          {!canUseDarkMode && (
+            <View style={styles.premiumBadge}>
+              <Ionicons name="star" size={12} color="#FFD700" />
+              <Text style={styles.premiumText}>Basic/Pro</Text>
+            </View>
+          )}
+        </View>
+        <TouchableOpacity
+          style={[
+            styles.darkModeToggle,
+            {
+              backgroundColor: isDarkModeNotes
+                ? currentPalette.quaternary
+                : currentPalette.card,
+            },
+            { borderColor: currentPalette.border },
+            !canUseDarkMode && { opacity: 0.6 },
+          ]}
+          onPress={handleDarkModeToggle}
+          activeOpacity={0.7}
+        >
+          <View
+            style={[
+              styles.darkModeToggleKnob,
+              {
+                backgroundColor: isDarkModeNotes
+                  ? currentPalette.lightText
+                  : currentPalette.quinary,
+                transform: [{ translateX: isDarkModeNotes ? 24 : 0 }],
+              },
+            ]}
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -525,7 +605,7 @@ export const AccountScreen = () => {
             ]}
           >
             <Text
-              style={[styles.avatarText, { color: currentPalette.tertiary }]}
+              style={[styles.avatarText, { color: currentPalette.lightText }]}
             >
               {userState.user.username.charAt(0).toUpperCase()}
             </Text>
@@ -1052,5 +1132,58 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     textDecorationLine: "underline",
+  },
+  // Dark Mode Toggle Styles
+  darkModeSection: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  darkModeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  darkModeTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  darkModeSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    flex: 1,
+  },
+  darkModeDescriptionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  premiumBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 215, 0, 0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+  premiumText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#FFD700",
+    marginLeft: 4,
+  },
+  darkModeToggle: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    padding: 2,
+    alignSelf: "flex-start",
+  },
+  darkModeToggleKnob: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
   },
 });

@@ -9,11 +9,11 @@ import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 export default function App() {
   return (
     <UserProvider>
-      <ThemeProvider>
-        <SubscriptionProvider>
+      <SubscriptionProvider>
+        <ThemeProvider>
           <AppNavigator />
-        </SubscriptionProvider>
-      </ThemeProvider>
+        </ThemeProvider>
+      </SubscriptionProvider>
     </UserProvider>
   );
 }
