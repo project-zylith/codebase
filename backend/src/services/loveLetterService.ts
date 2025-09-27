@@ -3,7 +3,7 @@ import {
   CreateLoveLetterRequest,
   UpdateLoveLetterRequest,
 } from "../types/loveLetter";
-import knex from "../database/database";
+const knex = require("../../database/database");
 
 export class LoveLetterService {
   static async create(

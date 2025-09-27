@@ -35,6 +35,7 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
   const [content, setContent] = useState("");
   const [isEncrypted, setIsEncrypted] = useState(false);
   const [availableOccasions, setAvailableOccasions] = useState<string[]>([]);
+  const [showRecipientDropdown, setShowRecipientDropdown] = useState(false);
   const [showOccasionDropdown, setShowOccasionDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -93,6 +94,11 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
     }
   };
 
+  const handleRecipientSelect = (selectedRecipient: string) => {
+    setRecipient(selectedRecipient);
+    setShowRecipientDropdown(false);
+  };
+
   const handleOccasionSelect = (selectedOccasion: string) => {
     setOccasion(selectedOccasion);
     setShowOccasionDropdown(false);
@@ -128,7 +134,7 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
                     borderColor: currentPalette.quaternary,
                   },
                 ]}
-                onPress={() => setShowOccasionDropdown(!showOccasionDropdown)}
+                onPress={() => setShowRecipientDropdown(!showRecipientDropdown)}
               >
                 <Text
                   style={[
@@ -144,7 +150,7 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
                   color={currentPalette.tertiary}
                 />
               </TouchableOpacity>
-              {showOccasionDropdown && (
+              {showRecipientDropdown && (
                 <View
                   style={[
                     styles.dropdownMenu,
@@ -153,7 +159,7 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
                 >
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => handleOccasionSelect("Honeybee")}
+                    onPress={() => handleRecipientSelect("Honeybee")}
                   >
                     <Text
                       style={[
@@ -166,7 +172,7 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => handleOccasionSelect("Bibi")}
+                    onPress={() => handleRecipientSelect("Bibi")}
                   >
                     <Text
                       style={[
