@@ -26,7 +26,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export const insights = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log("Initializing Gemini model...");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     const result = await model.generateContent(
       promptDevelopInsight,
       req.body.goal
@@ -46,7 +46,7 @@ export const finalInsight = async (
 ): Promise<void> => {
   try {
     console.log("Initializing Gemini model...");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     const result = await model.generateContent(
       promptProvideFinalInsight,
       req.body.insights
