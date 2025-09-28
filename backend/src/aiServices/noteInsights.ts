@@ -133,7 +133,7 @@ export const generateNoteInsight = async (
       return;
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
     // Prepare the context data
     const contextData = {
