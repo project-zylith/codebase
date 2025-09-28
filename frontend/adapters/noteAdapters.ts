@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
-import { getToken } from "./userAdapters";
+import { getAuthHeaders } from "./userAdapters";
 
 // Note interface matching the backend
 export interface Note {
@@ -23,15 +23,6 @@ export interface UpdateNoteRequest {
   content?: string | null;
   galaxy_id?: number | null;
 }
-
-// Get authorization headers with JWT token
-const getAuthHeaders = async () => {
-  const token = await getToken();
-  return {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
 
 export const getNotes = async () => {
   try {

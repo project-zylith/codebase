@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
-import { getToken } from "./userAdapters";
+import { getAuthHeaders } from "./userAdapters";
 
 // Task interface matching the backend
 export interface Task {
@@ -30,21 +30,11 @@ export interface UpdateTaskRequest {
   is_favorite?: boolean;
 }
 
-// Get authorization headers with JWT token
-const getAuthHeaders = async () => {
-  const token = await getToken();
-  return {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
-
 export const getTasks = async () => {
   try {
     return await fetch(`${API_ENDPOINTS.TASKS.LIST}`, {
       method: "GET",
       headers: await getAuthHeaders(),
-
     });
   } catch (error) {
     console.error("Get tasks error:", error);
@@ -85,7 +75,6 @@ export const deleteTask = async (id: number) => {
     return await fetch(`${API_ENDPOINTS.TASKS.DELETE(id)}`, {
       method: "DELETE",
       headers: await getAuthHeaders(),
-
     });
   } catch (error) {
     console.error("Delete task error:", error);
@@ -98,7 +87,6 @@ export const toggleTaskCompletion = async (id: number) => {
     return await fetch(`${API_ENDPOINTS.TASKS.TOGGLE(id)}`, {
       method: "PATCH",
       headers: await getAuthHeaders(),
-
     });
   } catch (error) {
     console.error("Toggle task error:", error);
@@ -111,7 +99,6 @@ export const toggleTaskFavorite = async (id: number) => {
     return await fetch(`${API_ENDPOINTS.TASKS.TOGGLE_FAVORITE(id)}`, {
       method: "PATCH",
       headers: await getAuthHeaders(),
-
     });
   } catch (error) {
     console.error("Toggle task favorite error:", error);
@@ -124,7 +111,6 @@ export const cleanupCompletedTasks = async () => {
     return await fetch(`${API_ENDPOINTS.TASKS.CLEANUP}`, {
       method: "DELETE",
       headers: await getAuthHeaders(),
-
     });
   } catch (error) {
     console.error("Cleanup completed tasks error:", error);

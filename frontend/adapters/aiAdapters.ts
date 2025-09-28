@@ -1,14 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
-import { getToken } from "./userAdapters";
-
-// Get authorization headers with JWT token
-const getAuthHeaders = async () => {
-  const token = await getToken();
-  return {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
+import { getAuthHeaders } from "./userAdapters";
 
 export const insights = async (goal: string) => {
   return await fetch(API_ENDPOINTS.AI.INSIGHTS, {

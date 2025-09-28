@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
-import { getToken } from "./userAdapters";
+import { getAuthHeaders } from "./userAdapters";
 
 export interface SubscriptionPlan {
   id: number;
@@ -23,15 +23,6 @@ export interface UserSubscription {
   price: number;
   description: string;
 }
-
-// Get authorization headers with JWT token
-const getAuthHeaders = async () => {
-  const token = await getToken();
-  return {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
 
 // Get all available subscription plans
 export const getSubscriptionPlans = async (): Promise<SubscriptionPlan[]> => {

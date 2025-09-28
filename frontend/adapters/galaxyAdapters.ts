@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "../utils/apiConfig";
-import { getToken } from "./userAdapters";
+import { getAuthHeaders } from "./userAdapters";
 
 export interface Galaxy {
   id: number;
@@ -17,15 +17,6 @@ export interface Note {
   created_at: string;
   updated_at: string;
 }
-
-// Get authorization headers with JWT token
-const getAuthHeaders = async () => {
-  const token = await getToken();
-  return {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
 
 // Get all galaxies for authenticated user
 export const getGalaxies = async () => {
@@ -99,7 +90,7 @@ export const generateGalaxies = async (notes: Note[]): Promise<any> => {
 
     const response = await fetch(API_ENDPOINTS.GALAXIES.GENERATE_GALAXIES, {
       method: "POST",
-          headers: await getAuthHeaders(),
+      headers: await getAuthHeaders(),
       headers: await getAuthHeaders(),
       body: JSON.stringify({
         notes: notes.map((note) => [note.title, note.content]),

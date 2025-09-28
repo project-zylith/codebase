@@ -36,7 +36,7 @@ export const removeToken = async () => {
 };
 
 // Get authorization headers with JWT token
-const getAuthHeaders = async () => {
+export const getAuthHeaders = async () => {
   const token = await getToken();
   return {
     "Content-Type": "application/json",
