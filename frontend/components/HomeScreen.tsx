@@ -901,13 +901,13 @@ export const HomeScreen = () => {
         />
 
         {/* Bottom info */}
-        <View style={styles.bottomInfo}>
+        {/* <View style={styles.bottomInfo}>
           <Text style={[styles.infoText, { color: currentPalette.quinary }]}>
             {currentGalaxyIndex === -1
               ? `${filteredNotes.length} notes in your universe`
               : `${filteredNotes.length} notes in galaxy`}
           </Text>
-        </View>
+        </View> */}
 
         {/* Swipe Indicators */}
         {galaxies.length > 0 && (

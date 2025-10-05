@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -12,68 +12,113 @@ import { Ionicons } from "@expo/vector-icons";
 import { RootTabParamList, RootStackParamList } from "../types/types";
 import { useUser } from "../contexts/UserContext";
 import { useTheme } from "../contexts/ThemeContext";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { BlurView as ExpoBlurView } from "expo-blur";
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// First intro screen component
-const IntroScreen1 = ({
-  onPress,
-  fadeAnim,
-  currentPalette,
-}: {
-  onPress: () => void;
-  fadeAnim: Animated.Value;
-  currentPalette: any;
-}) => (
-  <TouchableOpacity style={styles.fullScreenTouchable} onPress={onPress}>
-    <Animated.View
-      style={[
-        styles.screenContainer,
-        { opacity: fadeAnim, backgroundColor: currentPalette.primary },
-      ]}
-    >
-      <Text style={[styles.screenTitle, { color: currentPalette.quaternary }]}>
-        Welcome to REN|AI
-      </Text>
-    </Animated.View>
-  </TouchableOpacity>
-);
+// Custom Glass Tab Bar Component
+const GlassTabBar = ({ state, descriptors, navigation }: any) => {
+  const { currentPalette, currentPaletteId } = useTheme();
 
-// Second intro screen component
-const IntroScreen2 = ({
-  onPress,
-  fadeAnim,
-  currentPalette,
-}: {
-  onPress: () => void;
-  fadeAnim: Animated.Value;
-  currentPalette: any;
-}) => (
-  <TouchableOpacity style={styles.fullScreenTouchable} onPress={onPress}>
-    <Animated.View
-      style={[
-        styles.screenContainer,
-        { opacity: fadeAnim, backgroundColor: currentPalette.primary },
-      ]}
-    >
-      <Text style={[styles.screenTitle, { color: currentPalette.quaternary }]}>
-        Your Digital Mind Map
-      </Text>
-      <Text style={[styles.screenSubtitle, { color: currentPalette.tertiary }]}>
-        Capture ideas, organize thoughts, and let REN|AI help you achieve your
-        goals
-      </Text>
-    </Animated.View>
-  </TouchableOpacity>
-);
+  // Check if we should use dark mode for the nav bar
+  const isDarkNavMode =
+    currentPaletteId === "watercolor" || currentPaletteId === "monochrome";
+
+  return (
+    <View style={styles.glassTabBarContainer}>
+      <ExpoBlurView
+        intensity={isDarkNavMode ? 60 : 20}
+        tint={isDarkNavMode ? "dark" : "light"}
+        style={[
+          styles.glassTabBar,
+          {
+            backgroundColor: isDarkNavMode
+              ? "rgba(0, 0, 0, 0.25)"
+              : "rgba(255, 255, 255, 0.05)",
+            borderColor: isDarkNavMode
+              ? "rgba(255, 255, 255, 0.3)"
+              : "rgba(255, 255, 255, 0.15)",
+          },
+        ]}
+      >
+        {state.routes.map((route: any, index: number) => {
+          const { options } = descriptors[route.key];
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+              ? options.title
+              : route.name;
+
+          const isFocused = state.index === index;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          const onLongPress = () => {
+            navigation.emit({
+              type: "tabLongPress",
+              target: route.key,
+            });
+          };
+
+          let iconName = "";
+          if (route.name === "Home")
+            iconName = isFocused ? "home" : "home-outline";
+          if (route.name === "Todo")
+            iconName = isFocused ? "list" : "list-outline";
+          if (route.name === "Account")
+            iconName = isFocused ? "person" : "person-outline";
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={styles.tabButton}
+            >
+              <View
+                style={[
+                  styles.iconContainer,
+                  isFocused && {
+                    backgroundColor: isDarkNavMode
+                      ? "rgba(255, 255, 255, 0.4)"
+                      : "rgba(0, 0, 0, 0.3)",
+                    borderWidth: 1,
+                    borderColor: isDarkNavMode
+                      ? "rgba(255, 255, 255, 0.4)"
+                      : "rgba(255, 255, 255, 0.2)",
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={iconName as any}
+                  size={isFocused ? 24 : 22}
+                  color={isDarkNavMode ? "#000000" : "#FFFFFF"}
+                />
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </ExpoBlurView>
+    </View>
+  );
+};
 
 // Tab Navigator Component
 const TabNavigator = () => {
@@ -81,30 +126,10 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      tabBar={(props) => <GlassTabBar {...props} />}
+      screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: currentPalette.primary,
-          borderTopColor: currentPalette.secondary,
-          borderTopWidth: 1,
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
-        tabBarActiveTintColor: currentPalette.quaternary,
-        tabBarInactiveTintColor: currentPalette.quinary,
-        tabBarIcon: ({ color, size }) => {
-          let iconName = "";
-          if (route.name === "Home") iconName = "home-outline";
-          if (route.name === "Todo") iconName = "list-outline";
-          if (route.name === "Account") iconName = "person-outline";
-          return <Ionicons name={iconName as any} size={size} color={color} />;
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "500",
-        },
-      })}
+      }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Todo" component={TodoScreen} />
@@ -116,201 +141,91 @@ const TabNavigator = () => {
 const AppNavigator = () => {
   const { state } = useUser();
   const { currentPalette } = useTheme();
-  const [currentScreen, setCurrentScreen] = useState<
-    "intro1" | "intro2" | "main"
-  >("intro1");
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-transition function
-  const autoTransition = () => {
-    if (currentScreen === "intro1") {
-      transitionToScreen("intro2");
-    } else if (currentScreen === "intro2") {
-      transitionToScreen("main");
-    }
-  };
-
-  // Transition with fade effect
-  const transitionToScreen = (nextScreen: "intro1" | "intro2" | "main") => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Fade out
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      // Change screen
-      setCurrentScreen(nextScreen);
-
-      // Fade in
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    });
-  };
-
-  // Manual skip function
-  const skipToNext = () => {
-    if (currentScreen === "intro1") {
-      transitionToScreen("intro2");
-    } else if (currentScreen === "intro2") {
-      transitionToScreen("main");
-    }
-  };
-
-  // Set up auto-transition timer
-  useEffect(() => {
-    // Fade in current screen
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-
-    // Set up auto-transition timer (3 seconds)
-    if (currentScreen === "intro1" || currentScreen === "intro2") {
-      timeoutRef.current = setTimeout(() => {
-        autoTransition();
-      }, 3000);
-    }
-
-    // Cleanup timeout on unmount or screen change
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [currentScreen]);
-
-  useEffect(() => {
-    // Start fade-in animation
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
-
-  // First level: Intro screen flow
-  if (currentScreen === "intro1") {
-    return (
-      <IntroScreen1
-        onPress={skipToNext}
-        fadeAnim={fadeAnim}
-        currentPalette={currentPalette}
-      />
-    );
-  }
-
-  if (currentScreen === "intro2") {
-    return (
-      <IntroScreen2
-        onPress={skipToNext}
-        fadeAnim={fadeAnim}
-        currentPalette={currentPalette}
-      />
-    );
-  }
-
-  // Second level: Your existing auth logic (only runs after intro)
-  if (currentScreen === "main") {
-    // Show loading screen while checking authentication
-    if (state.isLoading) {
-      return (
-        <View
-          style={[
-            styles.loadingContainer,
-            { backgroundColor: currentPalette.primary },
-          ]}
-        >
-          <Text
-            style={[styles.loadingText, { color: currentPalette.tertiary }]}
-          >
-            Loading...
-          </Text>
-        </View>
-      );
-    }
-
-    // Show only Account screen when not authenticated
-    if (!state.isAuthenticated) {
-      return (
-        <NavigationContainer>
-          <AccountScreen />
-        </NavigationContainer>
-      );
-    }
-
-    // Show Rainy Day mode if special credentials are used
-    if (state.isRainyDayMode) {
-      return (
-        <NavigationContainer>
-          <RainyDayScreen />
-        </NavigationContainer>
-      );
-    }
-
-    // Show full navigation when authenticated
+  // Direct authentication logic - no intro screens
+  // Show only Account screen when not authenticated
+  if (!state.isAuthenticated) {
     return (
       <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="Main" component={TabNavigator} />
-          <Stack.Screen
-            name="NoteEditor"
-            component={EditorScreen}
-            options={{
-              presentation: "modal",
-              headerShown: false,
-            }}
-          />
-        </Stack.Navigator>
+        <AccountScreen />
       </NavigationContainer>
     );
   }
 
-  return null; // Should never reach here
+  // Show Rainy Day mode if special credentials are used
+  if (state.isRainyDayMode) {
+    return (
+      <NavigationContainer>
+        <RainyDayScreen />
+      </NavigationContainer>
+    );
+  }
+
+  // Show full navigation when authenticated
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="Main" component={TabNavigator} />
+        <Stack.Screen
+          name="NoteEditor"
+          component={EditorScreen}
+          options={{
+            presentation: "modal",
+            headerShown: false,
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 };
 
 const styles = StyleSheet.create({
-  loadingContainer: {
+  glassTabBarContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  glassTabBar: {
+    flexDirection: "row",
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1.5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 32,
+    elevation: 20,
+    overflow: "hidden",
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  tabButton: {
     flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 2,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingText: {
-    fontSize: 18,
+  tabLabel: {
+    fontSize: 11,
     fontWeight: "600",
-  },
-  fullScreenTouchable: {
-    flex: 1,
-  },
-  screenContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  screenTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  screenSubtitle: {
-    fontSize: 18,
-    textAlign: "center",
-    opacity: 0.8,
+    letterSpacing: 0.2,
   },
 });
 

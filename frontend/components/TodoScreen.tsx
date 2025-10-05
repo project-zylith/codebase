@@ -728,7 +728,7 @@ export const TodoScreen = () => {
             renderItem={renderTask}
             ItemSeparatorComponent={() => <View style={styles.divider} />}
             style={styles.list}
-            contentContainerStyle={{ paddingBottom: 32 }}
+            contentContainerStyle={{ paddingBottom: 100 }}
           />
         )}
 
@@ -746,8 +746,6 @@ export const TodoScreen = () => {
         />
 
         {renderFilterModal()}
-
-        <View style={styles.spacer} />
       </View>
     </SafeAreaView>
   );
@@ -780,9 +778,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 18,
     letterSpacing: 1,
-  },
-  spacer: {
-    height: 32,
   },
   list: {
     flex: 1,

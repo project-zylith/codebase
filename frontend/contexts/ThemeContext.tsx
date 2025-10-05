@@ -38,8 +38,8 @@ const paletteOptions: PaletteOption[] = [
   // { id: "default", name: "Cosmic Ocean", palette: cosmicOcean },
   // { id: "nebula", name: "Nebula", palette: nebula }, // Doesn't fit the overall theme but is production ready
   { id: "palette2", name: "Night Sky", palette: colorPalette3 },
-  { id: "palette3", name: "Watercolor", palette: colorPalette2 },
-  { id: "palette4", name: "Monochrome", palette: colorPalette5 }, // Needs work but is not a bad design
+  // { id: "palette3", name: "Watercolor", palette: colorPalette2 },
+  // { id: "palette4", name: "Monochrome", palette: colorPalette5 }, // Needs work but is not a bad design
   { id: "default", name: "Navy & Cyan", palette: colorPalette8 },
   // { id: "palette6", name: "Orange Fruit", palette: colorPalette7 },
   // { id: "palette7", name: "Coffee & Cream", palette: colorPalette9 },

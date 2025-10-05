@@ -98,55 +98,81 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     try {
       console.log("🔍 Checking stored session...");
 
-      // Add overall timeout for the entire session check
+      // Reduced timeout for faster app startup
       const sessionCheckTimeout = setTimeout(() => {
         console.log("⏰ Session check timeout - forcing login screen");
         dispatch({ type: "SET_LOADING", payload: false });
-      }, 15000); // 15 second overall timeout
+      }, 5000); // 5 second timeout for faster startup
 
       // First check if we have a stored user
       const storedUser = await AsyncStorage.getItem("user");
 
       if (storedUser) {
         console.log("📱 Found stored user, verifying with backend...");
-        // Verify the session with the backend
-        const response = await getCurrentUser();
-        console.log("🌐 Backend response:", response?.status);
+        try {
+          // Verify the session with the backend with a shorter timeout
+          const response = (await Promise.race([
+            getCurrentUser(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Request timeout")), 3000)
+            ),
+          ])) as Response;
 
-        if (response && response.ok) {
-          const currentUser = await response.json();
-          console.log("✅ Session valid, user authenticated");
-          // Update stored user with latest data from backend
-          await AsyncStorage.setItem("user", JSON.stringify(currentUser));
+          console.log("🌐 Backend response:", response?.status);
+
+          if (response && response.ok) {
+            const currentUser = await response.json();
+            console.log("✅ Session valid, user authenticated");
+            // Update stored user with latest data from backend
+            await AsyncStorage.setItem("user", JSON.stringify(currentUser));
+            clearTimeout(sessionCheckTimeout);
+            dispatch({ type: "SET_USER", payload: currentUser });
+          } else {
+            console.log(
+              "❌ Session invalid, clearing stored data. Status:",
+              response?.status
+            );
+            // Session is invalid, clear stored data
+            await AsyncStorage.removeItem("user");
+            clearTimeout(sessionCheckTimeout);
+            dispatch({ type: "SET_LOADING", payload: false });
+          }
+        } catch (networkError) {
+          console.log("🌐 Network error, using stored user for faster startup");
+          // If network fails, use stored user for faster startup
+          const parsedUser = JSON.parse(storedUser);
           clearTimeout(sessionCheckTimeout);
-          dispatch({ type: "SET_USER", payload: currentUser });
-        } else {
-          console.log(
-            "❌ Session invalid, clearing stored data. Status:",
-            response?.status
-          );
-          // Session is invalid, clear stored data
-          await AsyncStorage.removeItem("user");
-          clearTimeout(sessionCheckTimeout);
-          dispatch({ type: "SET_LOADING", payload: false });
+          dispatch({ type: "SET_USER", payload: parsedUser });
         }
       } else {
         console.log("📱 No stored user, checking for valid session...");
-        // No stored user, check if there's a valid session anyway
-        const response = await getCurrentUser();
-        console.log("🌐 Backend response:", response?.status);
+        try {
+          // No stored user, check if there's a valid session anyway
+          const response = (await Promise.race([
+            getCurrentUser(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Request timeout")), 3000)
+            ),
+          ])) as Response;
 
-        if (response && response.ok) {
-          const currentUser = await response.json();
-          console.log("✅ Found valid session, storing user");
-          await AsyncStorage.setItem("user", JSON.stringify(currentUser));
-          clearTimeout(sessionCheckTimeout);
-          dispatch({ type: "SET_USER", payload: currentUser });
-        } else {
-          console.log(
-            "❌ No valid session, showing login. Status:",
-            response?.status
-          );
+          console.log("🌐 Backend response:", response?.status);
+
+          if (response && response.ok) {
+            const currentUser = await response.json();
+            console.log("✅ Found valid session, storing user");
+            await AsyncStorage.setItem("user", JSON.stringify(currentUser));
+            clearTimeout(sessionCheckTimeout);
+            dispatch({ type: "SET_USER", payload: currentUser });
+          } else {
+            console.log(
+              "❌ No valid session, showing login. Status:",
+              response?.status
+            );
+            clearTimeout(sessionCheckTimeout);
+            dispatch({ type: "SET_LOADING", payload: false });
+          }
+        } catch (networkError) {
+          console.log("🌐 Network error, showing login screen");
           clearTimeout(sessionCheckTimeout);
           dispatch({ type: "SET_LOADING", payload: false });
         }
