@@ -86,10 +86,13 @@ const TabNavigator = () => {
         tabBarStyle: {
           backgroundColor: currentPalette.primary,
           borderTopColor: currentPalette.secondary,
-          height: 64,
+          borderTopWidth: 1,
+          paddingBottom: 5,
+          paddingTop: 5,
+          height: 60,
         },
         tabBarActiveTintColor: currentPalette.quaternary,
-        tabBarInactiveTintColor: currentPalette.tertiary,
+        tabBarInactiveTintColor: currentPalette.quinary,
         tabBarIcon: ({ color, size }) => {
           let iconName = "";
           if (route.name === "Home") iconName = "home-outline";
@@ -98,9 +101,8 @@ const TabNavigator = () => {
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
         tabBarLabelStyle: {
-          fontWeight: "700",
-          fontSize: 13,
-          marginBottom: 6,
+          fontSize: 12,
+          fontWeight: "500",
         },
       })}
     >

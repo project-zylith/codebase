@@ -241,6 +241,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           background-color: ${isDarkModeNotes ? "#1C1C1E" : "#ffffff"};
           color: ${isDarkModeNotes ? "#ffffff" : "#000000"};
+          overflow-x: hidden;
         }
         #editor {
           min-height: 300px;
@@ -250,7 +251,92 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           padding: 0;
         }
         .ql-toolbar {
-          display: none !important;
+          border: none;
+          border-bottom: 1px solid ${isDarkModeNotes ? "#48484A" : "#e5e5e7"};
+          background-color: ${isDarkModeNotes ? "#1C1C1E" : "#f8f9fa"};
+          padding: 8px 16px;
+          border-radius: 0;
+          box-shadow: none;
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+        .ql-toolbar .ql-formats {
+          margin-right: 16px;
+        }
+        .ql-toolbar .ql-formats:last-child {
+          margin-right: 0;
+        }
+        .ql-toolbar button {
+          width: 32px;
+          height: 32px;
+          border: none;
+          border-radius: 6px;
+          margin: 0 2px;
+          background: transparent;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .ql-toolbar button:hover {
+          background-color: ${
+            isDarkModeNotes ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"
+          };
+          transform: translateY(-1px);
+        }
+        .ql-toolbar button.ql-active {
+          background-color: ${isDarkModeNotes ? "#007AFF" : "#007AFF"};
+          box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+        }
+        .ql-toolbar .ql-stroke {
+          stroke: ${isDarkModeNotes ? "#ffffff" : "#1d1d1f"};
+          stroke-width: 1.5;
+        }
+        .ql-toolbar .ql-fill {
+          fill: ${isDarkModeNotes ? "#ffffff" : "#1d1d1f"};
+        }
+        .ql-toolbar button.ql-active .ql-stroke {
+          stroke: #ffffff;
+        }
+        .ql-toolbar button.ql-active .ql-fill {
+          fill: #ffffff;
+        }
+        .ql-toolbar .ql-picker {
+          border: none;
+          border-radius: 6px;
+          background: transparent;
+          margin: 0 2px;
+        }
+        .ql-toolbar .ql-picker:hover {
+          background-color: ${
+            isDarkModeNotes ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"
+          };
+        }
+        .ql-toolbar .ql-picker-options {
+          border: none;
+          border-radius: 8px;
+          background-color: ${isDarkModeNotes ? "#2C2C2E" : "#ffffff"};
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+        }
+        .ql-toolbar .ql-picker-item {
+          color: ${isDarkModeNotes ? "#ffffff" : "#1d1d1f"};
+          padding: 8px 12px;
+          border-radius: 4px;
+          margin: 2px;
+        }
+        .ql-toolbar .ql-picker-item:hover {
+          background-color: ${
+            isDarkModeNotes ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"
+          };
+        }
+        .ql-toolbar .ql-picker-item.ql-selected {
+          background-color: ${isDarkModeNotes ? "#007AFF" : "#007AFF"};
+          color: #ffffff;
         }
         .ql-container {
           border: none;
@@ -258,6 +344,7 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           line-height: 1.6;
           margin: 0;
           padding: 0;
+          position: relative;
         }
         .ql-editor {
           padding: 0 16px;
@@ -289,7 +376,14 @@ export const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(
           theme: 'snow',
           placeholder: '${placeholder}',
           modules: {
-            toolbar: false
+            toolbar: [
+              [{ 'header': [1, 2, 3, false] }],
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+              ['blockquote', 'code-block'],
+              ['link'],
+              ['clean']
+            ]
           }
         });
 

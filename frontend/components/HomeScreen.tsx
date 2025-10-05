@@ -49,9 +49,15 @@ export const HomeScreen = () => {
   const [galaxies, setGalaxies] = useState<Galaxy[]>([]);
   const [currentGalaxyIndex, setCurrentGalaxyIndex] = useState(-1); // -1 means home view
   const [filteredNotes, setFilteredNotes] = useState<NoteWithPosition[]>([]);
-  const [starAnimations] = useState(() =>
-    Array.from({ length: 20 }, () => ({
-      opacity: new Animated.Value(0),
+  const [starAnimations, setStarAnimations] = useState<
+    Array<{
+      opacity: Animated.Value;
+      translateX: Animated.Value;
+      translateY: Animated.Value;
+    }>
+  >(() =>
+    Array.from({ length: 100 }, () => ({
+      opacity: new Animated.Value(0.7),
       translateX: new Animated.Value(0),
       translateY: new Animated.Value(0),
     }))
