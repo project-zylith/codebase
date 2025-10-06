@@ -40,18 +40,16 @@ const GlassTabBar = ({ state, descriptors, navigation }: any) => {
             borderColor: isDarkNavMode
               ? "rgba(255, 255, 255, 0.3)"
               : "rgba(255, 255, 255, 0.15)",
+            // Apply enhanced design to all pages
+            width: "100%",
+            height: 57.5, // Increased height by 15%
+            borderRadius: 28.75, // 5% rounder (25 * 1.15 = 28.75)
+            alignSelf: "stretch",
           },
         ]}
       >
         {state.routes.map((route: any, index: number) => {
           const { options } = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-              ? options.title
-              : route.name;
-
           const isFocused = state.index === index;
 
           const onPress = () => {
@@ -95,6 +93,12 @@ const GlassTabBar = ({ state, descriptors, navigation }: any) => {
               <View
                 style={[
                   styles.iconContainer,
+                  {
+                    // Apply enhanced design to all pages (increased by 15%)
+                    width: 41.4,
+                    height: 41.4,
+                    borderRadius: 11.5,
+                  },
                   isFocused && {
                     backgroundColor: isDarkNavMode
                       ? "rgba(255, 255, 255, 0.4)"
@@ -108,7 +112,7 @@ const GlassTabBar = ({ state, descriptors, navigation }: any) => {
               >
                 <Ionicons
                   name={iconName as any}
-                  size={isFocused ? 24 : 22}
+                  size={isFocused ? 20.7 : 18.4}
                   color={isDarkNavMode ? "#000000" : "#FFFFFF"}
                 />
               </View>
@@ -189,13 +193,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingBottom: 24,
   },
   glassTabBar: {
     flexDirection: "row",
     height: 50,
-    borderRadius: 25,
     borderWidth: 1.5,
     shadowColor: "#000",
     shadowOffset: {
@@ -216,9 +219,6 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },

@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView as ExpoBlurView } from "expo-blur";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import {
@@ -232,110 +233,95 @@ export const HomeScreen = () => {
     (navigation.navigate as any)("NoteEditor", { noteId: note.id });
   };
 
-  // Generate random positions for stars around the center, avoiding restricted areas
+  // Generate positions for stars around the new note button, preventing overlaps
   const generateStarPosition = (
     index: number,
     total: number,
     existingPositions: { x: number; y: number }[] = []
   ) => {
-    const maxAttempts = 50; // Maximum attempts to find a non-overlapping position
-    const starSize = 60; // Approximate size of star + label
+    const maxAttempts = 100; // Increased attempts for better positioning
+    const starSize = 80; // Increased size to prevent overlaps
+    const minDistanceBetweenStars = starSize + 20; // Minimum distance between stars
     let attempts = 0;
 
-    // For the first 20 notes, use stricter bounds to ensure they appear on screen
-    const isFirstTwenty = index < 20;
+    // Define the new note button position and create a circular area around it
+    const buttonX = centerX - 60; // Button center X
+    const buttonY = centerY - 250; // Button center Y
+    const buttonRadius = 80; // Button radius
+    const minDistanceFromButton = buttonRadius + starSize / 2 + 30; // Distance from button edge
+    const maxDistanceFromButton = 200; // Maximum distance from button
 
     while (attempts < maxAttempts) {
-      const angle = (index / total) * 2 * Math.PI;
-      let radius, offsetAngle;
+      // Generate position in a circular area around the new note button
+      const angle = (index / total) * 2 * Math.PI + (Math.random() - 0.5) * 0.5; // Add some randomness
+      const distanceFromButton =
+        minDistanceFromButton +
+        Math.random() * (maxDistanceFromButton - minDistanceFromButton);
 
-      if (isFirstTwenty) {
-        // For first 20 notes, use smaller radius to keep them closer to center and in bounds
-        radius = 80 + Math.random() * 80; // Smaller radius range: 80-160
-        offsetAngle = (Math.random() - 0.5) * 0.4; // Smaller angle variation
-      } else {
-        // For additional notes, allow original behavior
-        radius = 80 + Math.random() * 120; // Original radius: 80-200
-        offsetAngle = (Math.random() - 0.5) * 0.8; // Original angle offset
-      }
+      let x = buttonX + Math.cos(angle) * distanceFromButton;
+      let y = buttonY + Math.sin(angle) * distanceFromButton;
 
-      let x = centerX + Math.cos(angle + offsetAngle) * radius - 60; // -60 to center the star
-      let y = centerY + Math.sin(angle + offsetAngle) * radius - 100; // -100 to account for header
+      // Ensure stars stay within screen bounds with stricter constraints
+      const padding = 80; // Increased padding from screen edges
+      const maxX = screenWidth - starSize - padding;
+      const maxY = screenHeight - starSize - padding - 120; // Account for navigation bar and extra space
+      const minX = padding;
+      const minY = padding + 140; // Account for header and extra space
 
-      // Define safe zones and restricted areas
-      const buttonSize = 160; // Size of the New Note button area
-      const buttonX = centerX - 60; // Button center X
-      const buttonY = centerY - 250; // Button center Y
-      const buttonRadius = buttonSize / 2; // Button radius
+      // Clamp to safe bounds - this ensures stars never go off-screen
+      x = Math.max(minX, Math.min(maxX, x));
+      y = Math.max(minY, Math.min(maxY, y));
 
-      // Check if star is too close to the New Note button
-      const distanceFromButton = Math.sqrt(
+      // Additional check: if the calculated position would be outside the circular area around button,
+      // adjust the distance to keep it within bounds
+      const distanceFromButtonCheck = Math.sqrt(
         Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
       );
-      const minDistanceFromButton = buttonRadius + starSize / 2 + 20; // Extra padding
-
-      // If star is too close to button, reposition it
-      if (distanceFromButton < minDistanceFromButton) {
-        // Move star away from button
+      if (distanceFromButtonCheck > maxDistanceFromButton) {
+        // Recalculate position to stay within the circular area
         const angleFromButton = Math.atan2(y - buttonY, x - buttonX);
-        x = buttonX + Math.cos(angleFromButton) * minDistanceFromButton;
-        y = buttonY + Math.sin(angleFromButton) * minDistanceFromButton;
-      }
+        x = buttonX + Math.cos(angleFromButton) * maxDistanceFromButton;
+        y = buttonY + Math.sin(angleFromButton) * maxDistanceFromButton;
 
-      // For first 20 notes, ensure they stay within screen bounds
-      if (isFirstTwenty) {
-        const padding = 40; // Extra padding for first 20 notes
-        const maxX = screenWidth - starSize - padding;
-        const maxY = screenHeight - starSize - padding - 100; // Extra bottom padding
-        const minX = padding;
-        const minY = padding + 120; // Extra top padding for header
-
-        // Clamp to safe bounds
+        // Re-clamp to screen bounds after adjustment
         x = Math.max(minX, Math.min(maxX, x));
         y = Math.max(minY, Math.min(maxY, y));
       }
 
-      // Check collision with existing stars
-      const minDistanceBetweenStars = starSize + 10; // Minimum distance between stars
-      let hasCollision = false;
-
+      // Check for overlaps with existing stars
+      let hasOverlap = false;
       for (const existingPos of existingPositions) {
         const distance = Math.sqrt(
           Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
         );
         if (distance < minDistanceBetweenStars) {
-          hasCollision = true;
+          hasOverlap = true;
           break;
         }
       }
 
-      // If no collision, return this position
-      if (!hasCollision) {
+      // Also check distance from button
+      const distanceFromButtonFinal = Math.sqrt(
+        Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
+      );
+      if (distanceFromButtonFinal < minDistanceFromButton) {
+        hasOverlap = true;
+      }
+
+      if (!hasOverlap) {
         return { x, y };
       }
 
       attempts++;
     }
 
-    // Fallback positioning
-    const fallbackAngle =
-      (index / total) * 2 * Math.PI + (Math.random() - 0.5) * 0.5;
-    const fallbackRadius = isFirstTwenty ? 100 : 100 + Math.random() * 100;
-    let x = centerX + Math.cos(fallbackAngle) * fallbackRadius - 60;
-    let y = centerY + Math.sin(fallbackAngle) * fallbackRadius - 100;
-
-    // Ensure star doesn't go off screen - stricter bounds for first 20
-    const padding = isFirstTwenty ? 40 : 20;
-    const maxX = screenWidth - starSize - padding;
-    const maxY = screenHeight - starSize - padding - (isFirstTwenty ? 100 : 0);
-    const minX = padding;
-    const minY = padding + (isFirstTwenty ? 120 : 100);
-
-    // Clamp positions
-    x = Math.max(minX, Math.min(maxX, x));
-    y = Math.max(minY, Math.min(maxY, y));
-
-    return { x, y };
+    // Fallback: return a position in a ring around the button
+    const fallbackAngle = (index / total) * 2 * Math.PI;
+    const fallbackDistance = minDistanceFromButton + (index % 3) * 40; // Vary distance slightly
+    return {
+      x: buttonX + Math.cos(fallbackAngle) * fallbackDistance,
+      y: buttonY + Math.sin(fallbackAngle) * fallbackDistance,
+    };
   };
 
   // Load notes from API
@@ -533,7 +519,7 @@ export const HomeScreen = () => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Create",
-          onPress: async (title) => {
+          onPress: async (title: string | undefined) => {
             if (title && title.trim()) {
               try {
                 // Get current galaxy ID if in a galaxy view
@@ -776,24 +762,6 @@ export const HomeScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          {/* Search Button - Top Right - Only on home page */}
-          {currentGalaxyIndex === -1 && (
-            <TouchableOpacity
-              style={[
-                styles.searchButton,
-                { backgroundColor: currentPalette.quaternary },
-              ]}
-              onPress={() => setShowSearchModal(true)}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name="search"
-                size={20}
-                color={currentPalette.lightText}
-              />
-            </TouchableOpacity>
-          )}
-
           {/* Centered Title and Welcome Message */}
           <View style={styles.headerText}>
             <Text
@@ -818,6 +786,22 @@ export const HomeScreen = () => {
             >
               <Ionicons
                 name={currentGalaxyIndex === -1 ? "planet" : "list"}
+                size={20}
+                color={currentPalette.lightText}
+              />
+            </TouchableOpacity>
+
+            {/* Search Button */}
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: currentPalette.quaternary },
+              ]}
+              onPress={() => setShowSearchModal(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="search"
                 size={20}
                 color={currentPalette.lightText}
               />
