@@ -144,7 +144,7 @@ export const generateNoteInsight = async (
       console.log("Error fetching available models:", error);
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Prepare the context data
     const contextData = {

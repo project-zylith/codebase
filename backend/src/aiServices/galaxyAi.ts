@@ -156,7 +156,7 @@ export const generateGalaxiesWithAI = async (
       ];
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Truncate note content to prevent response truncation while keeping context
     const truncatedNotes = cleanedNotes.map(([title, content]) => [
