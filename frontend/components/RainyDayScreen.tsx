@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../contexts/UserContext";
@@ -75,8 +76,6 @@ const RainyDayScreen: React.FC = () => {
 
   const renderOrigamiHeart = (letter: LoveLetter, index: number) => {
     const angle = (index * 15) % 360; // Rotate each heart slightly
-    const x = width / 2 + Math.sin((index * 0.5 * Math.PI) / 180) * 100;
-    const y = 200 + ((index * 80) % (height - 400));
 
     return (
       <TouchableOpacity
@@ -84,44 +83,60 @@ const RainyDayScreen: React.FC = () => {
         style={[
           styles.heartContainer,
           {
-            left: x - 25,
-            top: y - 25,
             transform: [{ rotate: `${angle}deg` }],
           },
         ]}
         onPress={() => handleLetterPress(letter)}
       >
-        <Ionicons name="heart" size={50} color="#ff6b6b" />
-        <Text style={styles.heartDate}>
-          {new Date(letter.written_date).toLocaleDateString()}
-        </Text>
+        <View style={styles.heartCard}>
+          <Ionicons name="heart" size={80} color="#ff6b6b" />
+          <View style={styles.heartDetails}>
+            <Text style={styles.heartTo}>To: {letter.recipient}</Text>
+            <Text style={styles.heartOccasion}>{letter.occasion}</Text>
+            <Text style={styles.heartDate}>
+              {new Date(letter.written_date).toLocaleDateString()}
+            </Text>
+          </View>
+        </View>
       </TouchableOpacity>
     );
   };
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: "#87CEEB" }]}>
-        <Text style={[styles.loadingText, { color: currentPalette.tertiary }]}>
+      <ImageBackground
+        source={require("../assets/flower-letter.jpg")}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <Text style={[styles.loadingText, { color: "#FFB6C1" }]}>
           Loading love letters...
         </Text>
-      </View>
+      </ImageBackground>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: "#87CEEB" }]}>
-      {/* Red String of Fate */}
-      <View style={styles.redString} />
+    <ImageBackground
+      source={require("../assets/flower-letter.jpg")}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      {/* Light Pink String of Fate */}
+      <View style={styles.pinkString} />
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: "#8B0000" }]}>
-          Rainy Day Letters
-        </Text>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#8B0000" />
-        </TouchableOpacity>
+        <View style={styles.headerLeft}>
+          {/* <Text style={[styles.title, { color: "#000000" }]}>
+            Rainy Day Letters
+          </Text> */}
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={24} color="#000000" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Love Letters */}
@@ -141,7 +156,7 @@ const RainyDayScreen: React.FC = () => {
         style={[styles.addButton, { backgroundColor: "#ff6b6b" }]}
         onPress={() => setShowForm(true)}
       >
-        <Ionicons name="add" size={30} color="white" />
+        <Ionicons name="add" size={30} color="#FFB6C1" />
       </TouchableOpacity>
 
       {/* Modals */}
@@ -160,7 +175,7 @@ const RainyDayScreen: React.FC = () => {
           onSubmit={handleFormSubmit}
         />
       )}
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -168,13 +183,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  redString: {
+  pinkString: {
     position: "absolute",
     top: 0,
     left: "50%",
     width: 4,
     height: "100%",
-    backgroundColor: "#DC143C",
+    backgroundColor: "#FF0000",
     transform: [{ translateX: -2 }],
     zIndex: 1,
   },
@@ -186,6 +201,15 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     zIndex: 2,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
@@ -199,18 +223,47 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   heartsContainer: {
-    minHeight: height,
-    position: "relative",
+    paddingTop: 20,
+    paddingBottom: 100,
+    alignItems: "center",
   },
   heartContainer: {
-    position: "absolute",
     alignItems: "center",
+    marginBottom: 20,
     zIndex: 3,
+  },
+  heartCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 20,
+    padding: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    minWidth: 140,
+  },
+  heartDetails: {
+    alignItems: "center",
+    marginTop: 8,
+  },
+  heartTo: {
+    fontSize: 12,
+    color: "#8B0000",
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  heartOccasion: {
+    fontSize: 11,
+    color: "#666",
+    fontWeight: "600",
+    marginBottom: 2,
+    textAlign: "center",
   },
   heartDate: {
     fontSize: 10,
     color: "#8B0000",
-    marginTop: 4,
     fontWeight: "600",
   },
   addButton: {
