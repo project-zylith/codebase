@@ -297,8 +297,7 @@ const RENAIGalaxyModal: React.FC<RENAIGalaxyModalProps> = ({
                         { color: currentPalette.quinary },
                       ]}
                     >
-                      REN|AI is analyzing your notes and creating themed
-                      collections
+                      Please give me a second, thank you for your patience!
                     </Text>
                   </View>
                 ) : (

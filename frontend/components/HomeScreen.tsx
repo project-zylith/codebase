@@ -233,59 +233,92 @@ export const HomeScreen = () => {
     (navigation.navigate as any)("NoteEditor", { noteId: note.id });
   };
 
-  // Generate positions for stars around the new note button, preventing overlaps
+  // Generate positions for stars distributed across the entire page, preventing overlaps
   const generateStarPosition = (
     index: number,
     total: number,
     existingPositions: { x: number; y: number }[] = []
   ) => {
-    const maxAttempts = 100; // Increased attempts for better positioning
-    const starSize = 80; // Increased size to prevent overlaps
-    const minDistanceBetweenStars = starSize + 20; // Minimum distance between stars
+    const maxAttempts = 200; // Increased attempts for better positioning
+    const starSize = 60; // Smaller size to allow more stars
+    const minDistanceBetweenStars = starSize + 60; // Increased minimum distance between stars for better spread
     let attempts = 0;
 
-    // Define the new note button position and create a circular area around it
-    const buttonX = centerX - 60; // Button center X
-    const buttonY = centerY - 250; // Button center Y
-    const buttonRadius = 80; // Button radius
-    const minDistanceFromButton = buttonRadius + starSize / 2 + 30; // Distance from button edge
-    const maxDistanceFromButton = 200; // Maximum distance from button
+    // Define safe screen bounds for star distribution
+    const padding = 40; // Reduced padding for more space
+    const headerHeight = 120; // Account for header
+    const navBarHeight = 100; // Account for navigation bar
 
-    while (attempts < maxAttempts) {
-      // Generate position in a circular area around the new note button
-      const angle = (index / total) * 2 * Math.PI + (Math.random() - 0.5) * 0.5; // Add some randomness
-      const distanceFromButton =
-        minDistanceFromButton +
-        Math.random() * (maxDistanceFromButton - minDistanceFromButton);
+    const maxX = screenWidth - starSize - padding;
+    const maxY = screenHeight - starSize - padding - navBarHeight;
+    const minX = padding;
+    const minY = padding + headerHeight;
 
-      let x = buttonX + Math.cos(angle) * distanceFromButton;
-      let y = buttonY + Math.sin(angle) * distanceFromButton;
+    // Define the new note button position to avoid placing stars too close to it
+    const buttonX = centerX - 60; // Button center X (120px wide button, so centerX - 60)
+    const buttonY = centerY - 300; // Button center Y
+    const buttonRadius = 120; // Larger radius to avoid button area
 
-      // Ensure stars stay within screen bounds with stricter constraints
-      const padding = 80; // Increased padding from screen edges
-      const maxX = screenWidth - starSize - padding;
-      const maxY = screenHeight - starSize - padding - 120; // Account for navigation bar and extra space
-      const minX = padding;
-      const minY = padding + 140; // Account for header and extra space
+    // Try to place stars in a more distributed pattern first
+    if (existingPositions.length < total * 0.3) {
+      // For the first 30% of stars, use a more structured approach
+      const cols = Math.ceil(Math.sqrt(total));
+      const rows = Math.ceil(total / cols);
+      const colWidth = (maxX - minX) / cols;
+      const rowHeight = (maxY - minY) / rows;
 
-      // Clamp to safe bounds - this ensures stars never go off-screen
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+
+      let x = minX + col * colWidth + colWidth / 2;
+      let y = minY + row * rowHeight + rowHeight / 2;
+
+      // Add randomness to the grid position
+      x += (Math.random() - 0.5) * colWidth * 0.8;
+      y += (Math.random() - 0.5) * rowHeight * 0.8;
+
+      // Ensure position is within bounds
       x = Math.max(minX, Math.min(maxX, x));
       y = Math.max(minY, Math.min(maxY, y));
 
-      // Additional check: if the calculated position would be outside the circular area around button,
-      // adjust the distance to keep it within bounds
-      const distanceFromButtonCheck = Math.sqrt(
+      // Check if position is too close to the new note button
+      const distanceFromButton = Math.sqrt(
         Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
       );
-      if (distanceFromButtonCheck > maxDistanceFromButton) {
-        // Recalculate position to stay within the circular area
-        const angleFromButton = Math.atan2(y - buttonY, x - buttonX);
-        x = buttonX + Math.cos(angleFromButton) * maxDistanceFromButton;
-        y = buttonY + Math.sin(angleFromButton) * maxDistanceFromButton;
 
-        // Re-clamp to screen bounds after adjustment
-        x = Math.max(minX, Math.min(maxX, x));
-        y = Math.max(minY, Math.min(maxY, y));
+      if (distanceFromButton >= buttonRadius) {
+        // Check for overlaps with existing stars
+        let hasOverlap = false;
+        for (const existingPos of existingPositions) {
+          const distance = Math.sqrt(
+            Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
+          );
+          if (distance < minDistanceBetweenStars) {
+            hasOverlap = true;
+            break;
+          }
+        }
+
+        if (!hasOverlap) {
+          return { x, y };
+        }
+      }
+    }
+
+    // Fallback to random positioning for remaining stars
+    while (attempts < maxAttempts) {
+      // Generate random position across the entire screen
+      let x = minX + Math.random() * (maxX - minX);
+      let y = minY + Math.random() * (maxY - minY);
+
+      // Check if position is too close to the new note button
+      const distanceFromButton = Math.sqrt(
+        Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
+      );
+
+      if (distanceFromButton < buttonRadius) {
+        attempts++;
+        continue; // Skip this position if too close to button
       }
 
       // Check for overlaps with existing stars
@@ -300,14 +333,6 @@ export const HomeScreen = () => {
         }
       }
 
-      // Also check distance from button
-      const distanceFromButtonFinal = Math.sqrt(
-        Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
-      );
-      if (distanceFromButtonFinal < minDistanceFromButton) {
-        hasOverlap = true;
-      }
-
       if (!hasOverlap) {
         return { x, y };
       }
@@ -315,12 +340,29 @@ export const HomeScreen = () => {
       attempts++;
     }
 
-    // Fallback: return a position in a ring around the button
-    const fallbackAngle = (index / total) * 2 * Math.PI;
-    const fallbackDistance = minDistanceFromButton + (index % 3) * 40; // Vary distance slightly
+    // Final fallback: return a position in a grid pattern across the screen
+    const cols = Math.ceil(Math.sqrt(total));
+    const rows = Math.ceil(total / cols);
+    const colWidth = (maxX - minX) / cols;
+    const rowHeight = (maxY - minY) / rows;
+
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+
+    let fallbackX = minX + col * colWidth + colWidth / 2;
+    let fallbackY = minY + row * rowHeight + rowHeight / 2;
+
+    // Add some randomness to the grid position
+    fallbackX += (Math.random() - 0.5) * colWidth * 0.4;
+    fallbackY += (Math.random() - 0.5) * rowHeight * 0.4;
+
+    // Ensure fallback position is within bounds
+    fallbackX = Math.max(minX, Math.min(maxX, fallbackX));
+    fallbackY = Math.max(minY, Math.min(maxY, fallbackY));
+
     return {
-      x: buttonX + Math.cos(fallbackAngle) * fallbackDistance,
-      y: buttonY + Math.sin(fallbackAngle) * fallbackDistance,
+      x: fallbackX,
+      y: fallbackY,
     };
   };
 
@@ -436,6 +478,9 @@ export const HomeScreen = () => {
     ) {
       // To next galaxy
       setCurrentGalaxyIndex((prev) => prev + 1);
+    } else if (currentGalaxyIndex === galaxies.length - 1) {
+      // From last galaxy back to home (loop)
+      setCurrentGalaxyIndex(-1);
     }
   };
 
@@ -446,6 +491,9 @@ export const HomeScreen = () => {
     } else if (currentGalaxyIndex > 0) {
       // To previous galaxy
       setCurrentGalaxyIndex((prev) => prev - 1);
+    } else if (currentGalaxyIndex === -1 && galaxies.length > 0) {
+      // From home to last galaxy (loop)
+      setCurrentGalaxyIndex(galaxies.length - 1);
     }
   };
 
@@ -902,20 +950,20 @@ export const HomeScreen = () => {
                 size={16}
                 color={currentPalette.quinary}
               />
-              <Text
+              {/* <Text
                 style={[styles.swipeText, { color: currentPalette.quinary }]}
               >
                 {currentGalaxyIndex === -1 ? "Home" : "Previous"}
-              </Text>
+              </Text> */}
             </View>
             <View style={styles.swipeIndicator}>
-              <Text
+              {/* <Text
                 style={[styles.swipeText, { color: currentPalette.quinary }]}
               >
                 {currentGalaxyIndex === -1
                   ? "Double tap to galaxies"
                   : `${currentGalaxyIndex + 1} of ${galaxies.length}`}
-              </Text>
+              </Text> */}
               <Ionicons
                 name="chevron-forward"
                 size={16}
@@ -1120,6 +1168,8 @@ const styles = StyleSheet.create({
   headerText: {
     alignItems: "center",
     marginBottom: 20,
+    height: 80, // Fixed height to prevent button shifting
+    justifyContent: "center",
   },
   headerButtons: {
     flexDirection: "row",
@@ -1154,7 +1204,7 @@ const styles = StyleSheet.create({
   centralButtonContainer: {
     position: "absolute",
     left: centerX - 60,
-    top: centerY - 250, // Use this to move the button up and down
+    top: centerY - 300, // Consistently positioned 300px above center across all pages (30% higher)
     alignItems: "center",
     justifyContent: "center",
   },

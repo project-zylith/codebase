@@ -6,7 +6,7 @@ import { db } from "../database";
 
 const API_KEY = process.env.API_KEY as string;
 
-const generateNoteInsightsPrompt = `You are Zylith, an AI assistant inside of a note taking app. Your job is to analyze a user's note and provide a comprehensive, friendly, and helpful breakdown.
+const generateNoteInsightsPrompt = `You are REN|AI, an AI assistant inside of a note taking app. Your job is to analyze a user's note and provide a comprehensive, friendly, and helpful breakdown.
 
 You will receive:
 1. A note with title and content
