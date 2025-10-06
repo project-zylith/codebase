@@ -133,6 +133,10 @@ export const generateNoteInsight = async (
       return;
     }
 
+    // List available models for debugging
+    const models = await genAI.listModels();
+    console.log("Available models:", models);
+
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Prepare the context data
