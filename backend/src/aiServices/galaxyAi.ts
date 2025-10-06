@@ -156,7 +156,7 @@ export const generateGalaxiesWithAI = async (
       ];
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Truncate note content to prevent response truncation while keeping context
     const truncatedNotes = cleanedNotes.map(([title, content]) => [
@@ -355,7 +355,7 @@ export const generateGalaxy = async (
       return;
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Combine the prompt with the notes data
     const fullPrompt = `${generateGalaxyPrompt}\n\nHere are the notes to organize:\n${JSON.stringify(
@@ -392,7 +392,7 @@ export const reSortGalaxy = async (
   try {
     console.log("🤖 Re-sorting galaxy with notes:", req.body.notes);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Combine the prompt with the notes data
     const fullPrompt = `${galaxyReSortPrompt}\n\nHere are the notes to re-sort:\n${JSON.stringify(
@@ -417,7 +417,7 @@ export const generateGalaxyInsight = async (
   try {
     console.log("🤖 Generating galaxy insight with notes:", req.body.notes);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Combine the prompt with the notes data
     const fullPrompt = `${generateGalaxyInsightPrompt}\n\nHere are the galaxy notes to analyze:\n${JSON.stringify(
@@ -440,7 +440,7 @@ export const generateGalaxyInsightAll = async (
   res: Response
 ): Promise<void> => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(
       generateGalaxyInsightAllPrompt,
       req.body.notes
