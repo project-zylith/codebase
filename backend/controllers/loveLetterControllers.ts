@@ -75,6 +75,10 @@ export const getLoveLetterById = async (
     const { id } = req.params;
     const loveLetterId = parseInt(id);
 
+    if (isNaN(loveLetterId)) {
+      return res.status(400).json({ error: "Invalid love letter ID" });
+    }
+
     if (!req.user) {
       return res.status(401).json({ error: "User not authenticated" });
     }

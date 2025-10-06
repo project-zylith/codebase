@@ -308,6 +308,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  closeButton: {
+    padding: 8,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -317,9 +320,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
-  },
-  closeButton: {
-    padding: 8,
   },
   title: {
     fontSize: 20,

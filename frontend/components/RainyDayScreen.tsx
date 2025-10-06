@@ -160,7 +160,7 @@ const RainyDayScreen: React.FC = () => {
       </TouchableOpacity>
 
       {/* Modals */}
-      {selectedLetter && (
+      {selectedLetter && selectedLetter.id && !isNaN(selectedLetter.id) && (
         <LoveLetterModal
           letter={selectedLetter}
           onClose={handleCloseModal}

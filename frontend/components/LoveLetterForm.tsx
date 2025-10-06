@@ -8,6 +8,8 @@ import {
   Modal,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
@@ -35,7 +37,6 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
   const [content, setContent] = useState("");
   const [isEncrypted, setIsEncrypted] = useState(false);
   const [availableOccasions, setAvailableOccasions] = useState<string[]>([]);
-  const [showRecipientDropdown, setShowRecipientDropdown] = useState(false);
   const [showOccasionDropdown, setShowOccasionDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -94,11 +95,6 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
     }
   };
 
-  const handleRecipientSelect = (selectedRecipient: string) => {
-    setRecipient(selectedRecipient);
-    setShowRecipientDropdown(false);
-  };
-
   const handleOccasionSelect = (selectedOccasion: string) => {
     setOccasion(selectedOccasion);
     setShowOccasionDropdown(false);
@@ -106,8 +102,10 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
 
   return (
     <Modal visible={true} animationType="slide" presentationStyle="pageSheet">
-      <View
+      <KeyboardAvoidingView
         style={[styles.container, { backgroundColor: currentPalette.primary }]}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -120,72 +118,25 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
         </View>
 
         <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
-          {/* Recipient Dropdown */}
+          {/* Recipient Text Input */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.label, { color: currentPalette.tertiary }]}>
               To:
             </Text>
-            <View style={styles.dropdownContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.dropdown,
-                  {
-                    backgroundColor: currentPalette.secondary,
-                    borderColor: currentPalette.quaternary,
-                  },
-                ]}
-                onPress={() => setShowRecipientDropdown(!showRecipientDropdown)}
-              >
-                <Text
-                  style={[
-                    styles.dropdownText,
-                    { color: currentPalette.tertiary },
-                  ]}
-                >
-                  {recipient || "Select recipient"}
-                </Text>
-                <Ionicons
-                  name="chevron-down"
-                  size={20}
-                  color={currentPalette.tertiary}
-                />
-              </TouchableOpacity>
-              {showRecipientDropdown && (
-                <View
-                  style={[
-                    styles.dropdownMenu,
-                    { backgroundColor: currentPalette.secondary },
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={styles.dropdownItem}
-                    onPress={() => handleRecipientSelect("Honeybee")}
-                  >
-                    <Text
-                      style={[
-                        styles.dropdownItemText,
-                        { color: currentPalette.tertiary },
-                      ]}
-                    >
-                      Honeybee
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.dropdownItem}
-                    onPress={() => handleRecipientSelect("Bibi")}
-                  >
-                    <Text
-                      style={[
-                        styles.dropdownItemText,
-                        { color: currentPalette.tertiary },
-                      ]}
-                    >
-                      Bibi
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: currentPalette.secondary,
+                  color: currentPalette.tertiary,
+                  borderColor: currentPalette.quaternary,
+                },
+              ]}
+              value={recipient}
+              onChangeText={setRecipient}
+              placeholder="Enter recipient name"
+              placeholderTextColor={currentPalette.quinary}
+            />
           </View>
 
           {/* Date */}
@@ -333,7 +284,7 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -341,6 +292,9 @@ const LoveLetterForm: React.FC<LoveLetterFormProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  closeButton: {
+    padding: 8,
   },
   header: {
     flexDirection: "row",
@@ -351,9 +305,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
-  },
-  closeButton: {
-    padding: 8,
   },
   title: {
     fontSize: 20,
