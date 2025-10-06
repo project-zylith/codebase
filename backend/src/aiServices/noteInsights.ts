@@ -134,8 +134,15 @@ export const generateNoteInsight = async (
     }
 
     // List available models for debugging
-    const models = await genAI.listModels();
-    console.log("Available models:", models);
+    try {
+      const modelsResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`
+      );
+      const modelsData = await modelsResponse.json();
+      console.log("Available models:", modelsData);
+    } catch (error) {
+      console.log("Error fetching available models:", error);
+    }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
