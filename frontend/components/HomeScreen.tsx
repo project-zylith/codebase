@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  Easing,
   Alert,
   Modal,
   PanResponder,
@@ -146,17 +147,14 @@ export const HomeScreen = () => {
             const response = await getNotes();
             if (response.ok) {
               const apiNotes: Note[] = await response.json();
-              // Add position to each note for display, avoiding overlaps
+              // Add position to each note for display (orbital distribution)
               const notesWithPosition: NoteWithPosition[] = [];
-              const existingPositions: { x: number; y: number }[] = [];
 
               apiNotes.forEach((note, index) => {
                 const position = generateStarPosition(
                   index,
-                  Math.max(apiNotes.length, 8),
-                  existingPositions
+                  Math.max(apiNotes.length, 8)
                 );
-                existingPositions.push(position);
                 notesWithPosition.push({
                   ...note,
                   position,
@@ -233,137 +231,56 @@ export const HomeScreen = () => {
     (navigation.navigate as any)("NoteEditor", { noteId: note.id });
   };
 
-  // Generate positions for stars distributed across the entire page, preventing overlaps
-  const generateStarPosition = (
-    index: number,
-    total: number,
-    existingPositions: { x: number; y: number }[] = []
-  ) => {
-    const maxAttempts = 200; // Increased attempts for better positioning
-    const starSize = 60; // Smaller size to allow more stars
-    const minDistanceBetweenStars = starSize + 60; // Increased minimum distance between stars for better spread
-    let attempts = 0;
+  // Generate orbital positions for stars around the new note button (like planets around the sun)
+  const generateStarPosition = (index: number, total: number) => {
+    // Define the new note button position (the "sun")
+    const buttonX = centerX - 60; // Button center X (120px wide button, so centerX - 60)
+    const buttonY = centerY - 300; // Button center Y
+    const buttonRadius = 80; // Button radius
 
-    // Define safe screen bounds for star distribution
-    const padding = 40; // Reduced padding for more space
-    const headerHeight = 120; // Account for header
-    const navBarHeight = 100; // Account for navigation bar
+    // Define orbital parameters
+    const minOrbitRadius = buttonRadius + 120; // Minimum distance from button (increased to stay in front)
+    const maxOrbitRadius = Math.min(
+      250,
+      (Math.min(screenWidth, screenHeight) - 200) / 2
+    ); // Maximum orbit radius (increased)
+    const numOrbits = Math.ceil(total / 8); // Number of orbital rings (8 stars per ring)
+
+    // Calculate which orbit this star belongs to
+    const orbitIndex = Math.floor(index / 8);
+    const starInOrbit = index % 8;
+
+    // Calculate orbital radius (increasing with each orbit)
+    const orbitRadius =
+      minOrbitRadius +
+      (orbitIndex * (maxOrbitRadius - minOrbitRadius)) /
+        Math.max(1, numOrbits - 1);
+
+    // Calculate angle for this star in its orbit
+    const baseAngle = (starInOrbit / 8) * 2 * Math.PI;
+    const angleOffset = orbitIndex * 0.3 + index * 0.1; // Add some variation
+    const angle = baseAngle + angleOffset;
+
+    // Calculate position
+    let x = buttonX + Math.cos(angle) * orbitRadius;
+    let y = buttonY + Math.sin(angle) * orbitRadius;
+
+    // Ensure stars stay within screen bounds
+    const padding = 40;
+    const headerHeight = 120;
+    const navBarHeight = 100;
+    const starSize = 60;
 
     const maxX = screenWidth - starSize - padding;
     const maxY = screenHeight - starSize - padding - navBarHeight;
     const minX = padding;
     const minY = padding + headerHeight;
 
-    // Define the new note button position to avoid placing stars too close to it
-    const buttonX = centerX - 60; // Button center X (120px wide button, so centerX - 60)
-    const buttonY = centerY - 300; // Button center Y
-    const buttonRadius = 120; // Larger radius to avoid button area
+    x = Math.max(minX, Math.min(maxX, x));
+    y = Math.max(minY, Math.min(maxY, y));
 
-    // Try to place stars in a more distributed pattern first
-    if (existingPositions.length < total * 0.3) {
-      // For the first 30% of stars, use a more structured approach
-      const cols = Math.ceil(Math.sqrt(total));
-      const rows = Math.ceil(total / cols);
-      const colWidth = (maxX - minX) / cols;
-      const rowHeight = (maxY - minY) / rows;
-
-      const col = index % cols;
-      const row = Math.floor(index / cols);
-
-      let x = minX + col * colWidth + colWidth / 2;
-      let y = minY + row * rowHeight + rowHeight / 2;
-
-      // Add randomness to the grid position
-      x += (Math.random() - 0.5) * colWidth * 0.8;
-      y += (Math.random() - 0.5) * rowHeight * 0.8;
-
-      // Ensure position is within bounds
-      x = Math.max(minX, Math.min(maxX, x));
-      y = Math.max(minY, Math.min(maxY, y));
-
-      // Check if position is too close to the new note button
-      const distanceFromButton = Math.sqrt(
-        Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
-      );
-
-      if (distanceFromButton >= buttonRadius) {
-        // Check for overlaps with existing stars
-        let hasOverlap = false;
-        for (const existingPos of existingPositions) {
-          const distance = Math.sqrt(
-            Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
-          );
-          if (distance < minDistanceBetweenStars) {
-            hasOverlap = true;
-            break;
-          }
-        }
-
-        if (!hasOverlap) {
-          return { x, y };
-        }
-      }
-    }
-
-    // Fallback to random positioning for remaining stars
-    while (attempts < maxAttempts) {
-      // Generate random position across the entire screen
-      let x = minX + Math.random() * (maxX - minX);
-      let y = minY + Math.random() * (maxY - minY);
-
-      // Check if position is too close to the new note button
-      const distanceFromButton = Math.sqrt(
-        Math.pow(x - buttonX, 2) + Math.pow(y - buttonY, 2)
-      );
-
-      if (distanceFromButton < buttonRadius) {
-        attempts++;
-        continue; // Skip this position if too close to button
-      }
-
-      // Check for overlaps with existing stars
-      let hasOverlap = false;
-      for (const existingPos of existingPositions) {
-        const distance = Math.sqrt(
-          Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
-        );
-        if (distance < minDistanceBetweenStars) {
-          hasOverlap = true;
-          break;
-        }
-      }
-
-      if (!hasOverlap) {
-        return { x, y };
-      }
-
-      attempts++;
-    }
-
-    // Final fallback: return a position in a grid pattern across the screen
-    const cols = Math.ceil(Math.sqrt(total));
-    const rows = Math.ceil(total / cols);
-    const colWidth = (maxX - minX) / cols;
-    const rowHeight = (maxY - minY) / rows;
-
-    const col = index % cols;
-    const row = Math.floor(index / cols);
-
-    let fallbackX = minX + col * colWidth + colWidth / 2;
-    let fallbackY = minY + row * rowHeight + rowHeight / 2;
-
-    // Add some randomness to the grid position
-    fallbackX += (Math.random() - 0.5) * colWidth * 0.4;
-    fallbackY += (Math.random() - 0.5) * rowHeight * 0.4;
-
-    // Ensure fallback position is within bounds
-    fallbackX = Math.max(minX, Math.min(maxX, fallbackX));
-    fallbackY = Math.max(minY, Math.min(maxY, fallbackY));
-
-    return {
-      x: fallbackX,
-      y: fallbackY,
-    };
+    // Return position without overlap checking since orbital motion handles this naturally
+    return { x, y };
   };
 
   // Load notes from API
@@ -374,17 +291,14 @@ export const HomeScreen = () => {
         const response = await getNotes();
         if (response.ok) {
           const apiNotes: Note[] = await response.json();
-          // Add position to each note for display, avoiding overlaps
+          // Add position to each note for display (orbital distribution)
           const notesWithPosition: NoteWithPosition[] = [];
-          const existingPositions: { x: number; y: number }[] = [];
 
           apiNotes.forEach((note, index) => {
             const position = generateStarPosition(
               index,
-              Math.max(apiNotes.length, 8),
-              existingPositions
+              Math.max(apiNotes.length, 8)
             );
-            existingPositions.push(position);
             notesWithPosition.push({
               ...note,
               position,
@@ -441,17 +355,14 @@ export const HomeScreen = () => {
         const galaxyNotes = notes.filter(
           (note) => note.galaxy_id === currentGalaxy.id
         );
-        // Regenerate positions for the filtered notes, avoiding overlaps
+        // Regenerate positions for the filtered notes (orbital distribution)
         const notesWithNewPositions: NoteWithPosition[] = [];
-        const existingPositions: { x: number; y: number }[] = [];
 
         galaxyNotes.forEach((note, index) => {
           const position = generateStarPosition(
             index,
-            Math.max(galaxyNotes.length, 8),
-            existingPositions
+            Math.max(galaxyNotes.length, 8)
           );
-          existingPositions.push(position);
           notesWithNewPositions.push({
             ...note,
             position,
@@ -503,58 +414,92 @@ export const HomeScreen = () => {
     return galaxies[currentGalaxyIndex]?.name || "REN|AI";
   };
 
-  // Start twinkling and drifting animation for stars
+  // Start twinkling and orbital animation for stars
   useEffect(() => {
     starAnimations.forEach((anim, index) => {
-      const startTwinkling = () => {
-        Animated.sequence([
-          Animated.timing(anim.opacity, {
-            toValue: 1,
-            duration: 1000 + Math.random() * 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim.opacity, {
-            toValue: 0.3,
-            duration: 1000 + Math.random() * 2000,
-            useNativeDriver: true,
-          }),
-        ]).start(() => startTwinkling());
+      // const startTwinkling = () => {
+      //   // Start with a random opacity between 0.4 and 0.8
+      //   const initialOpacity = 0.4 + Math.random() * 0.4;
+      //   anim.opacity.setValue(initialOpacity);
+      //
+      //   const twinkle = () => {
+      //     Animated.sequence([
+      //       Animated.timing(anim.opacity, {
+      //         toValue: 0.9 + Math.random() * 0.1, // Fade to bright (0.9-1.0)
+      //         duration: 3000 + Math.random() * 4000, // Slower fade in (3-7 seconds)
+      //         useNativeDriver: true,
+      //       }),
+      //       Animated.timing(anim.opacity, {
+      //         toValue: 0.2 + Math.random() * 0.3, // Fade to dim (0.2-0.5)
+      //         duration: 3000 + Math.random() * 4000, // Slower fade out (3-7 seconds)
+      //         useNativeDriver: true,
+      //       }),
+      //     ]).start(() => twinkle());
+      //   };
+      //
+      //   // Start twinkling after a random delay
+      //   setTimeout(() => twinkle(), Math.random() * 2000);
+      // };
+
+      const startOrbitalMotion = () => {
+        // Calculate orbital parameters for this star
+        const buttonX = centerX - 60;
+        const buttonY = centerY - 300;
+        const minOrbitRadius = 200; // Minimum distance from button (increased to stay in front)
+        const maxOrbitRadius = Math.min(
+          250,
+          (Math.min(screenWidth, screenHeight) - 200) / 2
+        );
+        const numOrbits = Math.ceil(starAnimations.length / 8);
+
+        const orbitIndex = Math.floor(index / 8);
+        const orbitRadius =
+          minOrbitRadius +
+          (orbitIndex * (maxOrbitRadius - minOrbitRadius)) /
+            Math.max(1, numOrbits - 1);
+
+        // Calculate orbital speed (faster for inner orbits, slower for outer)
+        const baseSpeed = 30000; // Slower base duration (30 seconds)
+        const orbitalSpeed = baseSpeed + orbitIndex * 10000; // Much slower for outer orbits
+
+        // Create smooth continuous orbital motion
+        const orbitalAnimation = () => {
+          // Start at a random angle for variety
+          const startAngle = Math.random() * 2 * Math.PI;
+          const rotation = new Animated.Value(0);
+
+          // Create a smooth, continuous rotation animation
+          const rotationAnimation = Animated.loop(
+            Animated.timing(rotation, {
+              toValue: 1,
+              duration: orbitalSpeed,
+              useNativeDriver: false, // We need to use the listener for smooth motion
+              easing: Easing.linear, // Linear motion for consistent orbital speed
+            })
+          );
+
+          // Update position smoothly based on rotation
+          rotation.addListener(({ value }) => {
+            const angle = startAngle + value * 2 * Math.PI;
+            const x = Math.cos(angle) * orbitRadius;
+            const y = Math.sin(angle) * orbitRadius;
+
+            // Apply smooth translation
+            anim.translateX.setValue(x);
+            anim.translateY.setValue(y);
+          });
+
+          rotationAnimation.start();
+        };
+
+        orbitalAnimation();
       };
 
-      const startDrifting = () => {
-        const driftX = (Math.random() - 0.5) * 40; // Drift up to 20px in each direction
-        const driftY = (Math.random() - 0.5) * 40;
+      // Set static opacity for stars (no twinkling or fading)
+      anim.opacity.setValue(1.0);
 
-        Animated.parallel([
-          Animated.timing(anim.translateX, {
-            toValue: driftX,
-            duration: 3000 + Math.random() * 4000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim.translateY, {
-            toValue: driftY,
-            duration: 3000 + Math.random() * 4000,
-            useNativeDriver: true,
-          }),
-        ]).start(() => {
-          // Return to original position
-          Animated.parallel([
-            Animated.timing(anim.translateX, {
-              toValue: 0,
-              duration: 3000 + Math.random() * 4000,
-              useNativeDriver: true,
-            }),
-            Animated.timing(anim.translateY, {
-              toValue: 0,
-              duration: 3000 + Math.random() * 4000,
-              useNativeDriver: true,
-            }),
-          ]).start(() => startDrifting());
-        });
-      };
-
-      setTimeout(() => startTwinkling(), Math.random() * 3000);
-      setTimeout(() => startDrifting(), Math.random() * 2000);
+      // Start orbital motion immediately
+      startOrbitalMotion();
     });
   }, []);
 
@@ -750,15 +695,36 @@ export const HomeScreen = () => {
       translateY: new Animated.Value(0),
     };
 
+    // Calculate orbital position relative to the button
+    const buttonX = centerX - 60;
+    const buttonY = centerY - 300;
+    const minOrbitRadius = 200; // Increased to stay in front of button
+    const maxOrbitRadius = Math.min(
+      250,
+      (Math.min(screenWidth, screenHeight) - 200) / 2
+    );
+    const numOrbits = Math.ceil(starAnimations.length / 8);
+
+    const orbitIndex = Math.floor(index / 8);
+    const orbitRadius =
+      minOrbitRadius +
+      (orbitIndex * (maxOrbitRadius - minOrbitRadius)) /
+        Math.max(1, numOrbits - 1);
+
+    // Calculate base orbital position
+    const baseAngle = ((index % 8) / 8) * 2 * Math.PI;
+    const baseX = buttonX + Math.cos(baseAngle) * orbitRadius;
+    const baseY = buttonY + Math.sin(baseAngle) * orbitRadius;
+
     return (
       <Animated.View
         key={note.id}
         style={[
           styles.noteStar,
           {
-            left: note.position.x,
-            top: note.position.y,
-            opacity: animatedValues.opacity,
+            left: baseX,
+            top: baseY,
+            opacity: 1.0, // Static opacity - no fading
             transform: [
               { translateX: animatedValues.translateX },
               { translateY: animatedValues.translateY },
@@ -945,11 +911,11 @@ export const HomeScreen = () => {
         {galaxies.length > 0 && (
           <View style={styles.swipeIndicators}>
             <View style={styles.swipeIndicator}>
-              <Ionicons
+              {/* <Ionicons
                 name="chevron-back"
                 size={16}
                 color={currentPalette.quinary}
-              />
+              /> */}
               {/* <Text
                 style={[styles.swipeText, { color: currentPalette.quinary }]}
               >
@@ -964,11 +930,11 @@ export const HomeScreen = () => {
                   ? "Double tap to galaxies"
                   : `${currentGalaxyIndex + 1} of ${galaxies.length}`}
               </Text> */}
-              <Ionicons
+              {/* <Ionicons
                 name="chevron-forward"
                 size={16}
                 color={currentPalette.quinary}
-              />
+              /> */}
             </View>
           </View>
         )}
@@ -995,16 +961,6 @@ export const HomeScreen = () => {
             ]}
           >
             <View style={styles.searchModalHeader}>
-              <TouchableOpacity
-                onPress={() => setShowSearchModal(false)}
-                style={styles.searchModalCloseButton}
-              >
-                <Ionicons
-                  name="close"
-                  size={24}
-                  color={currentPalette.tertiary}
-                />
-              </TouchableOpacity>
               <Text
                 style={[
                   styles.searchModalTitle,
@@ -1013,7 +969,6 @@ export const HomeScreen = () => {
               >
                 Search Notes
               </Text>
-              <View style={styles.searchModalPlaceholder} />
             </View>
 
             <View style={styles.searchInputContainer}>
@@ -1336,24 +1291,15 @@ const styles = StyleSheet.create({
   searchModalHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255,255,255,0.1)",
   },
-  searchModalCloseButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   searchModalTitle: {
     fontSize: 18,
     fontWeight: "600",
-  },
-  searchModalPlaceholder: {
-    width: 40,
   },
   searchInputContainer: {
     flexDirection: "row",

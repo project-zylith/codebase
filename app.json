@@ -1,36 +1,15 @@
 {
   "expo": {
-    "name": "Zylith",
-    "slug": "renaissance",
-    "version": "1.3.0",
-    "orientation": "portrait",
-    "icon": "./frontend/assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./frontend/assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "extra": {
       "eas": {
         "projectId": "edaab702-85e1-4899-9245-d4bab7ef1645"
       }
     },
     "ios": {
-      "bundleIdentifier": "com.apiary.zylith",
-      "buildNumber": "12",
+      "bundleIdentifier": "com.iaso.renaissance",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./frontend/assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    },
-    "web": {
-      "favicon": "./frontend/assets/favicon.png"
     }
   }
 }
