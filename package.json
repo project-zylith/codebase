@@ -18,5 +18,7 @@
   "author": "",
   "license": "MIT",
   "homepage": "https://github.com/Ibra-Hud/renaissance#readme",
-  "dependencies": {}
+  "devDependencies": {
+    "babel-preset-expo": "^54.0.3"
+  }
 }
