@@ -195,7 +195,7 @@ export const generateNoteInsight = async (
         }
       }
 
-      res.status(200).json({ result: parsedResponse });
+      res.status(200).json({ result: parsedResponse }); // Final step where the res is sent back
     } catch (parseError) {
       console.error("❌ Failed to parse AI response as JSON:", parseError);
       console.log("Raw AI response:", response);

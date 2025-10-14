@@ -227,6 +227,7 @@ app.post(
 // AI Routes
 /////////////////////////////////
 
+// Insights for the task, change naming later on if need be
 app.post(
   "/api/insights",
   checkAuthentication,
@@ -239,6 +240,8 @@ app.post(
   checkAiInsightLimits,
   ai.finalInsight
 );
+
+// Insight specifically for the notes
 app.post(
   "/api/noteInsight",
   checkAuthentication,

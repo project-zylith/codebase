@@ -43,8 +43,10 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/api/notes/${id}`,
   },
   AI: {
+    // task insights
     INSIGHTS: `${API_BASE_URL}/api/insights`,
     FINAL_INSIGHT: `${API_BASE_URL}/api/finalInsight`,
+    // Insights for the note
     NOTE_INSIGHT: `${API_BASE_URL}/api/noteInsight`,
   },
   GALAXIES: {
