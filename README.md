@@ -1,295 +1,308 @@
-# Renaissance App
+# RenAI - Transform Notes Into Reality
 
-A full-stack productivity and insights app with a Node.js/Express backend and a React Native (Expo) frontend.
+> **📚 All detailed documentation can be found in the [INFO](INFO/) folder.**  
+> This README provides an overview of RenAI. For comprehensive feature documentation, setup guides, and technical details, please see the [INFO](INFO/) directory.
+
+## 📱 Download RenAI
+
+**Get RenAI on the App Store:** [Download for iPhone](https://apps.apple.com/us/app/ren-ai/id6749666233)
+
+RenAI is available on iOS, iPadOS, macOS, and Apple Vision Pro. Stop dreaming. Start creating.
+
+## 📚 Table of Contents
+
+- [What is RenAI?](#-what-is-renai)
+- [The Problem RenAI Solves](#-the-problem-renai-solves)
+- [Why RenAI is the Solution](#-why-renai-is-the-solution)
+- [Technical Excellence](#-technical-excellence)
+- [Target Audience](#-target-audience)
+- [Key Differentiators](#-key-differentiators)
+- [Vision and Future](#-vision-and-future)
+
+## 📖 Feature Documentation
+
+For detailed documentation on each feature, see the following files in the [INFO](INFO/) folder:
+
+- [User Authentication](INFO/User_Authentication.md) - Secure authentication and user management
+- [Note Management](INFO/Note_Management.md) - Core note-taking with rich text editing
+- [Task Management](INFO/Task_Management.md) - AI-powered task creation and tracking
+- [Galaxy Organization](INFO/Galaxy_Organization.md) - AI-powered note organization into themed galaxies
+- [AI Insights](INFO/AI_Insights.md) - Zylith AI assistant for insights and task generation
+- [Love Letters](INFO/Love_Letters.md) - Personal love letter storage (Rainy Day feature)
+- [Subscriptions](INFO/Subscriptions.md) - Flexible subscription plans and payment processing
+- [Themes & UI](INFO/Themes_UI.md) - Beautiful cosmic-themed interface and design system
+- [Rich Text Editor](INFO/Rich_Text_Editor.md) - Mobile-optimized rich text editing with TenTap
+
+## 🌟 What is RenAI?
+
+RenAI (REN|AI) is a personal AI assistant that helps you turn notes into goals and goals into products. It's a full-stack productivity application that combines intelligent note-taking, task management, and AI-powered organization into a beautiful, cosmic-inspired mobile experience.
+
+RenAI is more than just a note-taking app—it's an intelligent workspace that understands your ideas, organizes them automatically, and helps you transform them into actionable tasks. Powered by Google's Generative AI (Gemini 1.5 Flash), RenAI acts as your personal assistant "Zylith," providing insights, generating tasks, and organizing your content into themed "galaxies."
+
+## 🎯 The Problem RenAI Solves
+
+### The Challenge of Modern Productivity
+
+In today's fast-paced world, knowledge workers, creatives, students, and professionals face several critical challenges:
+
+1. **Information Overload**: Ideas and thoughts come at us constantly, but traditional note-taking apps lack the intelligence to help us make sense of it all.
+
+2. **Disconnected Tools**: Most productivity apps treat notes and tasks as separate entities, forcing users to manually bridge the gap between ideas and action.
+
+3. **Organization Fatigue**: Traditional folder-based organization requires constant manual effort, leading to cluttered, unorganized notes that become difficult to find and utilize.
+
+4. **Lack of Intelligence**: Note-taking apps store information but don't help users understand, develop, or act on their ideas.
+
+5. **Visual Engagement**: Most productivity tools are functional but lack the visual appeal and engagement that makes users want to interact with their content regularly.
+
+6. **Fragmented Workflow**: The journey from capturing an idea to completing a task involves multiple steps across different tools, creating friction and reducing productivity.
+
+### Real-World Impact
+
+- **Students** struggle to organize lecture notes, research, and study materials efficiently
+- **Creative Professionals** have brilliant ideas but struggle to develop them into actionable projects
+- **Developers** need to capture technical notes, project ideas, and task lists in a unified system
+- **Knowledge Workers** accumulate notes but rarely convert them into meaningful action
+- **Entrepreneurs** have vision but need help breaking down ideas into executable steps
+
+## ✨ Why RenAI is the Solution
+
+RenAI addresses these challenges through a unique combination of AI intelligence, seamless integration, and beautiful design:
+
+### 1. **Intelligent Organization with AI-Powered Galaxies**
+
+RenAI doesn't require you to manually organize your notes into folders. Instead, it uses AI to analyze your content and automatically group related notes into themed "galaxies." This eliminates the cognitive load of organization while creating meaningful connections between your ideas.
+
+**How it works:**
+
+- Create multiple notes with different themes
+- Request AI galaxy generation
+- RenAI analyzes all your notes and suggests logical groupings
+- Notes are automatically organized into descriptive galaxies (e.g., "Programming Projects", "Health & Fitness", "Travel Planning")
+- Navigate between galaxies with intuitive swipe gestures
+
+**Why it's better:**
+
+- Zero manual organization effort
+- Intelligent, context-aware groupings
+- Visual cosmic metaphor that makes organization enjoyable
+- Adapts as your notes grow and evolve
+
+### 2. **Seamless Note-to-Task Conversion**
+
+RenAI bridges the gap between ideas and action by allowing you to generate actionable tasks directly from your notes. When you request insights on a note, RenAI (Zylith) analyzes the content and suggests specific actions you can take.
+
+**How it works:**
+
+- Write a note about a project or idea
+- Request AI insights on the note
+- Zylith analyzes the content and provides structured insights
+- One-tap conversion of insights into actionable tasks
+- Tasks are automatically linked to the source note and galaxy
+
+**Why it's better:**
+
+- Eliminates the mental gap between "I should do this" and actually creating a task
+- Context-aware task generation with goals automatically assigned
+- Tasks are visually distinguished as AI-generated
+- Maintains connection between ideas and actions
+
+### 3. **AI-Powered Insights (Zylith Assistant)**
+
+RenAI's AI assistant, Zylith, doesn't just organize—it understands. Zylith analyzes your notes and provides actionable insights, helping you develop ideas further and identify next steps.
+
+**Capabilities:**
+
+- **Note Insights**: Analyzes individual notes and provides summaries, key points, and suggestions
+- **Galaxy Overview**: Understands the themes and connections within a galaxy of notes
+- **Task Generation**: Converts insights into specific, actionable tasks
+- **Content Analysis**: Identifies patterns, themes, and relationships across your notes
+
+**Why it's better:**
+
+- Proactive assistance rather than passive storage
+- Context-aware analysis that understands your goals
+- Structured insights that are immediately actionable
+- Learns from your content to provide better suggestions over time
+
+### 4. **Rich Text Editing with Modern Tools**
+
+RenAI provides a powerful, mobile-optimized rich text editor (TenTap) that makes note-taking smooth and enjoyable on mobile devices.
+
+**Features:**
+
+- Rich text formatting (bold, italic, headings, lists)
+- Mobile-optimized keyboard handling
+- Auto-save functionality
+- Paste support for external content
+- Clean, distraction-free interface
+
+**Why it's better:**
+
+- Designed specifically for mobile, not adapted from desktop
+- Smooth typing experience with optimized performance
+- Automatic saving eliminates worry about losing work
+- Professional formatting capabilities without complexity
+
+### 5. **Beautiful Cosmic UI/UX**
+
+RenAI features a stunning, immersive cosmic-themed interface that makes productivity enjoyable rather than mundane.
+
+**Design Features:**
+
+- **Cosmic Color Palettes**: Multiple beautiful themes (cosmic, watercolor, monochrome)
+- **Star-Based Note Visualization**: Notes appear as stars in a cosmic space
+- **Smooth Animations**: Polished micro-interactions and transitions
+- **Holographic Elements**: Iridescent gradients and glass-morphism effects
+- **Dark-First Design**: Eye-friendly dark themes optimized for extended use
+
+**Why it's better:**
+
+- Visual appeal encourages regular engagement
+- Cosmic metaphor makes organization intuitive and memorable
+- Professional aesthetic suitable for all contexts
+- Reduces eye strain with thoughtful dark themes
+
+### 6. **Unified Workspace**
+
+RenAI combines notes, tasks, and organization in a single, cohesive application, eliminating the need to switch between multiple tools.
+
+**Integrated Features:**
+
+- Notes and tasks in one app
+- Galaxy organization system
+- AI insights that connect everything
+- Unified search across all content
+- Consistent design language throughout
+
+**Why it's better:**
+
+- Single source of truth for all your ideas and tasks
+- Reduced context switching
+- Maintains relationships between notes, tasks, and goals
+- Streamlined workflow from idea to completion
+
+### 7. **Flexible Subscription Model**
+
+RenAI offers a freemium model with clear upgrade paths, making advanced features accessible while supporting sustainable development.
+
+**Subscription Tiers:**
+
+- **Free Tier**: Basic features for getting started
+- **Basic Plans**: Enhanced limits and features
+- **Pro Plans**: Unlimited access to all features
+- **Apple IAP & Stripe**: Flexible payment options
+
+**Why it's better:**
+
+- Accessible entry point with free tier
+- Clear value proposition at each tier
+- Multiple payment options for user convenience
+- Sustainable model that supports continued development
+
+## 🚀 Technical Excellence
+
+### Modern Tech Stack
+
+- **Frontend**: React Native (Expo) for cross-platform mobile development
+- **Backend**: Node.js with Express and TypeScript
+- **Database**: PostgreSQL with Knex.js ORM
+- **AI**: Google Generative AI (Gemini 1.5 Flash)
+- **Authentication**: Session-based with secure cookie management
+- **Payments**: Stripe and Apple In-App Purchases
+- **Rich Text**: TenTap editor for mobile-optimized editing
+
+### Architecture Highlights
+
+- **RESTful API**: Clean, well-structured backend API
+- **Type Safety**: Full TypeScript implementation
+- **Database Migrations**: Version-controlled database schema
+- **Error Handling**: Comprehensive error handling and user feedback
+- **Security**: Secure authentication, data encryption, and privacy-first design
+- **Scalability**: Designed to handle growth with efficient data structures
+
+## 🎯 Target Audience
+
+### Primary Users
+
+- **Creative Professionals**: Writers, designers, artists who need to capture and develop ideas
+- **Developers**: Software engineers who need to document projects, track tasks, and organize technical notes
+- **Knowledge Workers**: Professionals who process information and need intelligent organization
+- **Students**: Learners who need to organize notes, research, and study materials
+
+### Secondary Users
+
+- **Researchers**: Academics and researchers organizing findings and insights
+- **Entrepreneurs**: Founders tracking ideas, projects, and tasks
+- **Content Creators**: Bloggers, YouTubers, and creators managing content ideas
+- **Anyone**: Who values both functionality and aesthetics in productivity tools
+
+## 📊 Key Differentiators
+
+### What Makes RenAI Unique
+
+1. **AI-First Organization**: Unlike manual folder systems, RenAI organizes automatically using AI
+2. **Seamless Integration**: Notes and tasks are deeply integrated, not separate silos
+3. **Cosmic Visual Metaphor**: Unique star/galaxy visualization makes organization intuitive
+4. **Mobile-Optimized**: Built specifically for mobile, not adapted from desktop
+5. **Intelligent Assistant**: Zylith provides proactive insights, not just storage
+6. **Beautiful Design**: Professional, engaging UI that users want to interact with
+7. **Context-Aware**: AI understands relationships between notes, tasks, and goals
+
+### Competitive Advantages
+
+**vs. Traditional Note Apps (Evernote, OneNote)**
+
+- AI-powered organization vs. manual folders
+- Integrated task management vs. separate apps
+- Modern mobile-first design vs. desktop-adapted interfaces
+- Proactive insights vs. passive storage
+
+**vs. Task Management Apps (Todoist, Asana)**
+
+- Rich note-taking vs. simple task lists
+- AI-generated tasks from notes vs. manual entry
+- Visual organization with galaxies vs. linear lists
+- Idea development vs. just task tracking
+
+**vs. Knowledge Management (Notion, Obsidian)**
+
+- Mobile-optimized vs. desktop-focused
+- AI organization vs. manual linking
+- Simpler, more focused vs. complex all-in-one
+- Cosmic visual metaphor vs. traditional interfaces
+
+## 🌟 Vision and Future
+
+RenAI is positioned to become the leading mobile productivity platform that combines intelligence, beauty, and functionality. Future enhancements include:
+
+- **Advanced AI Features**: More sophisticated analysis and suggestions
+- **Collaboration**: Shared galaxies and real-time collaboration
+- **Integrations**: Connect with other productivity tools
+- **Advanced Analytics**: Insights into productivity patterns
+- **Customization**: More themes, layouts, and personalization options
+- **Export Options**: PDF, Markdown, and other format exports
+- **Offline Support**: Full functionality without internet connection
+
+## 🎓 Conclusion
+
+RenAI solves the fundamental problem of modern productivity: the gap between capturing ideas and taking action. By combining AI intelligence, seamless integration, and beautiful design, RenAI transforms the way users interact with their thoughts, organize their content, and achieve their goals.
+
+Unlike traditional productivity tools that require manual effort and provide passive storage, RenAI is an active partner in your productivity journey. It understands your content, organizes it intelligently, and helps you transform ideas into reality.
+
+Whether you're a student organizing research, a developer tracking projects, a creative professional developing ideas, or a knowledge worker managing information, RenAI provides the intelligent, beautiful, and integrated solution you need to be more productive.
+
+**RenAI: Where notes become goals, and goals become products.**
 
 ---
 
-## 🚀 Getting Started
-
-This guide will help you set up and run both the **backend** and **frontend** of the app from scratch.
-
----
-
-## 🌌 AI Galaxy Generation
-
-Renaissance includes an intelligent AI-powered feature that automatically organizes your notes into themed collections called "galaxies."
-
-### How It Works
-
-1. **Create Notes**: Add multiple notes to your app with titles and content
-2. **Generate Galaxies**: Click the bulb icon (🤖) in the HomeScreen header
-3. **AI Analysis**: The AI analyzes your notes and suggests logical groupings
-4. **Review & Apply**: Preview the suggested galaxies and apply them to organize your notes
-
-### Features
-
-- **Smart Grouping**: AI identifies related notes based on content and themes
-- **Descriptive Names**: Galaxies are named clearly (e.g., "Programming Projects", "Health & Fitness")
-- **Preview Mode**: See suggested groupings before applying them
-- **Automatic Organization**: Notes are automatically assigned to appropriate galaxies
-- **Error Handling**: Graceful fallbacks and helpful error messages
-
-### Requirements
-
-- **Google AI API Key**: Set `API_KEY` in your backend `.env` file
-- **Multiple Notes**: Works best with 2+ notes (minimum 1 note required)
-- **Backend Running**: Ensure the backend server is running on port 3000
-
-### Setup
-
-1. **Get Google AI API Key**:
-
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Add it to your backend `.env` file: `API_KEY=your_api_key_here`
-
-2. **Test the Feature**:
-
-   ```bash
-   # Test the API directly
-   cd backend
-   node test-galaxy-api.mjs
-   ```
-
-3. **Use in App**:
-   - Create several notes with different themes
-   - Click the bulb icon in the header
-   - Follow the prompts to generate and apply galaxies
-
-### Example Galaxy Groupings
-
-The AI might group your notes like this:
-
-- **Software Development**: Programming notes, app development ideas, coding tutorials
-- **Health & Fitness**: Workout plans, nutrition notes, wellness goals
-- **Travel Planning**: Trip itineraries, budget planning, destination research
-- **Learning & Education**: Study notes, course materials, skill development
-
----
-
-## 1. Clone the Repository
-
-```sh
-git clone https://github.com/your-username/renaissance.git
-cd renaissance
-```
-
----
-
-## 2. Key Directories
-
-- `backend/` — Node.js/Express API, database, and business logic
-- `frontend/` — React Native (Expo) mobile app
-
----
-
-## 3. Backend Setup
-
-### a. Install Node.js (LTS)
-
-- [Download Node.js](https://nodejs.org/) (LTS version recommended)
-- Verify installation:
-  ```sh
-  node --version
-  npm --version
-  ```
-
-### b. Install Dependencies
-
-```sh
-cd backend
-npm install
-```
-
-### c. Environment Variables
-
-- Copy the example env file and fill in your values:
-  ```sh
-  cp env.example .env
-  ```
-- Edit `.env` to set your database credentials and any API keys.
-
-### d. Database Setup
-
-- **PostgreSQL** is required. Install it if you don't have it.
-- Create a database matching your `.env` settings (e.g., `renaissance_db`).
-- Run migrations and seeds:
-  ```sh
-  npm run migrate
-  npm run seed
-  ```
-
-### e. Build and Start the Backend
-
-```sh
-npm run build
-npm start
-```
-
-- The backend will run on the port specified in your `.env` (default: `3000`).
-
----
-
-## 4. Frontend Setup
-
-### a. Install Node.js (if not already done)
-
-- See backend instructions.
-
-### b. Install Expo CLI (if not already installed)
-
-```sh
-npm install -g expo-cli
-```
-
-### c. Install Frontend Dependencies
-
-```sh
-cd ../frontend
-npm install
-```
-
-### d. Install Required Modules
-
-Your app uses:
-
-- `@react-navigation/native`
-- `@react-navigation/bottom-tabs`
-- `@react-navigation/native-stack`
-- `react-native-screens`
-- `react-native-safe-area-context`
-- `@expo/vector-icons`
-
-If you see missing module errors, run:
-
-```sh
-npm install @react-navigation/native @react-navigation/bottom-tabs @react-navigation/native-stack
-npm install react-native-screens react-native-safe-area-context
-expo install @expo/vector-icons
-```
-
-### e. Start the Frontend (Expo)
-
-```sh
-expo start
-```
-
-- Use the QR code to open the app on your device (Expo Go app) or run on an emulator.
-
----
-
-## 5. Key Files & Directories
-
-- **backend/**
-
-  - `src/` — Main server code
-  - `controllers/` — Route handlers (e.g., authentication)
-  - `database/` — Migrations, seeds, and DB config
-  - `middleware/` — Express middleware
-  - `package.json` — Backend dependencies and scripts
-
-- **frontend/**
-  - `components/` — All React Native UI components (HomeScreen, AccountScreen, etc.)
-  - `adapters/` — API adapters for backend communication
-  - `utils/` — Utility functions (e.g., API config)
-  - `App.tsx` — App entry point
-  - `package.json` — Frontend dependencies and scripts
-
----
-
-## 5a. File Breakdown
-
-### backend/
-
-- **package.json** — Lists backend dependencies and scripts.
-- **env.example / .env** — Environment variable templates and secrets.
-- **src/**
-  - **index.ts** — Main Express server entry point.
-  - **database.ts** — Database connection logic.
-  - **migrate.ts** — Script for running migrations.
-  - **services/**
-    - **taskService.ts** — Business logic for tasks.
-    - **userService.ts** — Business logic for users.
-  - **types/**
-    - **task.ts, user.ts** — TypeScript types for tasks and users.
-  - **prompts/**
-    - **taskInsights.ts** — AI/insight-related logic.
-- **controllers/**
-  - **authControllers.ts** — Handles authentication routes.
-- **middleware/**
-  - **checkAuthentication.ts** — Auth middleware.
-  - **cookieSession.ts, handleCookieSessions.ts** — Session management.
-- **database/**
-  - **migrations/** — Knex migration files for DB schema.
-  - **seeds/** — Knex seed files for initial data.
-  - **database.ts** — DB connection config.
-- **knexfile.ts** — Knex configuration.
-- **README.md** — Backend-specific documentation (if any).
-
-### frontend/
-
-- **package.json** — Lists frontend dependencies and scripts.
-- **App.tsx** — Main entry point for the React Native app.
-- **components/**
-  - **AppNavigator.tsx** — Navigation setup (tab bar, etc).
-  - **HomeScreen.tsx** — Home page UI and logic.
-  - **AccountScreen.tsx** — Account/signup page UI and logic.
-  - **EditorScreen.tsx** — Editor page UI.
-  - **NewTask.tsx** — Task input form.
-  - **AuthSignUp.tsx** — Signup form.
-- **adapters/**
-  - **userAdapters.ts** — API calls for user/auth.
-  - **aiAdapters.ts** — API calls for AI/insights.
-- **utils/**
-  - **apiConfig.ts** — API base URL and endpoints.
-  - **fetchUtils.ts** — Helper functions for fetch requests.
-- **types/**
-  - **user.ts** — TypeScript types for users.
-- **assets/** — App icons and images.
-- **app.json** — Expo/React Native app configuration.
-- **.expo/** — Expo project files (auto-generated).
-
----
-
-## 6. Common Issues & Tips
-
-- **Backend not connecting?**  
-  Make sure your `.env` DB credentials are correct and PostgreSQL is running.
-
-- **Frontend can't reach backend?**
-
-  - If running on a device, set the API base URL in `frontend/utils/apiConfig.ts` to your computer's IP address (not `localhost`).
-  - If using an emulator, use the appropriate loopback address (e.g., `10.0.2.2` for Android).
-
-- **Missing modules?**  
-  Run `npm install` in both `backend` and `frontend`.
-
-- **Database errors?**  
-  Make sure you've run migrations and seeds.
-
----
-
-## 7. Development Workflow
-
-- **Backend:**  
-  Make changes in `backend/src/`, then rebuild (`npm run build`) and restart (`npm start`).
-
-- **Frontend:**  
-  Hot reloads with Expo. Edit files in `frontend/components/` and see changes instantly.
-
----
-
-## 8. Contributing
-
-- Fork the repo, create a feature branch, and submit a pull request.
-- Follow the code style and structure in both backend and frontend.
-
----
-
-## 9. Support
-
-- For issues, open a GitHub issue or contact the maintainer.
-
----
-
-**Enjoy building and using your app!**
+## 🚀 Quick Start
+
+For setup instructions and development guides, please see the documentation in the [INFO](INFO/) folder, including:
+
+- Setup guides and installation instructions
+- Feature documentation
+- API documentation
+- Troubleshooting guides
+- Migration guides
+- Technology stack details
